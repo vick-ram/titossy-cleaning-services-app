@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.manager.screens
+package com.example.titossycleaningservicesapp.presentation.users.cleaner.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun InvoiceScreen(navController: NavHostController, modifier: Modifier){
-    Box(modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ){
-        Text(text = "Invoice")
+fun AboutScreen(navController: NavHostController){
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+        Text(text = "Cleaner main screen")
     }
 }

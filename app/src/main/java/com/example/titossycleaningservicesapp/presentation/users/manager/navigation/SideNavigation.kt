@@ -36,9 +36,8 @@ fun SideNavigation() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val drawerItems = listOf(
-        RouteData.Dashboard,
         RouteData.Home,
-        RouteData.Invoices,
+        RouteData.Contact,
         RouteData.Profile
     )
     ModalNavigationDrawer(

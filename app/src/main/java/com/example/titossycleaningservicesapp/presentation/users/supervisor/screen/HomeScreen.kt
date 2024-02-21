@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.finance.screens
+package com.example.titossycleaningservicesapp.presentation.users.supervisor.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun FinanceMainScreen(navController: NavHostController){
+fun HomeScreen(navController: NavHostController){
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        Text(text = "Finance main screen")
+        Text(text = "Supervisor home screen")
     }
 }

@@ -4,39 +4,38 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
-import com.example.titossycleaningservicesapp.presentation.users.cleaner.screens.CleanerMainScreen
-import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerMainScreen
-import com.example.titossycleaningservicesapp.presentation.users.finance.screens.FinanceMainScreen
+import com.example.titossycleaningservicesapp.presentation.users.cleaner.navigation.CleanerNavigationDrawer
+import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerNavigationDrawer
+import com.example.titossycleaningservicesapp.presentation.users.finance.navigation.FinanceNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.manager.navigation.SideNavigation
-import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.SupervisorMainScreen
-import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.SupplierMainScreen
+import com.example.titossycleaningservicesapp.presentation.users.supervisor.navigation.SupervisorNavigationDrawer
+import com.example.titossycleaningservicesapp.presentation.users.supplier.navigation.SupplierNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
-fun NavGraphBuilder.usersNavigation(navController: NavHostController){
+fun NavGraphBuilder.usersNavigation() {
 
     navigation(
         route = RootNavRoutes.HOME.route,
         startDestination = UserRoutes.Customer.route
-    ){
-        composable(UserRoutes.Manager.route){
+    ) {
+        composable(UserRoutes.Manager.route) {
             SideNavigation()
         }
-        composable(UserRoutes.Finance.route){
-            FinanceMainScreen(navController)
+        composable(UserRoutes.Finance.route) {
+            FinanceNavigationDrawer()
         }
-        composable(UserRoutes.Supervisor.route){
-            SupervisorMainScreen(navController)
+        composable(UserRoutes.Supervisor.route) {
+            SupervisorNavigationDrawer()
         }
-        composable(UserRoutes.Cleaner.route){
-            CleanerMainScreen(navController)
+        composable(UserRoutes.Cleaner.route) {
+            CleanerNavigationDrawer()
         }
-        composable(UserRoutes.Supplier.route){
-            SupplierMainScreen(navController)
+        composable(UserRoutes.Supplier.route) {
+            SupplierNavigationDrawer()
         }
-        composable(UserRoutes.Customer.route){
-            CustomerMainScreen()
+        composable(UserRoutes.Customer.route) {
+            CustomerNavigationDrawer()
         }
     }
 }

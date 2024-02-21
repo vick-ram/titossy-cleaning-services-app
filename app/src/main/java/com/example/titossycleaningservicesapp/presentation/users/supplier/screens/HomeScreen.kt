@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun SupplierMainScreen(navController: NavHostController){
+fun HomeScreen(navController: NavHostController){
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
         Text(text = "Supplier main screen")
     }

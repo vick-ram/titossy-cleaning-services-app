@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.supervisor.screen
+package com.example.titossycleaningservicesapp.presentation.users.cleaner.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun SupervisorMainScreen(navController: NavHostController){
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        Text(text = "Supervisor main screen")
+fun HomeScreen(navController: NavHostController) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "cleaner home screen")
     }
 }

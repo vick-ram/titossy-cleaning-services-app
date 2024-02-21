@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun HomeScreen(navController: NavHostController, modifier: Modifier){
-    Box(modifier = modifier.fillMaxSize(),
+fun ContactScreen(navController: NavHostController, modifier: Modifier){
+    Box(
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ){
-        Text(text = "Manager Home screen")
+        Text(text = "Manager contact screen")
     }
 }

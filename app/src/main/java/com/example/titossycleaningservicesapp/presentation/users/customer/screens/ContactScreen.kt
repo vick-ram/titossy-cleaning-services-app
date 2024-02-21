@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
 @Composable
-fun NotificationsScreen(navController: NavHostController) {
+fun ContactScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()

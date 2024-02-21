@@ -6,7 +6,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.presentation.auth.signIn.EmployeesSignIn
 import com.example.titossycleaningservicesapp.presentation.auth.signIn.SignInScreen
 import com.example.titossycleaningservicesapp.presentation.auth.signUp.SignUpScreen
@@ -28,7 +27,7 @@ fun RootNavGraph(navController: NavHostController) {
         }
         authNavGraph(navController)
 
-        usersNavigation(navController)
+        usersNavigation()
     }
 }
 
