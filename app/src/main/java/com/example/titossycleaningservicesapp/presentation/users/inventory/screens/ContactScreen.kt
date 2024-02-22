@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.customer.screens
+package com.example.titossycleaningservicesapp.presentation.users.inventory.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun AboutScreen(navController: NavHostController){
+fun ContactScreen(navController: NavHostController, modifier: Modifier){
     Box(
-        modifier = Modifier.fillMaxSize(1f), contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ){
-        Text(text = "Customer About screen")
+        Text(text = "Inventory contact screen")
     }
 }

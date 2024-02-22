@@ -56,8 +56,8 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailAndPasswordValidation
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
+import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 import kotlinx.coroutines.launch
 
@@ -74,152 +74,152 @@ fun SignInScreen(
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .size(90.dp)
-                .clip(CircleShape)
-                .background(colorResource(id = R.color.gray_300)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                modifier = Modifier.size(60.dp),
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                tint = Color.Blue
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(CircleShape)
+                    .background(colorResource(id = R.color.gray_300)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(60.dp),
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "profile",
+                    tint = Color.Blue
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(
-            value = email,
-            onValueChange = { email = it },
-            modifier = Modifier,
-            label = "email",
-            leadingIcon = Icons.Default.Email,
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
+            CustomTextField(
+                value = email,
+                onValueChange = { email = it },
+                modifier = Modifier,
+                label = "email",
+                leadingIcon = Icons.Default.Email,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        CustomTextField(
-            value = password,
-            onValueChange = { password = it },
-            modifier = Modifier,
-            label = "password",
-            leadingIcon = Icons.Default.Lock,
-            trailingIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-            onTrailingIconClicked = { passwordVisible = !passwordVisible },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PassWordTransformation(),
-            keyBoardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Password
+            Spacer(modifier = Modifier.height(16.dp))
+            CustomTextField(
+                value = password,
+                onValueChange = { password = it },
+                modifier = Modifier,
+                label = "password",
+                leadingIcon = Icons.Default.Lock,
+                trailingIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                onTrailingIconClicked = { passwordVisible = !passwordVisible },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PassWordTransformation(),
+                keyBoardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Password
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        CustomButton(
-            onClick = {
-                scope.launch {
-                    if (emailAndPasswordValidation(email, password)) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CustomButton(
+                onClick = {
+                    scope.launch {
                         signInViewModel.signIn(email, password)
                     }
-                }
-            },
-            modifier = Modifier,
-            text = "Sign in"
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Employee?",
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.bodyMedium
+                },
+                modifier = Modifier,
+                text = "Sign in"
             )
-            TextButton(
-                onClick = {
-                    navController.navigate(Authentication.EMPLOYEE.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Employee?",
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                TextButton(
+                    onClick = {
+                        navController.navigate(Authentication.EMPLOYEE.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    content = {
+                        Text(
+                            text = "sign in", fontSize = 18.sp,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textDecoration = TextDecoration.Underline,
+                            fontStyle = FontStyle.Italic
+                        )
+                    },
+                    contentPadding = PaddingValues(8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "Don't have an account? ",
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = "Sign up",
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.SemiBold,
+                    fontStyle = FontStyle.Italic,
+                    style = TextStyle(color = Color.Blue),
+                    fontSize = 18.sp,
+                    modifier = Modifier.clickable { toSignUpScreen() },
+                )
+            }
+
+            LaunchedEffect(key1 = signInState.isSuccess) {
+                scope.launch {
+                    if (signInState.isSuccess?.isNotEmpty() == true) {
+                        navController.navigate(UserRoutes.Customer.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
                     }
-                },
-                content = {
-                    Text(
-                        text = "sign in", fontSize = 18.sp,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = TextDecoration.Underline,
-                        fontStyle = FontStyle.Italic
-                    )
-                },
-                contentPadding = PaddingValues(8.dp)
-            )
-        }
+                }
+            }
 
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.padding(end = 8.dp),
-                text = "Don't have an account? ",
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = "Sign up",
-                textDecoration = TextDecoration.Underline,
-                fontWeight = FontWeight.SemiBold,
-                fontStyle = FontStyle.Italic,
-                style = TextStyle(color = Color.Blue),
-                fontSize = 18.sp,
-                modifier = Modifier.clickable { toSignUpScreen() },
-            )
-        }
-
-        LaunchedEffect(key1 = signInState.isSuccess) {
-            scope.launch {
-                if (signInState.isSuccess?.isNotEmpty() == true) {
-                    navController.navigate(UserRoutes.Customer.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+            LaunchedEffect(key1 = signInState.errorMessage) {
+                scope.launch {
+                    if (signInState.errorMessage?.isNotEmpty() == true) {
+                        Toast.makeText(context, signInState.errorMessage, Toast.LENGTH_LONG).show()
                     }
                 }
             }
-        }
 
-        LaunchedEffect(key1 = signInState.errorMessage) {
-            scope.launch {
-                if (signInState.errorMessage?.isNotEmpty() == true) {
-                    Toast.makeText(context, signInState.errorMessage, Toast.LENGTH_LONG).show()
+            LaunchedEffect(key1 = signInState.isLoading, block = {
+                scope.launch {
+                    if (signInState.isLoading){
+                        Toast.makeText(context, "", Toast.LENGTH_LONG).show()
+                    }
                 }
-            }
-            !signInState.isLoading
+            })
         }
-
-        LaunchedEffect(key1 = signInState.isLoading, block = {
-            scope.launch {
-                if (!signInState.isLoading) {
-                    Toast.makeText(context, "", Toast.LENGTH_LONG).show()
-                }
-            }
-        })
+        CustomIndeterminateProgressIndicator(isLoading = signInState.isLoading)
     }
 
 }

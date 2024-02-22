@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 fun ContactScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(1f)
             .padding(8.dp), contentAlignment = Alignment.Center
     ) {
         Text("Support screen", fontSize = MaterialTheme.typography.titleLarge.fontSize)

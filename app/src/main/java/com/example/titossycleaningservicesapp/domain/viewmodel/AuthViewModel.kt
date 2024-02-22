@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
@@ -12,6 +13,7 @@ import com.example.titossycleaningservicesapp.data.repo.AuthenticationRepository
 import com.example.titossycleaningservicesapp.data.utils.Resource
 import com.example.titossycleaningservicesapp.domain.viewmodel.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +29,7 @@ class AuthViewModel @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
-
+    val isLoading = mutableStateOf(false)
     var currentUser = authenticationRepository.currentUser
         private set
 
@@ -146,9 +148,12 @@ class AuthViewModel @Inject constructor(
         }
 
     suspend fun setOnboardingCompleted() {
+        isLoading.value = true
+        delay(3000)
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ONBOARDING_COMPLETED] = true
         }
+        isLoading.value = false
     }
 
     private object PreferencesKeys {

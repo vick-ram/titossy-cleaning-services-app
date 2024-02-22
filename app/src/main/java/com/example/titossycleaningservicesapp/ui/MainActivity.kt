@@ -9,7 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
-import com.example.titossycleaningservicesapp.presentation.navigation.graph.RootNavGraph
+import com.example.titossycleaningservicesapp.presentation.navigation.rootGraph.RootNavGraph
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.ui.theme.TitossyCleaningServicesAppTheme
 import dagger.hilt.android.AndroidEntryPoint

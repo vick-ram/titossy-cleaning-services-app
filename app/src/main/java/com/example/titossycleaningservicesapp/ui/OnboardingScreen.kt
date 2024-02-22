@@ -28,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
+import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import kotlinx.coroutines.launch
 
@@ -35,65 +36,69 @@ import kotlinx.coroutines.launch
 fun OnBoardingScreen(navController: NavHostController) {
     val viewModel: AuthViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxSize()
+    val isLoading = viewModel.isLoading.value
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Image(
-                modifier = Modifier.fillMaxWidth(),
-                painter = painterResource(id = R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com),
-                contentDescription = "onBoarding image",
-                contentScale = ContentScale.FillWidth
-            )
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = "Welcome to Titossy cleaning services!",
-                    style = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Image(
+                    modifier = Modifier.fillMaxWidth(),
+                    painter = painterResource(id = R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com),
+                    contentDescription = "onBoarding image",
+                    contentScale = ContentScale.FillWidth
                 )
-                Text(
-                    text = "We offer top-notch, eco-friendly cleaning services for homes and businesses. Start your journey to a cleaner space with us today! Click the button below to get started",
-                    style = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                        fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        text = "Welcome to Titossy cleaning services!",
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     )
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    scope.launch {
-                        viewModel.setOnboardingCompleted()
-                    }
-                    navController.navigate(RootNavRoutes.AUTH.route){
-                        popUpTo(RootNavRoutes.ONBOARDING.route){
-                            inclusive = true
+                    Text(
+                        text = "We offer top-notch, eco-friendly cleaning services for homes and businesses. Start your journey to a cleaner space with us today! Click the button below to get started",
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                            fontFamily = FontFamily.SansSerif,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            viewModel.setOnboardingCompleted()
                         }
-                    }
-                },
-                shape = RectangleShape
-            ) {
-                Text(text = "Getting started")
+                        navController.navigate(RootNavRoutes.AUTH.route) {
+                            popUpTo(RootNavRoutes.ONBOARDING.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    shape = RectangleShape
+                ) {
+                    Text(text = "Getting started")
+                }
             }
-        }
 
+        }
+        CustomIndeterminateProgressIndicator(isLoading = isLoading)
     }
 }

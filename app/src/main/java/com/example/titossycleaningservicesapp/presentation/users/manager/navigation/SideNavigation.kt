@@ -10,6 +10,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -21,12 +22,12 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.RouteData
+import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,9 @@ fun SideNavigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val viewModel: AuthViewModel = hiltViewModel()
+    val displayName = viewModel.currentUser?.displayName ?: "Manager name"
+    val email = viewModel.currentUser?.email ?: "Manager email"
     val drawerItems = listOf(
         RouteData.Home,
         RouteData.Contact,
@@ -44,6 +48,7 @@ fun SideNavigation() {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
+                DrawerUserInfo(name = displayName, email = email)
                 LazyColumn(
                     contentPadding = PaddingValues(8.dp)
                 ) {
@@ -89,9 +94,8 @@ fun SideNavigation() {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = colorResource(id = R.color.blue_4),
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
             }

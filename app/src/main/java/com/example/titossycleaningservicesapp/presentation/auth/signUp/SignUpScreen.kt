@@ -49,9 +49,7 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailAndPasswordValidation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailValidation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.passwordValidation
+import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,131 +68,115 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-
-        Box(
+        Column(
             modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(colorResource(id = R.color.gray_300)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                modifier = Modifier.size(72.dp),
-                imageVector = Icons.Filled.Person,
-                contentDescription = "profile",
-                tint = Color.Blue
-            )
-        }
 
-        CustomTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            modifier = Modifier,
-            label = "first name",
-            leadingIcon = Icons.Default.Person,
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            )
-        )
-        CustomTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            modifier = Modifier,
-            label = "last name",
-            leadingIcon = Icons.Default.Person,
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            )
-        )
-
-        CustomTextField(
-            value = email,
-            onValueChange = { email = it },
-            modifier = Modifier,
-            label = "email",
-            leadingIcon = Icons.Default.Email,
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
-            )
-        )
-
-        CustomTextField(
-            value = password,
-            onValueChange = { password = it },
-            modifier = Modifier,
-            label = "password",
-            leadingIcon = Icons.Default.Lock,
-            trailingIcon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-            onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
-            visualTransformation = if (passwordVisibility) VisualTransformation.None else PassWordTransformation(),
-            keyBoardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Password
-            )
-        )
-
-        CustomButton(
-            modifier = Modifier,
-            onClick = {
-                scope.launch {
-                    if (!emailValidation(email)) {
-                        Toast.makeText(
-                            context,
-                            "email required or email not correctly formatted",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!passwordValidation(password)) {
-                        Toast.makeText(
-                            context,
-                            "password too short or must contain upper letter with special case character",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!emailAndPasswordValidation(email, password)) {
-                        Toast.makeText(
-                            context,
-                            "both email and password are not correctly formatted",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!emailValidation(email) || !passwordValidation(password)) {
-                        Toast.makeText(
-                            context,
-                            "either email or password is not correct",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else {
-                        signUpViewModel.signUp(userId, firstName, lastName, email, password)
-                    }
-                }
-            },
-            text = "Sign up"
-        )
-        Row(
-            modifier = Modifier
-                .padding(top = 20.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Already have an account?")
-            Text(
-                text = "Login",
+            Box(
                 modifier = Modifier
-                    .clickable { backToLogin() },
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                textDecoration = TextDecoration.Underline
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(colorResource(id = R.color.gray_300)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(72.dp),
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "profile",
+                    tint = Color.Blue
+                )
+            }
+
+            CustomTextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                modifier = Modifier,
+                label = "first name",
+                leadingIcon = Icons.Default.Person,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                )
             )
+            CustomTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                modifier = Modifier,
+                label = "last name",
+                leadingIcon = Icons.Default.Person,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            CustomTextField(
+                value = email,
+                onValueChange = { email = it },
+                modifier = Modifier,
+                label = "email",
+                leadingIcon = Icons.Default.Email,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            CustomTextField(
+                value = password,
+                onValueChange = { password = it },
+                modifier = Modifier,
+                label = "password",
+                leadingIcon = Icons.Default.Lock,
+                trailingIcon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PassWordTransformation(),
+                keyBoardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Password
+                )
+            )
+
+            CustomButton(
+                modifier = Modifier,
+                onClick = {
+                    scope.launch {
+                        signUpViewModel.signUp(userId, firstName, lastName, email, password)
+                        firstName = ""
+                        lastName = ""
+                        email = ""
+                        password = ""
+                    }
+                },
+                text = "Sign up"
+            )
+            Row(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Already have an account?")
+                Text(
+                    text = "Login",
+                    modifier = Modifier
+                        .clickable { backToLogin() },
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
+            CustomIndeterminateProgressIndicator(isLoading = signUpState.isLoading)
         }
     }
 

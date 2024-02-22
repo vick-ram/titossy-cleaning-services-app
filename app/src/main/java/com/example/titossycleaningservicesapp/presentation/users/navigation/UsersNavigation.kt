@@ -1,12 +1,12 @@
 package com.example.titossycleaningservicesapp.presentation.users.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.navigation.CleanerNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.finance.navigation.FinanceNavigationDrawer
+import com.example.titossycleaningservicesapp.presentation.users.inventory.navigation.InventoryNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.manager.navigation.SideNavigation
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.navigation.SupervisorNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.supplier.navigation.SupplierNavigationDrawer
@@ -21,6 +21,9 @@ fun NavGraphBuilder.usersNavigation() {
     ) {
         composable(UserRoutes.Manager.route) {
             SideNavigation()
+        }
+        composable(UserRoutes.Inventory.route) {
+            InventoryNavigationDrawer()
         }
         composable(UserRoutes.Finance.route) {
             FinanceNavigationDrawer()

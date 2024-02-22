@@ -7,26 +7,34 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.users.supplier.util.NavRoutes
+import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SupplierNavigationDrawer(){
+fun SupplierNavigationDrawer() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val viewModel: AuthViewModel = hiltViewModel()
+    val displayName = viewModel.currentUser?.displayName ?: "supplier name"
+    val email = viewModel.currentUser?.email ?: "supplier email"
     val drawerItems = listOf(
         NavRoutes.Home,
         NavRoutes.Contact,
@@ -38,13 +46,17 @@ fun SupplierNavigationDrawer(){
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
+                DrawerUserInfo(name = displayName, email = email)
                 drawerItems.forEach { item ->
                     NavigationDrawerItem(
-                        label = { item.title },
+                        label = { Text(text = item.title) },
                         selected = false,
-                        onClick = { navController.navigate(item.route) },
+                        onClick = {
+                            navController.navigate(item.route)
+                            scope.launch { drawerState.close() }
+                        },
                         icon = {
-                                Icon(imageVector = item.icon, contentDescription = item.title)
+                            Icon(imageVector = item.icon, contentDescription = item.title)
                         }
                     )
                 }
@@ -65,7 +77,11 @@ fun SupplierNavigationDrawer(){
                         ) {
                             Icon(imageVector = Icons.Default.Menu, contentDescription = "menu")
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 )
             }
         ) {

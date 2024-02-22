@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize(1f), contentAlignment = Alignment.Center) {
         Text(text = "cleaner home screen")
     }
 }
