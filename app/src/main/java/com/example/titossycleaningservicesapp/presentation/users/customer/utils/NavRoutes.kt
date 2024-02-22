@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 
 sealed class NavRoutes(val route: String, val title: String, val icon: ImageVector) {
 
@@ -17,5 +18,6 @@ sealed class NavRoutes(val route: String, val title: String, val icon: ImageVect
     data object Contact : NavRoutes("contact", "Contact", Icons.AutoMirrored.Default.ContactSupport)
     data object About : NavRoutes("about", "About", Icons.AutoMirrored.Default.ContactSupport)
     data object Profile : NavRoutes("profile", "Profile", Icons.Default.AccountCircle)
-    data object LogOut : NavRoutes("logout", "LogOut", Icons.AutoMirrored.Default.Logout)
+    data object LogOut :
+        NavRoutes(RootNavRoutes.AUTH.route, "LogOut", Icons.AutoMirrored.Default.Logout)
 }

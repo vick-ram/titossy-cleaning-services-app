@@ -32,7 +32,7 @@ import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnBoardingScreen(navController: NavHostController) {
+fun OnBoardingScreen(navController: NavHostController, onboardingStarted: () -> Unit) {
     val viewModel: AuthViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     Box(
@@ -83,8 +83,9 @@ fun OnBoardingScreen(navController: NavHostController) {
                     scope.launch {
                         viewModel.setOnboardingCompleted()
                     }
-                    navController.navigate(RootNavRoutes.AUTH.route){
-                        popUpTo(RootNavRoutes.ONBOARDING.route){
+                    onboardingStarted()
+                    navController.navigate(RootNavRoutes.AUTH.route) {
+                        popUpTo(RootNavRoutes.ONBOARDING.route) {
                             inclusive = true
                         }
                     }

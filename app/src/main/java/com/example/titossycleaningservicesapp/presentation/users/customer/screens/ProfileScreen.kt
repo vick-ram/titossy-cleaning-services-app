@@ -46,22 +46,29 @@ fun ProfileScreen(navController: NavHostController) {
         }
     }
     LaunchedEffect(key1 = signOutState.value.isSuccess, block = {
-        if (signOutState.value.isSuccess?.isNotEmpty() == true){
-            navController.navigate(RootNavRoutes.AUTH.route){
-                navController.popBackStack()
+        scope.launch {
+            if (signOutState.value.isSuccess?.isNotEmpty() == true) {
+                navController.navigate(RootNavRoutes.AUTH.route) {
+                    navController.popBackStack()
+                }
             }
         }
     })
 
     LaunchedEffect(key1 = signOutState.value.isLoading, block = {
-        if (signOutState.value.isLoading){
-            Toast.makeText(context, "TAG", Toast.LENGTH_LONG).show()
+        scope.launch {
+            if (signOutState.value.isLoading) {
+                Toast.makeText(context, "TAG", Toast.LENGTH_LONG).show()
+            }
         }
     })
 
     LaunchedEffect(key1 = signOutState.value.errorMessage, block = {
-        if (signOutState.value.errorMessage?.isNotEmpty() == true){
-            Toast.makeText(context, "${signOutState.value.errorMessage}", Toast.LENGTH_LONG).show()
+        scope.launch {
+            if (signOutState.value.errorMessage?.isNotEmpty() == true) {
+                Toast.makeText(context, "${signOutState.value.errorMessage}", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     })
 

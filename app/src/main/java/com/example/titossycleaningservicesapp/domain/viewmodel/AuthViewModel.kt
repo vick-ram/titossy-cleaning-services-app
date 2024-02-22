@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
@@ -26,7 +27,6 @@ class AuthViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
-
 
     var currentUser = authenticationRepository.currentUser
         private set

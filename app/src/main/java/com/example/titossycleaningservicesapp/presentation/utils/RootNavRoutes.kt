@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.utils
 
+/*Root navigation routes*/
 sealed class RootNavRoutes(val route: String) {
     data object ROOT : RootNavRoutes("ROOT")
     data object ONBOARDING : RootNavRoutes("onBoarding")
@@ -7,6 +8,7 @@ sealed class RootNavRoutes(val route: String) {
     data object HOME : RootNavRoutes("HOME")
 }
 
+/*Authentication routes*/
 sealed class Authentication(val route: String) {
     data object LOGIN : Authentication("LOGIN")
     data object SIGNUP : Authentication("SIGN_UP")
@@ -21,4 +23,5 @@ sealed class UserRoutes(val route: String) {
     data object Cleaner : UserRoutes("cleaner")
     data object Supplier : UserRoutes("supplier")
     data object Customer : UserRoutes("customer")
+    data object Inventory : UserRoutes("inventory")
 }

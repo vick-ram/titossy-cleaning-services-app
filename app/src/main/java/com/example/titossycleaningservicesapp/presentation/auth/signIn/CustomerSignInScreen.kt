@@ -56,7 +56,6 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailAndPasswordValidation
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 import kotlinx.coroutines.launch
@@ -64,7 +63,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignInScreen(
     toSignUpScreen: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    onboardingCompleted: () -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -127,9 +127,7 @@ fun SignInScreen(
         CustomButton(
             onClick = {
                 scope.launch {
-                    if (emailAndPasswordValidation(email, password)) {
-                        signInViewModel.signIn(email, password)
-                    }
+                    signInViewModel.signIn(email, password).isCompleted
                 }
             },
             modifier = Modifier,
@@ -148,6 +146,7 @@ fun SignInScreen(
             )
             TextButton(
                 onClick = {
+                    onboardingCompleted()
                     navController.navigate(Authentication.EMPLOYEE.route) {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = true

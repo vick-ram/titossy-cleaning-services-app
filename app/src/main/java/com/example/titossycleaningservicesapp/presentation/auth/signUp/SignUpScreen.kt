@@ -49,9 +49,6 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailAndPasswordValidation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.emailValidation
-import com.example.titossycleaningservicesapp.presentation.auth.utils.passwordValidation
 import kotlinx.coroutines.launch
 
 @Composable
@@ -147,33 +144,11 @@ fun SignUpScreen(
             modifier = Modifier,
             onClick = {
                 scope.launch {
-                    if (!emailValidation(email)) {
-                        Toast.makeText(
-                            context,
-                            "email required or email not correctly formatted",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!passwordValidation(password)) {
-                        Toast.makeText(
-                            context,
-                            "password too short or must contain upper letter with special case character",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!emailAndPasswordValidation(email, password)) {
-                        Toast.makeText(
-                            context,
-                            "both email and password are not correctly formatted",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else if (!emailValidation(email) || !passwordValidation(password)) {
-                        Toast.makeText(
-                            context,
-                            "either email or password is not correct",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else {
-                        signUpViewModel.signUp(userId, firstName, lastName, email, password)
-                    }
+                    signUpViewModel.signUp(userId, firstName, lastName, email, password)
+                    firstName = ""
+                    lastName = ""
+                    email = ""
+                    password = ""
                 }
             },
             text = "Sign up"

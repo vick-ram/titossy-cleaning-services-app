@@ -1,8 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signIn
 
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +17,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,7 +38,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.FirebaseViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
@@ -116,7 +111,10 @@ fun EmployeesSignIn(navController: NavHostController) {
                 scope.launch {
                     signInViewModel.signIn(email, password)
                     employeeViewModel.getEmployee()
+                    email = ""
+                    password = ""
                 }
+
             },
             modifier = Modifier
         )
@@ -194,7 +192,11 @@ fun EmployeesSignIn(navController: NavHostController) {
         }
     })
 
-    /*    if (employeeData.isLoading) {
-            CircularProgressIndicator()
-        }*/
+    LaunchedEffect(key1 = employeeData.isLoading, block = {
+        scope.launch {
+            if (employeeData.isLoading) {
+                Toast.makeText(context, "loading...", Toast.LENGTH_LONG).show()
+            }
+        }
+    })
 }
