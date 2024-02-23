@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:app/src/main/java/com/example/titossycleaningservicesapp/presentation/auth/authGraph/AuthGraph.kt
 package com.example.titossycleaningservicesapp.presentation.auth.authGraph
+========
+package com.example.titossycleaningservicesapp.presentation.auth.authGrapgh
+>>>>>>>> origin/master:app/src/main/java/com/example/titossycleaningservicesapp/presentation/auth/authGrapgh/AuthGraph.kt
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -12,7 +16,12 @@ import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 
 fun NavGraphBuilder.authNavGraph(
+<<<<<<<< HEAD:app/src/main/java/com/example/titossycleaningservicesapp/presentation/auth/authGraph/AuthGraph.kt
     navController: NavHostController
+========
+    navController: NavHostController,
+    onboardingCompleted: () -> Unit = {}
+>>>>>>>> origin/master:app/src/main/java/com/example/titossycleaningservicesapp/presentation/auth/authGrapgh/AuthGraph.kt
 ) {
     navigation(
         route = RootNavRoutes.AUTH.route,
@@ -21,7 +30,8 @@ fun NavGraphBuilder.authNavGraph(
         composable(Authentication.LOGIN.route) {
             SignInScreen(
                 navController = navController,
-                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) }
+                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) },
+                onboardingCompleted = onboardingCompleted
             )
         }
         composable(Authentication.SIGNUP.route) {
