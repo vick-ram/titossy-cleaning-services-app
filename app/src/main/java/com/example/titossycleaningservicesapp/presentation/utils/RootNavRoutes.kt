@@ -13,6 +13,7 @@ sealed class Authentication(val route: String) {
     data object LOGIN : Authentication("LOGIN")
     data object SIGNUP : Authentication("SIGN_UP")
     data object EMPLOYEE : Authentication("employee_sign_in")
+    data object SUPPLIER : Authentication("customer_sign_in")
 }
 
 /*Navigation user routes*/

@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.util.NavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
@@ -28,13 +28,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CleanerNavigationDrawer() {
+fun CleanerNavigationDrawer(signOutUser: () -> Unit) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val viewModel: AuthViewModel = hiltViewModel()
-    val displayName = viewModel.currentUser?.displayName ?: "No cleaner name"
-    val email = viewModel.currentUser?.email ?: "No cleaner email"
+    val viewModel: CustomerAuthViewModel = hiltViewModel()
     val drawerItems = listOf(
         NavRoutes.Home,
         NavRoutes.About,
@@ -45,13 +43,24 @@ fun CleanerNavigationDrawer() {
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
-                DrawerUserInfo(name = displayName, email = email)
+                DrawerUserInfo(name = "", email = "")
                 drawerItems.forEach { item ->
                     NavigationDrawerItem(
                         label = { Text(text = item.title) },
                         selected = false,
                         onClick = {
-                            navController.navigate(item.routes)
+                            if (item.routes == "logout") {
+                                navController.popBackStack()
+                                signOutUser()
+                            } else {
+                                navController.navigate(item.routes) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                }
+                            }
                             scope.launch { drawerState.close() }
                         },
                         icon = {

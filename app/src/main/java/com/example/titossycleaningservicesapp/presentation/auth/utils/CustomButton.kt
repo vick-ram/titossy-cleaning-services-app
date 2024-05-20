@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -17,24 +17,30 @@ import androidx.compose.ui.unit.dp
 fun CustomButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    enabled: Boolean = false
 ) {
     Button(
-        onClick = { onClick() },
+        onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp),
-        shape = RectangleShape,
+            .fillMaxWidth(.75f)
+            .padding(8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+
         ),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(vertical = 18.dp),
+        enabled = enabled
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onPrimary,
+            style = TextStyle(
+                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                fontWeight = MaterialTheme.typography.titleMedium.fontWeight,
+                fontStyle = MaterialTheme.typography.titleMedium.fontStyle,
+                fontFamily = MaterialTheme.typography.titleMedium.fontFamily,
+            ),
             textAlign = TextAlign.Center
         )
     }

@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.presentation.utils
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,7 +19,10 @@ fun CustomIndeterminateProgressIndicator(isLoading: Boolean) {
         contentAlignment = Alignment.BottomCenter
     ) {
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier.size(50.dp),
+                strokeWidth = 2.dp
+            )
         }
     }
 }

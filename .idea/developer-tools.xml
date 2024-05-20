@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="text-format-converter">
+    <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="regular-expression-matcher" id="e9bec1c9-2064-46b9-9c09-5d705d73f8fd" name="Workbench">
+        <properties>
+          <property key="regexOption" type="CONFIGURATION" value="kotlin.Int|130" />
+        </properties>
+      </developerToolConfiguration>
+    </developerToolsConfigurations>
+  </component>
+</project>

@@ -19,22 +19,20 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.users.inventory.utils.NavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryNavigationDrawer() {
+fun InventoryNavigationDrawer(signOutInventoryManager: () -> Unit) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val viewModel: AuthViewModel = hiltViewModel()
-    val displayName = viewModel.currentUser?.displayName ?: "No inventory name"
-    val email = viewModel.currentUser?.email ?: "No inventory email"
+    //val viewModel: CustomerAuthViewModel = hiltViewModel()
+    //val displayName = viewModel.currentUser?.displayName ?: "No inventory name"
+    //val email = viewModel.currentUser?.email ?: "No inventory email"
     val drawerItems = listOf(
         NavRoutes.Home,
         NavRoutes.Contact,
@@ -46,13 +44,18 @@ fun InventoryNavigationDrawer() {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                DrawerUserInfo(name = displayName, email = email)
+                DrawerUserInfo(name = "", email = "")
                 drawerItems.forEach { item ->
                     NavigationDrawerItem(
                         label = { Text(text = item.title) },
                         selected = false,
                         onClick = {
-                            navController.navigate(item.route)
+                            if (item.route == "log out") {
+                                navController.popBackStack()
+                                signOutInventoryManager()
+                            } else {
+                                navController.navigate(item.route)
+                            }
                             scope.launch { drawerState.close() }
                         },
                         icon = {

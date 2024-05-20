@@ -1,216 +1,154 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signIn
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.FirebaseViewModel
+import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
+import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
+import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
+import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
-import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
-import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
-import kotlinx.coroutines.launch
 
 @Composable
 fun EmployeesSignIn(navController: NavHostController) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+
     var togglePasswordVisibility by remember { mutableStateOf(false) }
-    val employeeViewModel: FirebaseViewModel = hiltViewModel()
-    val employeeData by employeeViewModel.employeeData.collectAsState()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val signInViewModel: AuthViewModel = hiltViewModel()
+    val signInViewModel: EmployeeViewModel = hiltViewModel()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(72.dp),
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = "employee account",
-                    tint = Color.Blue
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            CustomTextField(
-                value = email,
-                onValueChange = { email = it },
-                modifier = Modifier,
-                label = "email",
-                leadingIcon = Icons.Filled.Email,
-                keyBoardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Email
-                )
-            )
-            CustomTextField(
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier,
-                label = "password",
-                leadingIcon = Icons.Filled.Lock,
-                trailingIcon = if (togglePasswordVisibility) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                onTrailingIconClicked = { togglePasswordVisibility = !togglePasswordVisibility },
-                visualTransformation = if (togglePasswordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                keyBoardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Password
-                )
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            CustomButton(
-                text = "sign in",
-                onClick = {
-                    scope.launch {
-                        signInViewModel.signIn(email, password)
-                        employeeViewModel.getEmployee()
-                        email = ""
-                        password = ""
-                    }
+    var usernameOrEmail by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-                },
-                modifier = Modifier
-            )
-            TextButton(
-                onClick = { navController.popBackStack() }
-            ) {
-                Text(text = "Back")
+    val passwordState by signInViewModel.passwordState.collectAsState()
+    val usernameOrEmailState by signInViewModel.usernameOrEmailState.collectAsState()
+    val usernameOrEmailErrorMessage by signInViewModel.usernameOrEmailErrorMessage.collectAsState()
+    val passwordErrorMessage by signInViewModel.passwordErrorMessage.collectAsState()
+    val isUsernameOrEmailError = usernameOrEmailState is ValidationState.Invalid
+
+    LaunchedEffect(signInViewModel, context) {
+        signInViewModel.resultChannel.collect { result ->
+            when (result) {
+                is AuthEvent.Error -> TODO()
+                is AuthEvent.Loading -> TODO()
+                is AuthEvent.Success -> TODO()
             }
-            CustomIndeterminateProgressIndicator(isLoading = employeeData.isLoading)
         }
     }
 
-    LaunchedEffect(key1 = employeeData.employees, block = {
-        scope.launch {
-            employeeData.employee?.let { employee ->
-                when {
-                    employee.role == "manager" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Manager.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
 
-                    employee.role == "finance" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Finance.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-                    employee.role == "supplier" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Supplier.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 4.dp,
+            shape = RoundedCornerShape(15.dp),
+            shadowElevation = 1.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AuthCurve(title = "Login")
 
-                    employee.role == "supervisor" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Supervisor.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    employee.role == "inventory" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Customer.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                CustomTextField(
+                    value = usernameOrEmail,
+                    onValueChange = {
+                        usernameOrEmail = it
+                    },
+                    modifier = Modifier,
+                    label = "username or email",
+                    leadingIcon = Icons.Filled.Person,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    trailingIcon = if (isUsernameOrEmailError) Icons.Outlined.Info else null,
+                    isError = isUsernameOrEmailError,
+                    errorMessage = usernameOrEmailErrorMessage
+                )
 
-                    employee.role == "cleaner" && employee.status == "approved" -> {
-                        navController.navigate(UserRoutes.Cleaner.route) {
-                            popUpTo(Authentication.EMPLOYEE.route) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                CustomTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        signInViewModel.onPasswordChange(it)
+                    },
+                    modifier = Modifier,
+                    label = "Password",
+                    leadingIcon = Icons.Filled.Lock,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    trailingIcon = if (togglePasswordVisibility) {
+                        Icons.Filled.Visibility
+                    } else {
+                        Icons.Filled.VisibilityOff
+                    },
+                    onTrailingIconClicked = { togglePasswordVisibility = !togglePasswordVisibility },
+                    visualTransformation = if (togglePasswordVisibility) {
+                        VisualTransformation.None
+                    } else {
+                        PassWordTransformation()
+                    },
+                    errorMessage = passwordErrorMessage,
+                    isError = passwordState is ValidationState.Invalid,
+                )
 
-                    else -> {
-                        navController.navigate(UserRoutes.Customer.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                inclusive = true
-                            }
-                        }
-                    }
-                }
+                CustomButton(
+                    text = "Sign In",
+                    onClick = {
+                        navController.navigate(Authentication.EMPLOYEE.route)
+                    },
+                    modifier = Modifier.padding(16.dp),
+                    enabled = passwordState is ValidationState.Valid
+                )
             }
         }
-    })
-
-    LaunchedEffect(key1 = employeeData.errorMessage, block = {
-        scope.launch {
-            if (employeeData.errorMessage?.isNotEmpty() == true) {
-                Toast.makeText(context, "${employeeData.errorMessage}", Toast.LENGTH_LONG).show()
-            }
-        }
-    })
-
-    LaunchedEffect(key1 = employeeData.isLoading, block = {
-        scope.launch {
-            if (employeeData.isLoading) {
-                Toast.makeText(context, "loading...", Toast.LENGTH_LONG).show()
-            }
-        }
-    })
+    }
 }

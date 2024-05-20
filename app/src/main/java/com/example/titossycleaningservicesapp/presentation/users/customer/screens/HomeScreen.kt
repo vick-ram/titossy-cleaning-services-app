@@ -1,164 +1,224 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.screens
 
-import androidx.compose.foundation.clickable
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.Badge
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
-import com.example.titossycleaningservicesapp.presentation.users.customer.utils.ServiceCard
-import kotlin.random.Random
+import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
+import com.example.titossycleaningservicesapp.presentation.users.customer.utils.CustomServiceCard
+import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
-    val viewModel: AuthViewModel = hiltViewModel()
-    val currentUser = viewModel.currentUser
+fun HomeScreen(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+) {
     var searchText by remember { mutableStateOf("") }
-    val num = Random.nextInt()
-    val cardList = listOf(
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        ),
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        ),
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        ),
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        ),
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        ),
-        CardItem(
-            R.drawable.download_house_cleaning_services___cleaning_service_cartoon_png_png_image_with_no_backgroud___pngkey_com,
-            title = "$num",
-            price = 0.0f
-        )
-    )
+    var expanded by remember { mutableStateOf(false) }
+    val serviceViewModel: ServiceViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val serviceState by serviceViewModel.serviceState.collectAsState()
 
-    Scaffold(
-        topBar = {
+    when {
+        serviceState.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        serviceState.services.isNotEmpty() -> {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(vertical = 26.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
                 ) {
-                    Column {
-                        Text(text = "Welcome ${currentUser?.displayName}")
-                    }
-                    Row(
+
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(50))
                     ) {
-                        Box(modifier = Modifier
-                            .size(24.dp)
-                            .clickable { }
-                        ) {
-                            IconButton(
-                                onClick = { /*TODO*/ }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Notifications,
-                                    contentDescription = "notifications"
-                                )
-                            }
-                            Badge(modifier = Modifier.align(Alignment.TopEnd))
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "faqs", modifier = Modifier.clickable { })
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "help", modifier = Modifier.clickable { })
-                    }
-                }
-                TopAppBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    title = {
-                        TextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp, bottom = 8.dp),
-                            shape = RoundedCornerShape(35.dp),
-                            value = searchText,
-                            onValueChange = { searchText = it },
-                            placeholder = { Text(text = "search") },
-                            singleLine = true,
-                            maxLines = 1,
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
+
+                    IconButton(
+                        onClick = { expanded = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null,
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(text = "FAQs") },
+                                onClick = { /*TODO*/ }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = "Help") },
+                                onClick = { /*TODO*/ }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = "Logout") },
+                                onClick = { /*TODO*/ }
+                            )
+                        }
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f),
+                    placeholder = { Text(text = "Search for services") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "search"
+                        )
+                    },
+                    shape = RoundedCornerShape(50),
+                    singleLine = true,
+                    maxLines = 1,
+                    keyboardActions = KeyboardActions(
+                        onSend = { serviceViewModel.searchServices(searchText) }
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search,
+                        autoCorrect = true,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.primary
+                    )
+
                 )
-            }
-        }) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(1f)
-                .padding(it)
-        ) {
-            items(cardList) { item ->
-                ServiceCard(
-                    image = item.image,
-                    title = item.title,
-                    price = item.price
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "Services",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .consumeWindowInsets(paddingValues)
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentPadding = paddingValues,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(serviceState.services) { service ->
+                        CustomServiceCard(
+                            service = service,
+                            onServiceClick = {
+                                navController.navigate(
+                                    DetailsRoutes.Details.route + "/${it.id}"
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(
+                            modifier = Modifier.windowInsetsBottomHeight(
+                                WindowInsets.systemBars
+                            )
+                        )
+                    }
+                }
             }
         }
 
+        serviceState.error.isNotEmpty() -> {
+            Toast.makeText(
+                context,
+                serviceState.error,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
-
 }
 
-data class CardItem(
-    val image: Int,
-    val title: String,
-    val price: Float
-)
+

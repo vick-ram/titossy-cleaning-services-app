@@ -4,41 +4,50 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.navigation.CleanerNavigationDrawer
-import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerNavigationDrawer
+import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerBottomNavigation
 import com.example.titossycleaningservicesapp.presentation.users.finance.navigation.FinanceNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.inventory.navigation.InventoryNavigationDrawer
-import com.example.titossycleaningservicesapp.presentation.users.manager.navigation.SideNavigation
+import com.example.titossycleaningservicesapp.presentation.users.manager.navigation.ManagerNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.navigation.SupervisorNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.supplier.navigation.SupplierNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
-fun NavGraphBuilder.usersNavigation() {
+fun NavGraphBuilder.usersNavigation(
+    signOutCustomer: () -> Unit,
+    signOutCleaner: () -> Unit,
+    signOutManager: () -> Unit,
+    signOutSupplier: () -> Unit,
+    signOutSupervisor: () -> Unit,
+    signOutFinance: () -> Unit,
+    signOutInventory: () -> Unit
+) {
 
     navigation(
         route = RootNavRoutes.HOME.route,
         startDestination = UserRoutes.Customer.route
     ) {
         composable(UserRoutes.Manager.route) {
-            SideNavigation()
+            ManagerNavigationDrawer(signOutManager)
         }
         composable(UserRoutes.Inventory.route) {
-            InventoryNavigationDrawer()
+            InventoryNavigationDrawer(signOutInventory)
         }
         composable(UserRoutes.Finance.route) {
-            FinanceNavigationDrawer()
+            FinanceNavigationDrawer(signOutFinance)
         }
         composable(UserRoutes.Supervisor.route) {
-            SupervisorNavigationDrawer()
+            SupervisorNavigationDrawer(signOutSupervisor)
         }
         composable(UserRoutes.Cleaner.route) {
-            CleanerNavigationDrawer()
+            CleanerNavigationDrawer(signOutCleaner)
         }
         composable(UserRoutes.Supplier.route) {
-            SupplierNavigationDrawer()
+            SupplierNavigationDrawer(signOutSupplier)
         }
         composable(UserRoutes.Customer.route) {
-            CustomerNavigationDrawer()
+            //CustomerNavigationDrawer(signOutCustomer)
+            CustomerBottomNavigation()
         }
     }
 }

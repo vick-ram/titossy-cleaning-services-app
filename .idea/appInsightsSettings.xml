@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.titossycleaningservicesapp" />
-                  <option name="mobileSdkAppId" value="1:282761914035:android:fce40fd54597545b64f2c6" />
-                  <option name="projectId" value="titossy-cleaning-services" />
-                  <option name="projectNumber" value="282761914035" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

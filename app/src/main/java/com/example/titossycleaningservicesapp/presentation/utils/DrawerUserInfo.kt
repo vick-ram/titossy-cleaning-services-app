@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.utils
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.titossycleaningservicesapp.R
 
 
 @Composable
@@ -37,20 +41,11 @@ fun DrawerUserInfo(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(80.dp),
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "profile",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            Image(
+                modifier = Modifier.size(100.dp),
+                painter = painterResource(id = R.drawable.user),
+                contentDescription = "user profile"
+            )
             Text(
                 modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
                 text = name,

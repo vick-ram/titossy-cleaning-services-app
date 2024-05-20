@@ -23,22 +23,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.titossycleaningservicesapp.domain.viewmodel.AuthViewModel
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.RouteData
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SideNavigation() {
+fun ManagerNavigationDrawer(signOutManager: () -> Unit) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val viewModel: AuthViewModel = hiltViewModel()
-    val displayName = viewModel.currentUser?.displayName ?: "Manager name"
-    val email = viewModel.currentUser?.email ?: "Manager email"
+    //val viewModel: CustomerAuthViewModel = hiltViewModel()
+    //val displayName = viewModel.currentUser?.displayName ?: "Manager name"
+    //val email = viewModel.currentUser?.email ?: "Manager email"
     val drawerItems = listOf(
         RouteData.Home,
         RouteData.Contact,
@@ -48,7 +46,7 @@ fun SideNavigation() {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                DrawerUserInfo(name = displayName, email = email)
+                DrawerUserInfo(name = "", email = "")
                 LazyColumn(
                     contentPadding = PaddingValues(8.dp)
                 ) {
@@ -59,7 +57,12 @@ fun SideNavigation() {
                             },
                             selected = false,
                             onClick = {
-                                navController.navigate(item.route)
+                                if (item.route == "log out") {
+                                    navController.popBackStack()
+                                    signOutManager()
+                                } else {
+                                    navController.navigate(item.route)
+                                }
                                 scope.launch {
                                     drawerState.close()
                                 }
