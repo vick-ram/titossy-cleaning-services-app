@@ -5,37 +5,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
-import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
-import com.example.titossycleaningservicesapp.presentation.auth.utils.Validations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class SupplierAuthViewModel @Inject constructor(
-    private val supplierRepository: SupplierRepository
+    private val supplierRepository: SupplierRepository,
+    private val dataStoreKeys: DataStoreKeys
 ) : ViewModel() {
-
-
-    private val _passwordState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val passwordState: StateFlow<ValidationState> = _passwordState.asStateFlow()
-
-    private val _usernameOrEmailState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val usernameOrEmailState: StateFlow<ValidationState> = _usernameOrEmailState.asStateFlow()
-
-    private val _usernameOrEmailErrorMessage = MutableStateFlow("")
-    val usernameOrEmailErrorMessage: StateFlow<String> = _usernameOrEmailErrorMessage.asStateFlow()
-
-    private val _passwordErrorMessage = MutableStateFlow("")
-    val passwordErrorMessage: StateFlow<String> = _passwordErrorMessage.asStateFlow()
-
 
     var username by mutableStateOf("")
     var firstName by mutableStateOf("")
@@ -51,32 +35,109 @@ class SupplierAuthViewModel @Inject constructor(
     private val _resultChannel = Channel<AuthEvent>(Channel.BUFFERED)
     val resultChannel = _resultChannel.receiveAsFlow()
 
-    private fun signIn() = viewModelScope.launch {
+    var isLoading by mutableStateOf(false)
 
+    private fun sendEvent(event: AuthEvent) = viewModelScope.launch {
+        _resultChannel.send(event)
     }
 
-    private fun signUp() = viewModelScope.launch {
-
+    fun signIn() = viewModelScope.launch {
+        isLoading = true
+        val result = supplierRepository.signInSupplier(email, password)
+        if (result is AuthEvent.Success) {
+            dataStoreKeys.saveUserTypeToDataStore("SUPPLIER")
+        }
+        sendEvent(result)
+        isLoading = false
     }
 
-    private fun update() = viewModelScope.launch {
-
+    fun signUp() = viewModelScope.launch {
+        isLoading = true
+        val result = supplierRepository.createSupplier(
+            username,
+            firstName,
+            lastName,
+            phone,
+            company,
+            county,
+            region,
+            postalCode,
+            email,
+            password
+        )
+        sendEvent(result)
+        isLoading = false
     }
 
-    private fun signOut() = viewModelScope.launch {
-
+    fun update(id: UUID) = viewModelScope.launch {
+        isLoading = true
+        val result = supplierRepository.updateSupplier(
+            id,
+            username,
+            firstName,
+            lastName,
+            phone,
+            company,
+            county,
+            region,
+            postalCode,
+            email,
+            password
+        )
+        sendEvent(result)
+        isLoading = false
     }
 
+    fun signOut() = viewModelScope.launch {
+        isLoading = true
+        val result = supplierRepository.signOutSupplier()
+        sendEvent(result)
+        isLoading = false
+    }
+
+    fun onUsernameChange(newUsername: String) {
+        username = newUsername
+    }
+
+    fun onFirstNameChange(newFirstName: String) {
+        firstName = newFirstName
+    }
+
+    fun onLastNameChange(newLastName: String) {
+        lastName = newLastName
+    }
+
+    fun onPhoneChange(newPhone: String) {
+        phone = newPhone
+    }
+
+    fun onCompanyChange(newCompany: String) {
+        company = newCompany
+    }
+
+    fun onCountyChange(newCounty: String) {
+        county = newCounty
+    }
+
+    fun onRegionChange(newRegion: String) {
+        region = newRegion
+    }
+
+    fun onPostalCodeChange(newPostalCode: String) {
+        postalCode = newPostalCode
+    }
+
+    fun onEmailChange(newEmail: String) {
+        email = newEmail
+    }
 
     fun onPasswordChange(newPassword: String) {
-        viewModelScope.launch {
-            _passwordState.value = Validations.isPasswordValid(newPassword)
-            if (_passwordState.value is ValidationState.Valid) {
-                _passwordErrorMessage.emit("")
-            } else if (_passwordState.value is ValidationState.Invalid) {
-                _passwordErrorMessage.emit((_passwordState.value as ValidationState.Invalid).message)
-            }
-        }
+        password = newPassword
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _resultChannel.close()
     }
 
 }

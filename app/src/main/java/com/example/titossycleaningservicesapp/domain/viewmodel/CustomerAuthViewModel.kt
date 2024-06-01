@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
+import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CustomerState
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
@@ -16,17 +17,21 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.Validation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class CustomerAuthViewModel @Inject constructor(
-    private val customerRepository: CustomerRepository
+    private val customerRepository: CustomerRepository,
+    private val dataStoreKeys: DataStoreKeys
 ) : ViewModel() {
 
     var username by mutableStateOf("")
@@ -40,12 +45,6 @@ class CustomerAuthViewModel @Inject constructor(
 
     private val _passwordState = MutableStateFlow<ValidationState>(ValidationState.Idle)
     val passwordState: StateFlow<ValidationState> = _passwordState.asStateFlow()
-
-    private val _nameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val nameState: StateFlow<ValidationState> = _nameState.asStateFlow()
-
-    private val _nameErrorMessage = MutableStateFlow("")
-    val nameErrorMessage: StateFlow<String> = _nameErrorMessage.asStateFlow()
 
     private val _passwordErrorMessage = MutableStateFlow("")
     val passwordErrorMessage: StateFlow<String> = _passwordErrorMessage.asStateFlow()
@@ -69,8 +68,12 @@ class CustomerAuthViewModel @Inject constructor(
         _authEvent.send(event)
     }
 
-    private val _customerUiState = MutableStateFlow(CustomerState())
+    private val _customerUiState = MutableStateFlow(CustomerState(isLoading = true))
     val customerUiState: StateFlow<CustomerState> = _customerUiState
+
+    init {
+        getCustomers()
+    }
 
 
     fun signIn() = viewModelScope.launch {
@@ -81,43 +84,34 @@ class CustomerAuthViewModel @Inject constructor(
             email = if (usernameOrEmail.contains("@")) usernameOrEmail else null,
             password = password
         )
+        if (result is AuthEvent.Success) {
+            dataStoreKeys.saveUserTypeToDataStore("CUSTOMER")
+        }
         sendEvent(result)
-
         isLoading = false
     }
 
     fun signUp() = viewModelScope.launch {
-
         isLoading = true
-
         val result =
             customerRepository.createCustomer(username, firstName, lastName, phone, email, password)
-
         sendEvent(result)
-
         isLoading = false
     }
 
     fun update(customerId: UUID) = viewModelScope.launch {
-
         isLoading = true
-
         val result = customerRepository.updateCustomer(
             customerId, username, firstName, lastName, phone, email, password
         )
-
         sendEvent(result)
-
         isLoading = false
     }
 
     fun signOut() = viewModelScope.launch {
-
         isLoading = true
-
         val result = customerRepository.signOutCustomer()
         sendEvent(result)
-
         isLoading = false
     }
 
@@ -173,16 +167,57 @@ class CustomerAuthViewModel @Inject constructor(
         }
     }
 
+    fun getCustomerByUsername() = viewModelScope.launch {
+        customerRepository.getCustomerByUsername(username)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = Resource.Loading
+            )
+            .collect { resource ->
+                when (resource) {
+                    is Resource.Error -> {
+                        _customerUiState.update {
+                            it.copy(
+                                error = resource.message,
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        _customerUiState.update { it.copy(isLoading = true) }
+                    }
+
+                    is Resource.Success -> {
+                        _customerUiState.update {
+                            it.copy(
+                                customer = resource.data,
+                                isLoading = false
+                            )
+                        }
+                    }
+                }
+            }
+    }
+
     fun getCustomers() = viewModelScope.launch {
-        val result = customerRepository.getCustomers()
         customerRepository.getCustomers()
             .map { resource ->
                 when (resource) {
-                    is Resource.Error -> CustomerState(error = resource.message)
+                    is Resource.Error -> CustomerState(error = resource.message, isLoading = false)
                     is Resource.Loading -> CustomerState(isLoading = true)
-                    is Resource.Success -> CustomerState(customers = resource.data)
+                    is Resource.Success -> CustomerState(
+                        customers = resource.data,
+                        isLoading = false
+                    )
                 }
             }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = CustomerState(isLoading = true)
+            )
             .collect { state ->
                 _customerUiState.value = state
             }
@@ -195,17 +230,6 @@ class CustomerAuthViewModel @Inject constructor(
                 _passwordErrorMessage.emit("")
             } else if (_passwordState.value is ValidationState.Invalid) {
                 _passwordErrorMessage.emit((_passwordState.value as ValidationState.Invalid).message)
-            }
-        }
-    }
-
-    fun onNameChange(name: String) {
-        viewModelScope.launch {
-            _nameState.value = Validations.isValidName(name)
-            if (_nameState.value is ValidationState.Valid) {
-                _nameErrorMessage.emit("")
-            } else if (_nameState.value is ValidationState.Invalid) {
-                _nameErrorMessage.emit((_nameState.value as ValidationState.Invalid).message)
             }
         }
     }

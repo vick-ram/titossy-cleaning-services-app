@@ -13,7 +13,9 @@ sealed class Authentication(val route: String) {
     data object LOGIN : Authentication("LOGIN")
     data object SIGNUP : Authentication("SIGN_UP")
     data object EMPLOYEE : Authentication("employee_sign_in")
-    data object SUPPLIER : Authentication("customer_sign_in")
+    data object SUPPLIER_SIGNUP : Authentication("supplier_sign_up")
+    data object SUPPLIER : Authentication("supplier_sign_in")
+    data object APPROVAL: Authentication("waiting_approval")
 }
 
 /*Navigation user routes*/
@@ -26,3 +28,4 @@ sealed class UserRoutes(val route: String) {
     data object Customer : UserRoutes("customer")
     data object Inventory : UserRoutes("inventory")
 }
+

@@ -1,11 +1,13 @@
 package com.example.titossycleaningservicesapp.data.repository
 
+import com.example.titossycleaningservicesapp.core.FileUtils
 import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.data.local.database.dao.SupplierDao
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
 import com.example.titossycleaningservicesapp.data.remote.dto.SupplierAddressDto
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
@@ -45,32 +47,58 @@ class SupplierRepositoryImpl @Inject constructor(
                 email = email,
                 password = password
             )
+
             val apiSupplier = apiService.supplierSignUp(supplier)
-            apiSupplier.data?.toSupplierEntity()?.let { supplierDao.insertSupplier(it) }
-            AuthEvent.Success()
-        }catch (e: Exception) {
-            when(e){
-                is HttpException -> {
-                    when(e.code()) {
-                        400 -> AuthEvent.Error(e.message())
-                        401 -> AuthEvent.Error(e.message())
-                        403 -> AuthEvent.Error(e.message())
-                        404 -> AuthEvent.Error(e.message())
-                        500 -> AuthEvent.Error(e.message())
-                        else -> AuthEvent.Error(e.message())
+            when (apiSupplier.status) {
+                "success" -> {
+                    apiSupplier.data?.toSupplierEntity()?.let { supplierDao.insertSupplier(it) }
+                    AuthEvent.Success()
+                }
+
+                "error" -> {
+                    if (apiSupplier.error != null) {
+                        val errorMessage = FileUtils.createErrorMessage(apiSupplier.error)
+                        throw Exception(errorMessage)
+                    } else {
+                        throw Exception("Could not process your request")
                     }
                 }
 
-                else -> {
-                    AuthEvent.Error(e.message ?: "An unknown error occurred")
-                }
+                else -> throw Exception("Something went wrong")
             }
+
+        } catch (e: Exception) {
+            AuthEvent.Error(e.message.toString())
         }
     }
 
     override suspend fun signInSupplier(email: String, password: String): AuthEvent {
         return try {
             AuthEvent.Loading
+            val response = apiService.supplierSignIn(
+                SupplierSignInRequest(
+                    email, password
+                )
+            )
+            when (response.status) {
+                "success" -> {
+                    response.data?.let { dataStoreKeys.saveTokenToDataStore(it) }
+                    AuthEvent.Success()
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    } else {
+                        throw Exception("Could not process your request")
+                    }
+                }
+
+                else -> {
+                    throw Exception("Something went wrong")
+                }
+            }
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
         }
@@ -79,26 +107,28 @@ class SupplierRepositoryImpl @Inject constructor(
     override suspend fun signOutSupplier(): AuthEvent {
         return try {
             val token = dataStoreKeys.getTokenFromDataStore()
-            token?.let { apiService.customerSignOut(it) }
-            dataStoreKeys.clearToken()
-            AuthEvent.Success()
-        }catch (e: Exception) {
-            when(e){
-                is HttpException -> {
-                    when(e.code()) {
-                        400 -> AuthEvent.Error(e.message())
-                        401 -> AuthEvent.Error(e.message())
-                        403 -> AuthEvent.Error(e.message())
-                        404 -> AuthEvent.Error(e.message())
-                        500 -> AuthEvent.Error(e.message())
-                        else -> AuthEvent.Error(e.message())
+            val response = token?.let { apiService.supplierSignOut("Bearer $it") }
+            when (response?.status) {
+                "success" -> {
+                    response.data?.let { dataStoreKeys.clearToken() }
+                    AuthEvent.Success()
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    } else {
+                        throw Exception("Could not process your request")
                     }
                 }
 
                 else -> {
-                    AuthEvent.Error(e.message ?: "An unknown error occurred")
+                    throw Exception("Something went wrong")
                 }
             }
+        } catch (e: Exception) {
+            AuthEvent.Error(e.message.toString())
         }
     }
 
@@ -131,12 +161,11 @@ class SupplierRepositoryImpl @Inject constructor(
                 password = password
             )
             apiService.supplierUpdate(id.toString(), supplier)
-            //apiSupplier.data?.let { supplierDao.insertSupplier() }
             AuthEvent.Success()
-        }catch (e: Exception) {
-            when(e){
+        } catch (e: Exception) {
+            when (e) {
                 is HttpException -> {
-                    when(e.code()) {
+                    when (e.code()) {
                         400 -> AuthEvent.Error(e.message())
                         else -> AuthEvent.Error(e.message())
                     }

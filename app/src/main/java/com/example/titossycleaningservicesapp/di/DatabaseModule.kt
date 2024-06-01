@@ -42,7 +42,4 @@ object DatabaseModule {
 
     @Provides
     fun provideServiceDao(database: TitossyDatabase) = database.serviceDao()
-
-    @Provides
-    fun provideCartDao(database: TitossyDatabase) = database.cartDao()
 }

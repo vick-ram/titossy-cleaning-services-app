@@ -86,18 +86,37 @@ class CustomerRepositoryImpl @Inject constructor(
             when (response.status) {
                 "success" -> {
                     response.data?.let { dataStore.saveTokenToDataStore(it) }
+                    val customerEntity = when {
+                        email != null -> apiService.getCustomerByEmail(email).data?.toCustomerEntity()?.customer
+                        username != null -> apiService.getCustomerByUsername(username).data?.toCustomerEntity()?.customer
+                        else -> null
+                    }
+
+                    customerEntity?.let {
+                        customerDao.insertCustomer(it)
+                        AuthEvent.Success(response.message, it.status)
+                    } ?: throw Exception("cannot complete process")
                 }
 
                 "error" -> {
                     if (response.error != null) {
                         val errorMessage = FileUtils.createErrorMessage(response.error)
                         throw Exception(errorMessage)
+                    } else {
+                        throw Exception("something went wrong")
                     }
                 }
+                else -> throw Exception("Internal error")
             }
-            val customerFromApi = apiService.customerSignIn(customer).data
-            customerFromApi?.let { dataStore.saveTokenToDataStore(it) }
-            AuthEvent.Success(response.message)
+
+            /*val customerFromDb = (email ?: username)?.let {
+                customerDao.getCustomerByUsernameOrEmail(
+                    it
+                )
+            }
+            val customerStatus = customerFromDb?.customer?.status
+
+            AuthEvent.Success(response.message, customerStatus)*/
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
         }
@@ -214,7 +233,6 @@ class CustomerRepositoryImpl @Inject constructor(
             if (customersFromDb.isNullOrEmpty()) {
 
                 val response = apiService.getCustomers()
-                println("All customers from api: ${response.data}")
                 when (response.status) {
                     "success" -> {
                         val customers = response.data?.mapNotNull { it.toCustomerEntity().customer }
@@ -243,7 +261,7 @@ class CustomerRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCustomerById(id: UUID): Flow<Resource<Customer>> {
+    override fun getCustomerById(id: UUID): Flow<Resource<Customer>> {
         return flow {
             emit(Resource.Loading)
             val customerFromDb = customerDao.getCustomerById(id)
@@ -275,7 +293,39 @@ class CustomerRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCustomersByEmail(email: String): Flow<Resource<Customer>> {
+    override fun getCustomerByUsername(username: String): Flow<Resource<Customer>> {
+        return flow {
+            emit(Resource.Loading)
+            val customerFromDb = customerDao.getCustomerByUsername(username)
+
+            if (customerFromDb == null) {
+                val response = apiService.getCustomerByUsername(username)
+                when (response.status) {
+                    "success" -> {
+                        response.data?.toCustomerEntity()?.customer?.let {
+                            customerDao.insertCustomer(it)
+                        }
+                        response.data?.address?.let {
+                            val addresses = it.map { address -> address.toAddressEntity() }
+                            addressDao.insertAddresses(addresses)
+                        }
+                    }
+
+                    "error" -> {
+                        if (response.error != null) {
+                            val errorMessage = FileUtils.createErrorMessage(response.error)
+                            throw Exception(errorMessage)
+                        }
+                    }
+                }
+            }
+            customerFromDb?.toCustomerWithAddress()?.let { emit(Resource.Success(it)) }
+        }.catch { e ->
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
+
+    override fun getCustomersByEmail(email: String): Flow<Resource<Customer>> {
         return flow<Resource<Customer>> {
             emit(Resource.Loading)
             val customerFromDb = customerDao.getCustomerByEmail(email)

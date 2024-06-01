@@ -21,7 +21,7 @@ fun CustomIndeterminateProgressIndicator(isLoading: Boolean) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(50.dp),
-                strokeWidth = 2.dp
+                strokeWidth = 3.dp
             )
         }
     }

@@ -1,5 +1,7 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signUp
 
+import android.widget.Toast
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocalPostOffice
@@ -27,50 +28,64 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
+import com.example.titossycleaningservicesapp.presentation.users.customer.screens.rememberImeState
+import com.example.titossycleaningservicesapp.presentation.utils.Authentication
+import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SupplierSignUpScreen() {
-    /*val signUpViewModel: SupplierAuthViewModel = hiltViewModel()
-    val context = LocalContext.current*/
-
-    var passwordVisibility by remember { mutableStateOf(false) }
-
-    /*    val passwordState by signUpViewModel.passwordState.collectAsState()
-        val emailState by signUpViewModel.usernameOrEmailState.collectAsState()
-        val emailErrorMessage by signUpViewModel.emailErrorMessage.collectAsState()
-        val passwordErrorMessage by signUpViewModel.passwordErrorMessage.collectAsState()
-        val phoneState by signUpViewModel.phoneState.collectAsState()
-        val phoneErrorMessage by signUpViewModel.phoneErrorMessage.collectAsState()*/
+fun SupplierSignUpScreen(
+    navController: NavHostController
+) {
+    val signUpViewModel: SupplierAuthViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val passwordVisibility by remember { mutableStateOf(false) }
+    val scrollSate = rememberScrollState()
+    val imeState = rememberImeState()
 
 
-    /*LaunchedEffect(signUpViewModel, context) {
+    LaunchedEffect(imeState) {
+        if (imeState.value) {
+            scrollSate.animateScrollTo(scrollSate.maxValue, animationSpec = tween(300))
+        }
+    }
+
+    LaunchedEffect(signUpViewModel, context) {
         signUpViewModel.resultChannel.collect { result ->
             when (result) {
-                is AuthState.Authenticated -> TODO()
-                is AuthState.PendingApproval -> TODO()
-                is AuthState.UnAuthenticated -> TODO()
-                is AuthState.UnKnownError -> TODO()
+                is AuthEvent.Error -> {
+                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                }
+
+                is AuthEvent.Loading -> signUpViewModel.isLoading
+
+                is AuthEvent.Success -> {
+                    navController.navigate(Authentication.SUPPLIER.route)
+                }
             }
         }
-    }*/
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -84,24 +99,24 @@ fun SupplierSignUpScreen() {
         ) {
 
             IconButton(onClick = {
-                //navController.navigate(RootNavRoutes.AUTH.route)
+                navController.popBackStack()
             }) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBackIosNew,
+                    painter = painterResource(id = R.drawable.baseline_chevron_left_24),
                     contentDescription = null
                 )
             }
-
-            Text(
-                text = "Back to login",
-                color = MaterialTheme.colorScheme.primary
-            )
         }
 
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 0.dp),
+                .padding(
+                    start = 18.dp,
+                    end = 18.dp,
+                    top = 18.dp,
+                    bottom = 0.dp
+                ),
             tonalElevation = 4.dp,
             shadowElevation = 1.dp,
             color = MaterialTheme.colorScheme.surface,
@@ -112,10 +127,7 @@ fun SupplierSignUpScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .verticalScroll(
-                        enabled = true,
-                        state = rememberScrollState()
-                    ),
+                    .verticalScroll(scrollSate),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AuthCurve(title = "Register")
@@ -123,8 +135,8 @@ fun SupplierSignUpScreen() {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.username,
+                    onValueChange = { signUpViewModel.onUsernameChange(it) },
                     modifier = Modifier,
                     label = "Username",
                     leadingIcon = Icons.Filled.Person,
@@ -135,8 +147,8 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = signUpViewModel.firstName,
+                    onValueChange = { signUpViewModel.onFirstNameChange(it) },
                     modifier = Modifier,
                     label = "First Name",
                     leadingIcon = Icons.Filled.Person,
@@ -147,40 +159,32 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = signUpViewModel.lastName,
+                    onValueChange = { signUpViewModel.onLastNameChange(it) },
                     modifier = Modifier,
                     label = "Last Name",
                     leadingIcon = Icons.Filled.Person,
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
-                    ),
-                    /*isError = signUpViewModel.email.trim().isEmpty(),
-                    errorMessage = "required*",
-                    trailingIcon = if (signUpViewModel.email.trim()
-                            .isNotEmpty()
-                    ) Icons.Outlined.Info else null*/
+                    )
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.phone,
+                    onValueChange = { signUpViewModel.onPhoneChange(it) },
                     modifier = Modifier,
                     label = "Phone",
                     leadingIcon = Icons.Filled.Phone,
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
-                    ),
-                    /*errorMessage = phoneErrorMessage,
-                    isError = phoneState is ValidationState.Invalid,
-                    trailingIcon = if (phoneState is ValidationState.Valid) Icons.Outlined.Info else null*/
+                    )
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = signUpViewModel.company,
+                    onValueChange = { signUpViewModel.onCompanyChange(it) },
                     modifier = Modifier,
                     label = "Company",
                     leadingIcon = Icons.Filled.Business,
@@ -191,8 +195,8 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.county,
+                    onValueChange = { signUpViewModel.onCountyChange(it) },
                     modifier = Modifier,
                     label = "County",
                     leadingIcon = Icons.Filled.LocationCity,
@@ -203,8 +207,8 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.region,
+                    onValueChange = { signUpViewModel.onRegionChange(it) },
                     modifier = Modifier,
                     label = "Region",
                     leadingIcon = Icons.Filled.Place,
@@ -215,8 +219,8 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.postalCode,
+                    onValueChange = { signUpViewModel.onPostalCodeChange(it) },
                     modifier = Modifier,
                     label = "Postal Code",
                     leadingIcon = Icons.Filled.LocalPostOffice,
@@ -227,23 +231,20 @@ fun SupplierSignUpScreen() {
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.email,
+                    onValueChange = { signUpViewModel.onEmailChange(it) },
                     modifier = Modifier,
                     label = "Email",
                     leadingIcon = Icons.Filled.Email,
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
-                    ),
-                    errorMessage = "",
-                    /*isError = emailState is ValidationState.Invalid,
-                    trailingIcon = if (emailState is ValidationState.Valid) Icons.Outlined.Info else null*/
+                    )
                 )
 
                 CustomTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = signUpViewModel.password,
+                    onValueChange = { signUpViewModel.onPasswordChange(it) },
                     modifier = Modifier,
                     label = "Password",
                     leadingIcon = Icons.Filled.Lock,
@@ -260,18 +261,14 @@ fun SupplierSignUpScreen() {
                         VisualTransformation.None
                     } else {
                         PassWordTransformation()
-                    },
-                    /*isError = passwordState is ValidationState.Invalid,
-                    errorMessage = passwordErrorMessage,*/
+                    }
                 )
 
                 CustomButton(
                     text = "Register",
-                    onClick = { /*TODO*/ },
+                    onClick = { signUpViewModel.signUp() },
                     modifier = Modifier,
-                    enabled = true/*passwordState is ValidationState.Valid
-                            && emailState is ValidationState.Valid
-                            && phoneState is ValidationState.Valid*/
+                    enabled = true
                 )
             }
         }

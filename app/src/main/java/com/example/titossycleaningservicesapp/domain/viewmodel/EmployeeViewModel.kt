@@ -1,64 +1,81 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
-import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
-import com.example.titossycleaningservicesapp.presentation.auth.utils.Validations
+import com.example.titossycleaningservicesapp.presentation.auth.utils.decodeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class EmployeeViewModel @Inject constructor(
-    private val employeeRepository: EmployeeRepository
+    private val employeeRepository: EmployeeRepository,
+    private val dataStore: DataStoreKeys
 ) : ViewModel() {
-
-
-    private val _passwordState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val passwordState: StateFlow<ValidationState> = _passwordState.asStateFlow()
-
-    private val _usernameOrEmailState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val usernameOrEmailState: StateFlow<ValidationState> = _usernameOrEmailState.asStateFlow()
-
-    private val _usernameOrEmailErrorMessage = MutableStateFlow("")
-    val usernameOrEmailErrorMessage: StateFlow<String> = _usernameOrEmailErrorMessage.asStateFlow()
-
-    private val _passwordErrorMessage = MutableStateFlow("")
-    val passwordErrorMessage: StateFlow<String> = _passwordErrorMessage.asStateFlow()
-
 
     private val _resultChannel = Channel<AuthEvent>(Channel.BUFFERED)
     val resultChannel = _resultChannel.receiveAsFlow()
 
-    private fun signIn() = viewModelScope.launch {
+    var isLoading by mutableStateOf(false)
+    var email by mutableStateOf("")
+    var password by mutableStateOf("")
+    var availability by mutableStateOf("")
+
+    fun signIn() = viewModelScope.launch {
+        isLoading = true
+        val result = employeeRepository.signInEmployee(email, password)
+        if (result is AuthEvent.Success) {
+            val role = employeeRole()
+            role?.let { dataStore.saveUserTypeToDataStore(it) }
+        }
+        _resultChannel.send(result)
+        isLoading = false
     }
 
-    private fun update() = viewModelScope.launch {
-
+    fun update(id: UUID) = viewModelScope.launch {
+        isLoading = true
+        val result = employeeRepository.updateAvailability(id, availability)
+        _resultChannel.send(result)
+        isLoading = false
     }
 
-    private fun signOut() = viewModelScope.launch {
-
+    fun signOut() = viewModelScope.launch {
+        isLoading = true
+        val result = employeeRepository.signOutEmployee()
+        _resultChannel.send(result)
+        isLoading = false
     }
 
+
+    fun onEmailChange(newEmail: String) {
+        email = newEmail
+    }
 
     fun onPasswordChange(newPassword: String) {
-        viewModelScope.launch {
-            _passwordState.value = Validations.isPasswordValid(newPassword)
-            if (_passwordState.value is ValidationState.Valid) {
-                _passwordErrorMessage.emit("")
-            } else if (_passwordState.value is ValidationState.Invalid) {
-                _passwordErrorMessage.emit((_passwordState.value as ValidationState.Invalid).message)
-            }
-        }
+        password = newPassword
     }
+
+    suspend fun readToken(): String? {
+        return dataStore.getTokenFromDataStore()
+    }
+
+
+    suspend fun employeeRole() : String? {
+        val token = readToken()
+        val decodedToken = token?.let { decodeToken(it) }
+        val role = decodedToken?.get("role")
+        return role as? String
+    }
+
 
     override fun onCleared() {
         super.onCleared()

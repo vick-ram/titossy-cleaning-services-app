@@ -1,8 +1,13 @@
 package com.example.titossycleaningservicesapp.presentation.users.navigation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.navigation.CleanerNavigationDrawer
 import com.example.titossycleaningservicesapp.presentation.users.customer.navigation.CustomerBottomNavigation
 import com.example.titossycleaningservicesapp.presentation.users.finance.navigation.FinanceNavigationDrawer
@@ -20,12 +25,13 @@ fun NavGraphBuilder.usersNavigation(
     signOutSupplier: () -> Unit,
     signOutSupervisor: () -> Unit,
     signOutFinance: () -> Unit,
-    signOutInventory: () -> Unit
+    signOutInventory: () -> Unit,
+    startDestination: String
 ) {
 
     navigation(
         route = RootNavRoutes.HOME.route,
-        startDestination = UserRoutes.Customer.route
+        startDestination = startDestination
     ) {
         composable(UserRoutes.Manager.route) {
             ManagerNavigationDrawer(signOutManager)
@@ -46,8 +52,7 @@ fun NavGraphBuilder.usersNavigation(
             SupplierNavigationDrawer(signOutSupplier)
         }
         composable(UserRoutes.Customer.route) {
-            //CustomerNavigationDrawer(signOutCustomer)
-            CustomerBottomNavigation()
+            CustomerBottomNavigation(signOutCustomer)
         }
     }
 }

@@ -42,9 +42,10 @@ interface CustomerRepository {
     fun getCustomers(): Flow<Resource<List<Customer>>>
 
     //update customer status
-    suspend fun getCustomerById(id: UUID): Flow<Resource<Customer>>
+    fun getCustomerById(id: UUID): Flow<Resource<Customer>>
+    fun getCustomerByUsername(username: String) : Flow<Resource<Customer>>
 
     //get customer by email
-    suspend fun getCustomersByEmail(email: String): Flow<Resource<Customer>>
+    fun getCustomersByEmail(email: String): Flow<Resource<Customer>>
 
 }

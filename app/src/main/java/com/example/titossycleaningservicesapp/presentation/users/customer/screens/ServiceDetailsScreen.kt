@@ -1,70 +1,82 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.titossycleaningservicesapp.presentation.users.customer.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,347 +85,598 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.BASE_URL
-import com.example.titossycleaningservicesapp.domain.models.ui_models.CartItem
 import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
-import com.example.titossycleaningservicesapp.presentation.users.customer.utils.BottomRow
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.ServiceAddOnCard
+import com.example.titossycleaningservicesapp.presentation.users.customer.utils.ServiceCardInCart
+import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceDetailsScreen(
     serviceId: String,
-    onServiceDetailsBack: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
-    val columnState = rememberImeState()
-    val scrollState = rememberScrollState()
-    val showBottomRow = remember { mutableStateOf(true) }
-    var showDescription by remember { mutableStateOf(false) }
     val viewModel: ServiceViewModel = hiltViewModel()
     val services by viewModel.serviceState.collectAsState()
     val service = services.services.find { it.id.toString() == serviceId }
+    val cartState by viewModel.cartUiState.collectAsState()
+    val cartDataState by viewModel.cartDataUiState.collectAsState()
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
-    /*LaunchedEffect(key1 = columnState) {
-        if (columnState.value) {
-            scrollState.animateScrollTo(
-                scrollState.maxValue,
-                animationSpec = tween(600)
-            )
+    LaunchedEffect(key1 = cartState) {
+        when {
+            cartState.loading -> isLoading = true
+            cartState.message.isNotEmpty() -> {
+                isLoading = false
+                Toast.makeText(context, cartState.message, Toast.LENGTH_LONG).show()
+            }
+
+            cartState.error.isNotEmpty() -> {
+                isLoading = false
+                Toast.makeText(context, cartState.error, Toast.LENGTH_LONG).show()
+            }
         }
-    }*/
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-        //.verticalScroll(scrollState)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(
-                onClick = { onServiceDetailsBack() }
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = null
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = service?.name ?: "") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_chevron_left_24),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            Column {
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 5.dp)
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable { showBottomSheet = true },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(bottom = 4.dp),
+                                text = "Total",
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                        Text(
+                            text = "Kshs: ${cartDataState.cartItems.sumOf { it.total }}",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Button(
+                        onClick = { navController.navigate(DetailsRoutes.BookingDetails.route) }
+                    ) {
+                        Text(text = "Proceed")
+                    }
+                }
+            }
+        }
+    ) { innerPadding ->
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+                sheetMaxWidth = BottomSheetDefaults.SheetMaxWidth
+            ) {
+                when {
+                    cartDataState.loading -> CustomIndeterminateProgressIndicator(isLoading = cartDataState.loading)
+                    cartDataState.cartItems.isNotEmpty() -> {
+                        LazyColumn(
+                            state = rememberLazyListState(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentPadding = innerPadding
+                        ) {
+                            items(cartDataState.cartItems) { cartItem ->
+                                ServiceCardInCart(cartItem = cartItem) {
+                                    // TODO: i'm going to work on it
+                                }
+                            }
+                        }
+                    }
+
+                    cartDataState.error.isNotEmpty() -> {
+                        Toast.makeText(context, cartDataState.error, Toast.LENGTH_LONG).show()
+                    }
+                }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentPadding = PaddingValues(18.dp),
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                            }
+                        }
+                    }) {
+                    Text(
+                        text = "Hide bottom sheet",
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize
+                    )
+                }
             }
         }
 
-        ElevatedCard(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .padding(8.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            )
+                .padding(innerPadding),
+            contentPadding = innerPadding
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            item {
                 Image(
-                    painter = painterResource(
-                        id = R.drawable.cleaning1
-                    )/*rememberAsyncImagePainter(
-                       model =  ImageRequest.Builder(LocalContext.current)
+                    painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(LocalContext.current)
                             .data("$BASE_URL${service?.image}")
                             .crossfade(true)
-                            .placeholder(R.drawable.cleaning1)
-                            .error(R.drawable.errorimg)
-                            .build())*/,
-                        //model = "$BASE_URL${service?.image}",
-                        contentScale = ContentScale.Crop
-                    ,
+                            .error(R.drawable.cleaning1)
+                            .build()
+                    ),
+                    contentScale = ContentScale.Crop,
                     contentDescription = service?.name,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp),
                 )
+            }
 
+            item {
                 Text(
                     text = service?.name ?: "",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
+            }
 
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth()
+            item {
+                Text(
+                    text = service?.description ?: "",
+                    modifier = Modifier
+                        .padding(16.dp),
+                    color = Color.Gray,
+                    fontSize = 16.sp
                 )
+            }
 
-                AnimatedVisibility(
-                    visible = !showDescription,
+            item {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = service?.description ?: "",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDescription = !showDescription },
-                        color = Color.Gray,
-                        fontSize = 16.sp
+                        text = service?.formattedPrice ?: "",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Add ons",
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                )
-            )
-        }
+            item {
+                Button(
+                    onClick = {
+                        service?.let {
+                            viewModel.addServiceToCart(
+                                serviceId = it.id,
+                                quantity = 1
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    elevation = ButtonDefaults.elevatedButtonElevation(
+                        pressedElevation = 4.dp,
+                        hoveredElevation = 2.dp
+                    ),
+                    shape = RectangleShape
+                ) {
+                    Text(
+                        text = "Add service to cart",
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            //contentPadding = PaddingValues(8.dp)
-        ) {
-            items(service?.addOns.orEmpty()) { addon ->
-                ServiceAddOnCard(
-                    serviceAddOn = addon,
-                    addToCart = {}
-                )
+            item {
+                if (service?.addOns?.isNotEmpty() == true) {
+                    Text(
+                        text = "Addons",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    LazyRow(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(service.addOns) { addon ->
+                            ServiceAddOnCard(
+                                serviceAddOn = addon,
+                                addToCart = { serviceAddon ->
+                                    viewModel.addServiceAddonToCart(
+                                        serviceAddonId = serviceAddon.id,
+                                        quantity = 1
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+                CustomIndeterminateProgressIndicator(isLoading = isLoading)
             }
         }
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
-            thickness = 2.dp
-        )
-        BottomRow(
-            navController = navController,
-            showBottomRow = showBottomRow,
-            modifier = Modifier.navigationBarsPadding()
-        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CartBottomSheet(
-    cart: MutableList<CartItem>,
-    onItemRemoved: (CartItem) -> Unit,
-    onPayment: () -> Unit
-) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-
-    fun addToCart(item: CartItem) {
-        cart.add(item)
-        showBottomSheet = true
-    }
-
-    ModalBottomSheet(
-        sheetState = sheetState,
-        onDismissRequest = { showBottomSheet = false },
-        tonalElevation = 4.dp,
-        shape = when (showBottomSheet) {
-            true -> MaterialTheme.shapes.large
-            false -> MaterialTheme.shapes.medium
-        },
-    ) {
-        CarSheetContent(
-            cart = cart,
-            onItemRemoved = onItemRemoved,
-            onPayment = { onPayment() },
-            expanded = expanded,
-            onExpandChange = { expanded = it }
-        )
-    }
-
-}
 
 @Composable
-fun CarSheetContent(
-    cart: MutableList<CartItem>,
-    onItemRemoved: (CartItem) -> Unit,
-    onPayment: () -> Unit,
-    expanded: Boolean,
-    onExpandChange: (Boolean) -> Unit
-) {
+fun DateTimePickerDemo(paddingValues: PaddingValues, onNavigate: () -> Unit) {
+    val context = LocalContext.current
+    var selectedDate by remember { mutableStateOf("") }
+    var selectedTime by remember { mutableStateOf("") }
+    val frequency = Frequency.entries.toTypedArray().map { it.toString() }
+    var selectedFrequency by remember { mutableStateOf(Frequency.ONE_TIME.name) }
+    var instructions by remember { mutableStateOf("") }
+    val hours = listOf("2Hrs", "3Hrs", "4Hrs", "5Hrs", "6Hrs", "7Hrs", "8Hrs")
+    val employees = listOf(1, 2, 3, 4, 5, 6, 7, 8)
+    var selectedEmployee by rememberSaveable { mutableIntStateOf(1) }
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxSize()
+            .padding(paddingValues)
+            .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-
         Text(
-            text = "Your cart",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            modifier = Modifier
+                .padding(8.dp),
+            text = "Select date you wish",
+            style = MaterialTheme.typography.titleMedium
         )
-
-        LazyColumn(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            items(cart) { cartItem ->
-                CartItemRow(
-                    item = cartItem,
-                    onItemRemoved = onItemRemoved
+            TextField(
+                value = selectedDate,
+                onValueChange = { selectedDate = it },
+                label = {
+                    if (selectedDate.isEmpty()) {
+                        Text(
+                            "Select date",
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                        )
+                    }
+                },
+                readOnly = true,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = {
+                    showDatePicker(
+                        onDateSelected = { selectedDate = it },
+                        context = context
+                    )
+                }
+            ) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = colorResource(id = R.color.teal_700)
                 )
             }
         }
-
-        val totalAmount = cart.sumOf { it.price }
-
         Text(
-            text = "Total: $${String.format("%.2f", totalAmount)}",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
+            modifier = Modifier.padding(start = 8.dp),
+            text = "Select time you wish",
+            style = MaterialTheme.typography.titleMedium
         )
 
-        Button(
-            onClick = onPayment,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Proceed to Payment")
+            TextField(
+                value = selectedTime,
+                onValueChange = { selectedTime = it },
+                label = {
+                    if (selectedTime.isEmpty()) {
+                        Text(
+                            "Select Time..",
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                        )
+                    }
+                },
+                readOnly = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = {
+                showTimePicker(
+                    onTimeSelected = { selectedTime = it },
+                    context = context
+                )
+            }) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint = colorResource(id = R.color.teal_700)
+                )
+            }
+
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = "Select number of cleaners you wish:",
+            style = MaterialTheme.typography.titleMedium
+        )
+        SelectableBox(
+            boxes = employees,
+            value = selectedEmployee,
+            onSelected = { selectedEmployee = it }
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = "Select hours you wish",
+            style = MaterialTheme.typography.titleMedium
+        )
+        RangeLazyRow(onRangeSelected = {}, ranges = hours)
+        CustomRadioButton(
+            values = frequency,
+            selected = selectedFrequency,
+            onSelected = { newValue ->
+                selectedFrequency = newValue
+            }
+        )
+        AdditionalInstructions(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            value = instructions,
+            onValueChange = { instructions = it }
+        )
 
-        if (expanded) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Additional Details (Click to Hide)", color = Color.Gray)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Placeholder for more details...")
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .align(Alignment.CenterHorizontally)
+                .shadow(elevation = 1.dp),
+            shape = RectangleShape,
+            onClick = { onNavigate() },
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            Text(text = "Proceed to checkout")
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+private fun showDatePicker(onDateSelected: (String) -> Unit, context: Context) {
+    val calendar = Calendar.getInstance()
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, monthOfYear, dayOfMonth ->
+            val selectedDate = "$dayOfMonth/${monthOfYear + 1}/$year"
+            onDateSelected(selectedDate)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+    datePickerDialog.show()
+}
+
+private fun showTimePicker(onTimeSelected: (String) -> Unit, context: Context) {
+    val calendar = Calendar.getInstance()
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hourOfDay, minuteOfHour ->
+            val selectedTime = "$hourOfDay:$minuteOfHour"
+            onTimeSelected(selectedTime)
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true
+    )
+    timePickerDialog.show()
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SelectableBox(
+    modifier: Modifier = Modifier,
+    boxes: List<Int>,
+    value: Int,
+    onSelected: (Int) -> Unit,
+) {
+
+    FlowRow(
+        modifier = Modifier
+            .padding(8.dp),
+    ) {
+        boxes.forEach { box ->
+            Box(
+                modifier = modifier
+                    .size(70.dp)
+                    .padding(8.dp)
+                    .clip(CircleShape)
+                    .background(if (value == box) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+                    .border(BorderStroke(0.7.dp, MaterialTheme.colorScheme.onSurface), CircleShape)
+                    .shadow(elevation = 0.dp)
+                    .clickable { onSelected(box) },
+                contentAlignment = Alignment.Center
             ) {
-                IconButton(onClick = { onExpandChange(!expanded) }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = if (expanded) "Collapse Details" else "Expand Details"
-                    )
-                }
+                Text(
+                    text = box.toString(),
+                    color = if (value == box) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                )
             }
         }
     }
 }
 
+enum class Frequency {
+    ONE_TIME, WEEKLY, BIWEEKLY, MONTHLY
+}
+
 @Composable
-fun CartItemRow(
-    item: CartItem,
-    onItemRemoved: (CartItem) -> Unit
+fun CustomRadioButton(
+    modifier: Modifier = Modifier,
+    values: List<String>,
+    selected: String,
+    onSelected: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column {
-            Text(text = item.service.toString(), fontWeight = FontWeight.Bold)
-            Text(text = item.service.toString())
-        }
-        Text(text = "$${String.format("%.2f", item.price)}")
-        IconButton(onClick = { onItemRemoved(item) }) {
-            Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete Item")
-        }
-    }
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CartBottomSheetPreview() {
-    val cart = remember { mutableStateListOf<CartItem>() }
-    CartBottomSheet(cart = cart, onItemRemoved = {}, onPayment = {})
-}
-
-
-@Composable
-fun ApiMessageSnackbar(message: String?, onDismiss: () -> Unit) {
-    var showSnackbar by remember { mutableStateOf(false) }
-    val snackBarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(key1 = message) {
-        if (message != null) {
-            showSnackbar = true
-        }
-    }
-
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackBarHostState,
-                snackbar = { data ->
-                    Snackbar(
-                        snackbarData = data,
-                    )
+        values.chunked(2)
+            .forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    row.forEach { value ->
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = value == selected,
+                                onClick = { onSelected(value) }
+                            )
+                            Text(text = value)
+                        }
+                    }
                 }
+            }
+    }
+}
+
+@Composable
+fun AdditionalInstructions(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .fillMaxWidth(.8f)
+            .height(100.dp),
+        placeholder = {
+            Text(
+                text = "Additional instructions..",
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (showSnackbar) {
-                LaunchedEffect(key1 = Unit) {
-                    onDismiss()
-                    showSnackbar = false
-                }
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RangeLazyRow(onRangeSelected: (String) -> Unit, ranges: List<String>) {
+    var selectedRange by remember { mutableStateOf<String?>(null) }
+
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        maxItemsInEachRow = 3
+    ) {
+        ranges.forEach { range ->
+            Box(
+                modifier = Modifier
+                    .size(width = 80.dp, height = 50.dp)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(50))
+                    .border(
+                        BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface),
+                        RoundedCornerShape(50)
+                    )
+                    .background(if (range == selectedRange) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+                    .clickable {
+                        selectedRange = range
+                        onRangeSelected(range)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = range,
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = if (range == selectedRange) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ApiMessageSnackbarPreview() {
-    ApiMessageSnackbar(message = "API response message", onDismiss = {})
-}
+
+
+

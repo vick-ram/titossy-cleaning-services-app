@@ -21,7 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
-import com.example.titossycleaningservicesapp.presentation.users.cleaner.util.NavRoutes
+import com.example.titossycleaningservicesapp.presentation.users.cleaner.util.CleanerNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
 import kotlinx.coroutines.launch
 
@@ -32,12 +32,11 @@ fun CleanerNavigationDrawer(signOutUser: () -> Unit) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val viewModel: CustomerAuthViewModel = hiltViewModel()
     val drawerItems = listOf(
-        NavRoutes.Home,
-        NavRoutes.About,
-        NavRoutes.Profile,
-        NavRoutes.LogOut
+        CleanerNavRoutes.Home,
+        CleanerNavRoutes.About,
+        CleanerNavRoutes.Profile,
+        CleanerNavRoutes.LogOut
     )
 
     ModalNavigationDrawer(

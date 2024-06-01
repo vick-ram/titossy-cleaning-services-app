@@ -40,9 +40,18 @@ object FileUtils {
     }
 
     fun createErrorMessage(error: Any?): String {
-        val errorMap = error as? Map<String, List<String>>
-        return errorMap?.entries?.joinToString(", ") {
-            "${it.key}: ${it.value.joinToString(", ")}"
-        } ?: error.toString()
+        return when (error) {
+            is Map<*, *> -> {
+                val errorMap = error as? Map<*, *>
+                errorMap?.entries?.joinToString(", ") {
+                    "${it.key}: ${it.value}"
+                } ?: error.toString()
+            }
+
+            is List<*> -> error.joinToString(", ") { it.toString() }
+            is String -> error
+            else -> error.toString()
+        }
     }
+
 }

@@ -35,13 +35,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.core.LoadingScreen
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
@@ -49,30 +47,45 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
-import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 import kotlinx.coroutines.launch
 
 @Composable
 fun CustomerSignInScreen(
     toSignUpScreen: (() -> Unit)? = null,
-    navController: NavHostController = rememberNavController(),
-    signInViewModel: CustomerAuthViewModel = hiltViewModel()
+    navController: NavHostController,
+    signInViewModel: CustomerAuthViewModel
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-
     val passwordState by signInViewModel.passwordState.collectAsState()
     val passwordErrorMessage by signInViewModel.passwordErrorMessage.collectAsState()
+
 
     LaunchedEffect(signInViewModel, context) {
         signInViewModel.authEvent.collect { result ->
             when (result) {
                 is AuthEvent.Success -> {
-                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
-                    navController.popBackStack()
-                    navController.navigate(UserRoutes.Customer.route)
+                    val customerStatus = result.approvalStatus
+                    when(customerStatus) {
+                        ApprovalStatus.PENDING -> {
+                            navController.navigate(Authentication.APPROVAL.route)
+                        }
+                        ApprovalStatus.APPROVED -> {
+                            Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                            navController.popBackStack()
+                            navController.navigate(UserRoutes.Customer.route)
+                        }
+                        ApprovalStatus.REJECTED -> {
+                            Toast.makeText(context, "rejected", Toast.LENGTH_LONG).show()
+                        }
+                        null -> Toast.makeText(
+                            context,
+                            "Customer is unauthorized",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
 
                 is AuthEvent.Error -> {
@@ -113,7 +126,7 @@ fun CustomerSignInScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     CustomTextField(
-                        value = signInViewModel.email ?: signInViewModel.username,
+                        value = signInViewModel.email,
                         onValueChange = {
                             signInViewModel.email = it
                         },
@@ -157,7 +170,9 @@ fun CustomerSignInScreen(
                     CustomButton(
                         text = "Sign In",
                         onClick = {
-                            scope.launch { signInViewModel.signIn() }
+                            scope.launch {
+                                signInViewModel.signIn()
+                            }
                         },
                         modifier = Modifier.padding(16.dp),
                         enabled = passwordState is ValidationState.Valid
@@ -219,8 +234,3 @@ fun BottomSection(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewCustomer() {
-    CustomerSignInScreen()
-}

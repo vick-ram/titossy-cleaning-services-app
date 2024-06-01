@@ -14,6 +14,7 @@ import java.util.UUID
 @Dao
 interface CustomerDao {
 
+    @Transaction
     @Insert(entity = CustomerEntity::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCustomer(customer: CustomerEntity)
 
@@ -49,7 +50,7 @@ interface CustomerDao {
 
     @Transaction
     @Query("SELECT * FROM customers WHERE username = :username")
-    suspend fun getCustomerByUsername(username: String): CustomerWIthAddress
+    suspend fun getCustomerByUsername(username: String): CustomerWIthAddress?
 
     @Transaction
     @Query("SELECT * FROM customers")
@@ -63,8 +64,9 @@ interface CustomerDao {
     @Query("SELECT * FROM customers WHERE customer_id = :id")
     suspend fun getCustomerById(id: UUID): CustomerWIthAddress?
 
-    @Query("SELECT * FROM customers WHERE approval_status = 'PENDING'")
-    suspend fun getPendingCustomers(): List<CustomerWIthAddress>
+    @Transaction
+    @Query("SELECT * FROM customers WHERE email = :input OR username = :input")
+    suspend fun getCustomerByUsernameOrEmail(input: String) : CustomerWIthAddress?
 
 
 }

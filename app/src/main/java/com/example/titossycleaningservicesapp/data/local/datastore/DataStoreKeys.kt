@@ -18,14 +18,17 @@ import javax.inject.Inject
 class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Preferences>) {
 
     companion object {
-        private  val ONBOARDING_COMPLETED = booleanPreferencesKey(ONBOARDING_KEY)
+        private val ONBOARDING_COMPLETED = booleanPreferencesKey(ONBOARDING_KEY)
+        private val USER_TYPE = stringPreferencesKey("userType")
     }
+
     suspend fun saveTokenToDataStore(token: String) {
         dataStore.edit { key ->
             key[stringPreferencesKey(LOGIN_KEY)] = token
         }
     }
-    suspend fun getTokenFromDataStore() : String? {
+
+    suspend fun getTokenFromDataStore(): String? {
         val prefs = dataStore.data.first()
         return prefs[stringPreferencesKey(LOGIN_KEY)]
     }
@@ -37,9 +40,9 @@ class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Prefere
     }
 
     suspend fun setOnBoardingCompleted() {
-            dataStore.edit { prefs ->
-                prefs[ONBOARDING_COMPLETED] = true
-            }
+        dataStore.edit { prefs ->
+            prefs[ONBOARDING_COMPLETED] = true
+        }
     }
 
     fun isOnBoardingCompleted(): Flow<Boolean> {
@@ -55,4 +58,18 @@ class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Prefere
             }
 
     }
+
+    // Function to save user type
+    suspend fun saveUserTypeToDataStore(userType: String) {
+        dataStore.edit { key ->
+            key[USER_TYPE] = userType
+        }
+    }
+
+    // Function to get user type
+    suspend fun getUserTypeFromDataStore(): String? {
+        val prefs = dataStore.data.first()
+        return prefs[USER_TYPE]
+    }
+
 }

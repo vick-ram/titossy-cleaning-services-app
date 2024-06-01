@@ -54,7 +54,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnBoardingScreen(onBoardingCompleted: () -> Unit) {
+fun OnBoardingScreen(
+    onBoardingCompleted: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val items = OnboardingItems.getData()
     val pageState = rememberPagerState(
@@ -144,8 +146,6 @@ fun BottomSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-//            .padding(start = 12.dp, end = 12.dp)
-            .navigationBarsPadding()
             .padding(start = 12.dp, end = 12.dp, bottom = 16.dp)
 
     ) {

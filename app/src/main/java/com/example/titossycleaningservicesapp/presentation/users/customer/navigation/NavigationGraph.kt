@@ -1,7 +1,16 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.navigation
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -21,10 +30,19 @@ import com.example.titossycleaningservicesapp.presentation.users.customer.utils.
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.PaymentScreen
 
 @Composable
-fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValues) {
-    NavHost(navController = navController, startDestination = CustomerBottomRoutes.Home.route) {
+fun NavigationGraph(
+    onSignOut: () -> Unit,
+    navController: NavHostController,
+    paddingValues: PaddingValues
+) {
+    NavHost(
+        modifier = Modifier.animateContentSize(),
+        navController = navController,
+        startDestination = CustomerBottomRoutes.Home.route,
+        enterTransition = { slideInVertically() }
+    ) {
         composable(NavRoutes.Home.route) {
-            HomeScreen(navController, paddingValues)
+            HomeScreen(navController, paddingValues, onSignOut)
         }
         composable(CustomerBottomRoutes.Bookings.route) {
             BookingsScreen(navController, paddingValues)
@@ -44,28 +62,29 @@ fun NavGraphBuilder.detailsGraph(
     navigation(
         route = DetailsRoute.DETAILS.name,
         startDestination = DetailsRoutes.Details.route
-    ){
+    ) {
         composable(
-            DetailsRoutes.Details.route +"/{serviceId}"
-        ) {navBackStackEntry ->
+            DetailsRoutes.Details.route + "/{serviceId}",
+            enterTransition = { scaleIn(tween(700)) },
+            exitTransition = { scaleOut(tween(700)) },
+        ) { navBackStackEntry ->
             val serviceId = navBackStackEntry.arguments?.getString("serviceId")
             ServiceDetailsScreen(
                 serviceId = serviceId ?: "",
-                onServiceDetailsBack = { navController.popBackStack() },
                 navController = navController
             )
         }
 
-        composable(DetailsRoutes.BookingDetails.route){
+        composable(DetailsRoutes.BookingDetails.route) {
             BookingDetailsScreen(navController = navController)
         }
-        composable(DetailsRoutes.CheckOut.route){
+        composable(DetailsRoutes.CheckOut.route) {
             CheckOutScreen(navController = navController)
         }
-        composable(DetailsRoutes.Payment.route){
+        composable(DetailsRoutes.Payment.route) {
             PaymentScreen(navController = navController)
         }
-        composable(DetailsRoutes.BookingSuccess.route){
+        composable(DetailsRoutes.BookingSuccess.route) {
             BookingSuccessScreen(navController = navController)
         }
     }

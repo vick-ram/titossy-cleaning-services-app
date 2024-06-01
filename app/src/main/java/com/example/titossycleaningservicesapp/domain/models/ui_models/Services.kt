@@ -13,7 +13,7 @@ data class Service(
     val addOns: List<ServiceAddOn>? = null,
 ) {
     val formattedPrice: String
-        get() = DecimalFormat("#,###.00").format(price)
+        get() = "Kshs. ${DecimalFormat("#,###.00").format(price)}"
 }
 
 data class ServiceAddOn(
@@ -25,7 +25,7 @@ data class ServiceAddOn(
     val image: String,
 ) {
     val formattedPrice: String
-        get() = DecimalFormat("#,###.00").format(price)
+        get() = "Kshs. ${DecimalFormat("#,###.00").format(price)}"
 }
 
 data class ServiceState(

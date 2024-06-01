@@ -3,12 +3,18 @@ package com.example.titossycleaningservicesapp.domain.models.ui_models
 import java.math.BigDecimal
 import java.util.UUID
 
+/*
 data class CartItem(
-    val id: UUID,
-    val cartId: UUID,
-    val service: UUID,
-    val serviceAddOn: UUID,
-    val quantity: Int,
+    val addOns: CartAddOn? = null,
+    val customerId: UUID,
+    val service: CartService? = null,
+    val total: BigDecimal
+)*/
+
+data class CartItem(
+    val id: String,
+    val name: String,
     val price: BigDecimal,
-    val subtotal: BigDecimal
+    val thumbnail: String,
+    val total: BigDecimal
 )
