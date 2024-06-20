@@ -25,6 +25,7 @@ object DatabaseModule {
         ).setQueryCallback({ sqlQuery, bindArgs ->
             Log.d("RoomSql", "SQL Query: $sqlQuery SQL Args: $bindArgs")
         }, Runnable::run)
+            .fallbackToDestructiveMigration()
             .build()
     }
 
@@ -36,9 +37,6 @@ object DatabaseModule {
 
     @Provides
     fun provideSupplierDao(database: TitossyDatabase) = database.supplierDao()
-
-    @Provides
-    fun provideAddressDao(database: TitossyDatabase) = database.addressDao()
 
     @Provides
     fun provideServiceDao(database: TitossyDatabase) = database.serviceDao()

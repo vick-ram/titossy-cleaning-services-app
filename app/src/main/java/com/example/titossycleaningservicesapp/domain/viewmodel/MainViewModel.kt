@@ -6,8 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
+import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
+import com.example.titossycleaningservicesapp.presentation.auth.utils.decodeToken
+import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,34 +27,41 @@ class MainViewModel @Inject constructor(
         mutableStateOf(RootNavRoutes.ONBOARDING.route)
     val startDestination: State<String> = _startDestination
 
-    private val _isLoading: MutableState<Boolean> = mutableStateOf(true)
-    val isLoading: State<Boolean> = _isLoading
-
-    private val _userRole: MutableState<String?> = mutableStateOf(null)
-    val userRole: State<String?> = _userRole
-
+    private val _isReady = MutableStateFlow(false)
+    val isReady = _isReady.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _isLoading.value = true
+
             val token = dataStoreKeys.getTokenFromDataStore()
             val authenticated = !token.isNullOrEmpty()
             val onboardingCompleted = dataStoreKeys.isOnBoardingCompleted().first()
-            _isLoading.value = false
+            val approvalStatus = dataStoreKeys.getApprovalStatusFromDataStore()
 
+            delay(2000)
             _startDestination.value = when {
-                onboardingCompleted && authenticated -> RootNavRoutes.HOME.route
+                onboardingCompleted && authenticated
+                        && approvalStatus == ApprovalStatus.APPROVED.name -> RootNavRoutes.HOME.route
+                onboardingCompleted && authenticated && approvalStatus == ApprovalStatus.PENDING.name -> Authentication.APPROVAL.route
                 onboardingCompleted -> RootNavRoutes.AUTH.route
                 else -> RootNavRoutes.ONBOARDING.route
             }
-            _isLoading.value = false
+            delay(1000L)
+            _isReady.value = true
         }
     }
-
 
     fun setOnBoardingCompleted() {
         viewModelScope.launch {
             dataStoreKeys.setOnBoardingCompleted()
         }
+    }
+
+    suspend fun readUserFromToken(): Pair<String, String> {
+        val token = dataStoreKeys.getTokenFromDataStore()
+        val decodeToken = token?.let { decodeToken(it) }
+        val username = decodeToken?.get("username") as? String
+        val email = decodeToken?.get("email") as? String
+        return Pair(username ?: "", email ?: "")
     }
 }

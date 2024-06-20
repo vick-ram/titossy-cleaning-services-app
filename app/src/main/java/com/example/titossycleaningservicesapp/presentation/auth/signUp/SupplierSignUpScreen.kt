@@ -10,20 +10,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocalPostOffice
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +52,7 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.rememberImeState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
-import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
+import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 
 @Composable
 fun SupplierSignUpScreen(
@@ -67,7 +67,10 @@ fun SupplierSignUpScreen(
 
     LaunchedEffect(imeState) {
         if (imeState.value) {
-            scrollSate.animateScrollTo(scrollSate.maxValue, animationSpec = tween(300))
+            scrollSate.animateScrollTo(
+                scrollSate.maxValue,
+                animationSpec = tween(300)
+            )
         }
     }
 
@@ -81,6 +84,7 @@ fun SupplierSignUpScreen(
                 is AuthEvent.Loading -> signUpViewModel.isLoading
 
                 is AuthEvent.Success -> {
+
                     navController.navigate(Authentication.SUPPLIER.route)
                 }
             }
@@ -98,27 +102,17 @@ fun SupplierSignUpScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            IconButton(onClick = {
-                navController.popBackStack()
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_chevron_left_24),
-                    contentDescription = null
-                )
+            NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
+                navController.navigateUp()
             }
         }
 
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = 18.dp,
-                    end = 18.dp,
-                    top = 18.dp,
-                    bottom = 0.dp
-                ),
-            tonalElevation = 4.dp,
-            shadowElevation = 1.dp,
+                .padding(18.dp),
+            tonalElevation = 0.dp,
+            shadowElevation = 4.dp,
             color = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         ) {
@@ -183,47 +177,11 @@ fun SupplierSignUpScreen(
                 )
 
                 CustomTextField(
-                    value = signUpViewModel.company,
-                    onValueChange = { signUpViewModel.onCompanyChange(it) },
+                    value = signUpViewModel.address,
+                    onValueChange = { signUpViewModel.onAddressChange(it) },
                     modifier = Modifier,
-                    label = "Company",
-                    leadingIcon = Icons.Filled.Business,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                )
-
-                CustomTextField(
-                    value = signUpViewModel.county,
-                    onValueChange = { signUpViewModel.onCountyChange(it) },
-                    modifier = Modifier,
-                    label = "County",
+                    label = "Address",
                     leadingIcon = Icons.Filled.LocationCity,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                )
-
-                CustomTextField(
-                    value = signUpViewModel.region,
-                    onValueChange = { signUpViewModel.onRegionChange(it) },
-                    modifier = Modifier,
-                    label = "Region",
-                    leadingIcon = Icons.Filled.Place,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                )
-
-                CustomTextField(
-                    value = signUpViewModel.postalCode,
-                    onValueChange = { signUpViewModel.onPostalCodeChange(it) },
-                    modifier = Modifier,
-                    label = "Postal Code",
-                    leadingIcon = Icons.Filled.LocalPostOffice,
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
@@ -265,7 +223,7 @@ fun SupplierSignUpScreen(
                 )
 
                 CustomButton(
-                    text = "Register",
+                    text = "Sign Up",
                     onClick = { signUpViewModel.signUp() },
                     modifier = Modifier,
                     enabled = true

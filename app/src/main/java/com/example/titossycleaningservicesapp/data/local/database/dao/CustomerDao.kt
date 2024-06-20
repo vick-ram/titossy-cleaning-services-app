@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.example.titossycleaningservicesapp.data.local.database.entities.CustomerEntity
-import com.example.titossycleaningservicesapp.data.local.database.entities.CustomerWIthAddress
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
@@ -42,31 +41,28 @@ interface CustomerDao {
         password: String
     )
 
-    @Query("UPDATE customers SET profile_picture = :profilePicture WHERE customer_id = :id")
-    suspend fun updateCustomerProfilePicture(id: UUID, profilePicture: String)
-
     @Delete
     suspend fun deleteCustomer(customer: CustomerEntity)
 
     @Transaction
     @Query("SELECT * FROM customers WHERE username = :username")
-    suspend fun getCustomerByUsername(username: String): CustomerWIthAddress?
+    suspend fun getCustomerByUsername(username: String): CustomerEntity?
 
     @Transaction
     @Query("SELECT * FROM customers")
-    fun getCustomers() : Flow<List<CustomerWIthAddress>>
+    fun getCustomers() : Flow<List<CustomerEntity>>
 
     @Transaction
     @Query("SELECT * FROM customers WHERE email = :email")
-    suspend fun getCustomerByEmail(email: String): CustomerWIthAddress?
+    suspend fun getCustomerByEmail(email: String): CustomerEntity?
 
     @Transaction
     @Query("SELECT * FROM customers WHERE customer_id = :id")
-    suspend fun getCustomerById(id: UUID): CustomerWIthAddress?
+    suspend fun getCustomerById(id: UUID): CustomerEntity?
 
     @Transaction
     @Query("SELECT * FROM customers WHERE email = :input OR username = :input")
-    suspend fun getCustomerByUsernameOrEmail(input: String) : CustomerWIthAddress?
+    suspend fun getCustomerByUsernameOrEmail(input: String) : CustomerEntity?
 
 
 }

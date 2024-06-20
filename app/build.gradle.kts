@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin)
     alias (libs.plugins.hilt)
     alias(libs.plugins.kotlinKsp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -41,9 +42,9 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
+//    composeOptions {
+//        kotlinCompilerExtensionVersion = "1.5.7"
+//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -67,12 +68,12 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.coil.compose)
-    implementation(libs.threetenabp)
     implementation(libs.androidx.room.runtime)
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.converter.gson)
+    implementation(libs.androidx.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.symbol.processing.api)

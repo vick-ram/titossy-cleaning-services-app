@@ -3,11 +3,10 @@ package com.example.titossycleaningservicesapp.data.local.database.entities
 import androidx.room.TypeConverter
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.Gender
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class Converters {
-    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     @TypeConverter
     fun fromGender(value: Gender): String {
         return value.name
@@ -30,7 +29,7 @@ class Converters {
 
     @TypeConverter
     fun fromLocalDateTime(date : LocalDateTime?) : String? {
-        return date?.format(formatter)
+        return date?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 
     @TypeConverter

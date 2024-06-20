@@ -60,7 +60,25 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun removeServiceFromCart(addonId: UUID): Flow<Resource<String?>> {
+    override suspend fun removeServiceFromCart(serviceId: UUID): Flow<Resource<String?>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.removeService(serviceId.toString())
+            when(response.status) {
+                "success" -> {
+                    emit(Resource.Success(response.message))
+                }
+                "error" -> {
+                    val errorMessage = FileUtils.createErrorMessage(response.error)
+                    throw Exception(errorMessage)
+                }
+            }
+        }.catch { e ->
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
+
+    override fun removeAddonFromCart(addonId: UUID): Flow<Resource<String?>> {
         return flow {
             emit(Resource.Loading)
             val response = apiService.removeAddon(addonId.toString())

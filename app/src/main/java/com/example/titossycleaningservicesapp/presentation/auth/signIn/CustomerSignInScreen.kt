@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signIn
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -61,6 +64,7 @@ fun CustomerSignInScreen(
     val context = LocalContext.current
     val passwordState by signInViewModel.passwordState.collectAsState()
     val passwordErrorMessage by signInViewModel.passwordErrorMessage.collectAsState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
 
     LaunchedEffect(signInViewModel, context) {
@@ -68,29 +72,27 @@ fun CustomerSignInScreen(
             when (result) {
                 is AuthEvent.Success -> {
                     val customerStatus = result.approvalStatus
-                    when(customerStatus) {
+                    when (customerStatus) {
                         ApprovalStatus.PENDING -> {
                             navController.navigate(Authentication.APPROVAL.route)
                         }
+
                         ApprovalStatus.APPROVED -> {
-                            Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                            snackBarHostState.showSnackbar(result.message.toString())
                             navController.popBackStack()
                             navController.navigate(UserRoutes.Customer.route)
                         }
+
                         ApprovalStatus.REJECTED -> {
-                            Toast.makeText(context, "rejected", Toast.LENGTH_LONG).show()
+                            snackBarHostState.showSnackbar("rejected")
                         }
-                        null -> Toast.makeText(
-                            context,
-                            "Customer is unauthorized",
-                            Toast.LENGTH_LONG
-                        ).show()
+
+                        null -> {}
                     }
                 }
 
-                is AuthEvent.Error -> {
-                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
-                }
+                is AuthEvent.Error -> {}
+
                 AuthEvent.Loading -> signInViewModel.isLoading
             }
         }
@@ -193,8 +195,11 @@ fun CustomerSignInScreen(
                 navigateToEmployee = { navController.navigate(Authentication.EMPLOYEE.route) }
             )
         }
-
         LoadingScreen(isLoading = signInViewModel.isLoading)
+        SnackbarHost(
+            hostState = snackBarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -211,11 +216,21 @@ fun BottomSection(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Are you a supplier?")
+        Text(
+            text = "Are you a supplier?",
+            style = MaterialTheme.typography.bodyLarge
+        )
         TextButton(
             onClick = navigateToSupplier
         ) {
-            Text(text = "Sign In/Sign Up", color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = "Sign In/Sign Up",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontStyle = FontStyle.Italic
+                )
+            )
         }
     }
     Row(
@@ -225,12 +240,23 @@ fun BottomSection(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Are you a employee/staff?")
+        Text(
+            text = "Are you an employee/staff?",
+            style = MaterialTheme.typography.bodyLarge
+        )
         TextButton(
             onClick = navigateToEmployee
         ) {
-            Text(text = "Sign In", color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = "Sign In",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontStyle = FontStyle.Italic
+                )
+            )
         }
     }
 }
+
 

@@ -1,36 +1,31 @@
 package com.example.titossycleaningservicesapp.data.remote.dto
 
 import com.example.titossycleaningservicesapp.data.local.database.entities.EmployeeEntity
-import com.example.titossycleaningservicesapp.domain.models.Availability
-import com.example.titossycleaningservicesapp.domain.models.Gender
-import com.example.titossycleaningservicesapp.domain.models.Roles
-import org.threeten.bp.LocalDateTime
-import java.util.UUID
 
 data class EmployeeDto(
     val id: String,
     val username: String,
-    val firstName: String,
-    val lastName: String,
-    val phone: String,
+    val fullName: String,
     val gender: String,
     val email: String,
     val password: String,
-    val availability: String,
+    val phone: String,
     val role: String,
+    val availability: String,
+    val approvalStatus: String,
     val createdAt: String,
     val updatedAt: String
 ) {
     fun toEmployee() = EmployeeEntity(
         id = id,
         username = username,
-        firstName = firstName,
-        lastName = lastName,
+        fullName = fullName,
         phone = phone,
         gender = gender,
         email = email,
         password = password,
         availability = availability,
+        approvalStatus = approvalStatus,
         role = role,
         createdAt = createdAt,
         updatedAt = updatedAt

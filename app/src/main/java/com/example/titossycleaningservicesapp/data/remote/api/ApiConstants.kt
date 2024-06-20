@@ -9,7 +9,6 @@ object ApiConstants {
     const val CUSTOMER_SIGN_OUT = "$CUSTOMER_AUTH/sign_out"
     const val CUSTOMER_ID = "$CUSTOMER/{id}"
 
-    val id = "79cb8d0f-a520-4d15-9a06-babcefee3cef"
 
     const val SUPPLIER = "api/supplier"
     private const val SUPPLIER_AUTH = "$SUPPLIER/auth"
@@ -25,11 +24,25 @@ object ApiConstants {
     const val EMPLOYEE_ID = "$EMPLOYEE/{id}"
 
     const val SERVICE = "api/service"
-    const val SERVICE_ADDON = "api/addon"
+    const val SERVICE_ADDON = "$SERVICE/{id}/addon"
 
     const val CART = "api/cart"
     const val SERVICE_CART = "$CART/add-service"
     const val SERVICE_ADDON_CART = "$CART/add-service-addon"
-    const val DELETE_ADDON = "$CART/{id}"
+    const val DELETE_SERVICE = "$CART/{id}"
+    const val DELETE_ADDON = "$CART/addon/{id}"
     const val CLEAR_CART = "$CART/clear"
+
+    const val BOOKING = "api/booking"
+    const val BOOKING_ID = "$BOOKING/{id}"
+
+    const val PAYMENT = "api/payment"
+    const val CUSTOMER_PAYMENT = "$PAYMENT/customer"
+    const val CUSTOMER_PAYMENT_ID = "$PAYMENT/customer/{id}"
+
+    const val PRODUCT = "api/product"
+    const val PRODUCT_ID = "$PRODUCT/{id}"
+
+    const val PRODUCT_CART = "$PRODUCT/cart"
+    const val PRODUCT_CART_ID = "$PRODUCT/cart/productId"
 }

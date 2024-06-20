@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.presentation.users.finance.naviga
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.presentation.users.supplier.util.NavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
+import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -30,9 +32,6 @@ fun FinanceNavigationDrawer(signOutFinanceManager: () -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
-    //val viewModel: CustomerAuthViewModel = hiltViewModel()
-    //val displayName = viewModel.currentUser?.displayName ?: "Supplier"
-    //val email = viewModel.currentUser?.email ?: "Email"
     val drawerItems = listOf(
         NavRoutes.Home,
         NavRoutes.Contact,
@@ -50,12 +49,7 @@ fun FinanceNavigationDrawer(signOutFinanceManager: () -> Unit) {
                         label = { Text(text = item.title) },
                         selected = false,
                         onClick = {
-                            if (item.route == "logout") {
-                                navController.popBackStack()
-                                signOutFinanceManager()
-                            } else {
-                                navController.navigate(item.route)
-                            }
+                            navController.navigate(item.route)
                             scope.launch { drawerState.close() }
                         },
                         icon = {
@@ -71,20 +65,21 @@ fun FinanceNavigationDrawer(signOutFinanceManager: () -> Unit) {
                 TopAppBar(
                     title = { Text(text = "Supplier") },
                     navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    drawerState.apply { if (isClosed) open() else close() }
-                                }
+                        NavigationIcon(icon = Icons.Default.Menu) {
+                            scope.launch {
+                                drawerState.apply { if (isClosed) open() else close() }
                             }
-                        ) {
-                            Icon(imageVector = Icons.Default.Menu, contentDescription = "menu")
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    actions = {
+                        NavigationIcon(
+                            icon = Icons.Outlined.MoreVert,
+                            onClick = {
+                                signOutFinanceManager()
+                                navController.navigateUp()
+                            }
+                        )
+                    }
                 )
             }
         ) {

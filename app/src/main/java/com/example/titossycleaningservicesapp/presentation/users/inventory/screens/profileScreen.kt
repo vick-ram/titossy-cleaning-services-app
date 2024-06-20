@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun ProfileScreen(navController: NavHostController, modifier: Modifier){
+fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifier,){
     Box(modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ){

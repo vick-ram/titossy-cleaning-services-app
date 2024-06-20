@@ -3,9 +3,12 @@ package com.example.titossycleaningservicesapp.domain.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
+import com.example.titossycleaningservicesapp.data.remote.util.ErrorEvent
 import com.example.titossycleaningservicesapp.domain.models.requests.cart.CartClearState
 import com.example.titossycleaningservicesapp.domain.models.requests.cart.CartUiDataState
 import com.example.titossycleaningservicesapp.domain.models.requests.cart.CartUiState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.CartItem
+import com.example.titossycleaningservicesapp.domain.models.ui_models.ServiceAddonUiState
 import com.example.titossycleaningservicesapp.domain.models.ui_models.ServiceState
 import com.example.titossycleaningservicesapp.domain.repository.CartRepository
 import com.example.titossycleaningservicesapp.domain.repository.ServiceRepository
@@ -32,6 +35,9 @@ class ServiceViewModel @Inject constructor(
     private val _serviceState = MutableStateFlow(ServiceState(isLoading = true))
     val serviceState = _serviceState.asStateFlow()
 
+    private val _serviceAddonState = MutableStateFlow(ServiceAddonUiState(isLoading = true))
+    val serviceAddonState = _serviceAddonState.asStateFlow()
+
     private val _cartUiState = MutableStateFlow(CartUiState(loading = true))
     val cartUiState = _cartUiState.asStateFlow()
 
@@ -45,7 +51,6 @@ class ServiceViewModel @Inject constructor(
 
     init {
         fetchServices()
-        fetchCartItems()
     }
 
     fun searchServices(query: String) {
@@ -57,8 +62,8 @@ class ServiceViewModel @Inject constructor(
                     when (resource) {
                         is Resource.Error -> resource.message?.let {
                             ServiceState(
-                                error = it,
-                                isLoading = false
+                                isLoading = false,
+                                error = ErrorEvent(it)
                             )
                         }
 
@@ -75,19 +80,27 @@ class ServiceViewModel @Inject constructor(
                     }
                 }
                 .collect { service ->
-                    service?.let { _serviceState.value = it }
+                    service?.let {
+                        _serviceState.value = it
+                    }
                 }
+
         }
     }
 
-    private fun fetchServices() = viewModelScope.launch {
+    fun fetchServices() = viewModelScope.launch {
         serviceRepository.getAllServices()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = Resource.Loading
+            )
             .map { resource ->
                 when (resource) {
                     is Resource.Error -> resource.message?.let {
                         ServiceState(
                             isLoading = false,
-                            error = it
+                            error = ErrorEvent(it)
                         )
                     }
 
@@ -101,7 +114,39 @@ class ServiceViewModel @Inject constructor(
                 }
             }
             .collectLatest { state ->
-                state?.let { _serviceState.value = it }
+                state?.let {
+                    _serviceState.value = it
+                }
+            }
+    }
+
+    fun fetchServiceAddons(serviceId: String) = viewModelScope.launch {
+        serviceRepository.getServiceAddons(serviceId)
+            .map { resource ->
+                when (resource) {
+                    is Resource.Error -> resource.message?.let {
+                        ServiceAddonUiState(
+                            isLoading = false,
+                            error = ErrorEvent(it)
+                        )
+                    }
+
+                    is Resource.Loading -> ServiceAddonUiState(
+                        isLoading = false
+                    )
+
+                    is Resource.Success -> resource.data?.let {
+                        ServiceAddonUiState(
+                            isLoading = false,
+                            serviceAddons = it
+                        )
+                    }
+                }
+            }
+            .collectLatest { state ->
+                state?.let {
+                    _serviceAddonState.value = it
+                }
             }
     }
 
@@ -130,9 +175,11 @@ class ServiceViewModel @Inject constructor(
                 is Resource.Success -> {
                     _cartUiState.update {
                         it.copy(
-                            loading = false, message = resource.data.toString()
+                            loading = false,
+                            message = resource.data.toString()
                         )
                     }
+                    fetchCartItems()
                 }
             }
         }
@@ -140,29 +187,39 @@ class ServiceViewModel @Inject constructor(
 
     fun addServiceAddonToCart(serviceAddonId: UUID, quantity: Int = 1) = viewModelScope.launch {
         cartRepository.addServiceAddonToCart(serviceAddonId, quantity)
-            .map { resource ->
+            .collectLatest { resource ->
                 when (resource) {
-                    is Resource.Error -> CartUiState(
-                        loading = false,
-                        error = resource.message.toString()
-                    )
+                    is Resource.Error -> {
+                        _cartUiState.update {
+                            it.copy(
+                                loading = false,
+                                error = resource.message.toString()
+                            )
+                        }
+                    }
 
-                    is Resource.Loading -> CartUiState(loading = true)
-                    is Resource.Success -> CartUiState(
-                        loading = false,
-                        message = resource.data.toString()
-                    )
+                    is Resource.Loading -> {
+                        _cartUiState.update { it.copy(loading = true) }
+                    }
+
+                    is Resource.Success -> {
+                        _cartUiState.update {
+                            it.copy(
+                                loading = false,
+                                message = resource.data.toString()
+                            )
+                        }
+                        fetchCartItems()
+                    }
                 }
-            }.collect { cartUiState ->
-                _cartUiState.value = cartUiState
             }
     }
 
-    private fun fetchCartItems() = viewModelScope.launch {
+    fun fetchCartItems() = viewModelScope.launch {
         cartRepository.getServicesInCart()
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Eagerly,
+                started = SharingStarted.Lazily,
                 initialValue = Resource.Loading
             )
             .map { resource ->
@@ -181,7 +238,7 @@ class ServiceViewModel @Inject constructor(
                     }
                 }
             }
-            .collectLatest {
+            .collect {
                 it?.let { cartData ->
                     _cartDataUiState.value = cartData
                 }
@@ -189,23 +246,69 @@ class ServiceViewModel @Inject constructor(
     }
 
     fun removeServiceAddonFromCart(serviceAddonId: UUID) = viewModelScope.launch {
-        cartRepository.removeServiceFromCart(serviceAddonId)
-            .map { resource ->
+        cartRepository.removeAddonFromCart(serviceAddonId)
+            .collectLatest { resource ->
                 when (resource) {
-                    is Resource.Error -> CartClearState(
-                        loading = false,
-                        error = resource.message.toString()
-                    )
+                    is Resource.Error -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = false,
+                                error = resource.message.toString()
+                            )
+                        }
+                    }
 
-                    is Resource.Loading -> CartClearState(loading = true)
-                    is Resource.Success -> CartClearState(
-                        loading = false,
-                        message = resource.data.toString()
-                    )
+                    is Resource.Loading -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = true
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = false,
+                                message = resource.data.toString()
+                            )
+                        }
+                        fetchCartItems()
+                    }
                 }
             }
-            .collectLatest { cartClearState ->
-                _cartClearState.value = cartClearState
+    }
+
+    fun removeServiceFromCart(serviceId: UUID) = viewModelScope.launch {
+        cartRepository.removeServiceFromCart(serviceId)
+            .collectLatest { resource ->
+                when (resource) {
+                    is Resource.Error -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = false,
+                                error = resource.message.toString()
+                            )
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = true
+                            )
+                        }
+                    }
+                    is Resource.Success -> {
+                        _cartClearState.update {
+                            it.copy(
+                                loading = false,
+                                message = resource.data.toString()
+                            )
+                        }
+                        fetchCartItems()
+                    }
+                }
             }
     }
 
@@ -225,5 +328,13 @@ class ServiceViewModel @Inject constructor(
                     )
                 }
             }
+            .collect { state ->
+                _cartClearState.value = state
+            }
+    }
+
+    fun clearServiceAddons() {
+        _serviceAddonState.value = ServiceAddonUiState()
     }
 }
+

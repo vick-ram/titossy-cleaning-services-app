@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,10 +17,10 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,14 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.Roles
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
@@ -47,6 +46,7 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButt
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
+import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
 @Composable
@@ -60,7 +60,11 @@ fun EmployeesSignIn(navController: NavHostController) {
         signInViewModel.resultChannel.collect { result ->
             when (result) {
                 is AuthEvent.Error -> {
-                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        result.message,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
 
                 is AuthEvent.Loading -> signInViewModel.isLoading
@@ -92,9 +96,7 @@ fun EmployeesSignIn(navController: NavHostController) {
                             navController.navigate(UserRoutes.Cleaner.route)
                         }
 
-                        else -> {
-                            Toast.makeText(context, "Unauthorized", Toast.LENGTH_LONG).show()
-                        }
+                        else -> {}
                     }
                 }
             }
@@ -112,21 +114,23 @@ fun EmployeesSignIn(navController: NavHostController) {
                     .padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.Start,
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(top = 8.dp, start = 8.dp),
-                        painter = painterResource(id = R.drawable.baseline_chevron_left_24),
-                        contentDescription = null
-                    )
+                NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
+                    navController.navigateUp()
                 }
             }
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+                text = "Employees Sign In",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
+            )
 
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
                     .padding(18.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 4.dp,
@@ -148,7 +152,7 @@ fun EmployeesSignIn(navController: NavHostController) {
                         value = signInViewModel.email,
                         onValueChange = { signInViewModel.onEmailChange(it) },
                         modifier = Modifier,
-                        label = "username or email",
+                        label = "email",
                         leadingIcon = Icons.Filled.Person,
                         keyBoardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,

@@ -14,3 +14,7 @@ enum class Availability {
 enum class ApprovalStatus {
     PENDING, APPROVED, REJECTED
 }
+
+enum class Frequency {
+    ONE_TIME, WEEKLY, BIWEEKLY, MONTHLY
+}

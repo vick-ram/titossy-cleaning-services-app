@@ -1,8 +1,7 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
-import com.example.titossycleaningservicesapp.domain.models.Gender
-import org.threeten.bp.LocalDateTime
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class Customer(
@@ -10,8 +9,7 @@ data class Customer(
     val username: String,
     val fullName: String,
     val phone: String,
-    val profilePicture: String?,
-    val address: List<Address> = emptyList(),
+    val address: String?,
     val email: String,
     val password: String,
     val status: ApprovalStatus,
@@ -19,17 +17,9 @@ data class Customer(
     val updatedAt: LocalDateTime
 )
 
-data class Address(
-    val id: UUID,
-    val customerId: UUID,
-    val county: String,
-    val region: String,
-    val postalCode: String
-)
-
 data class CustomerState(
     val isLoading: Boolean = false,
     val customer: Customer? = null,
     val error: String? = null,
-    val customers: List<Customer>? = emptyList()
+    val customers: List<Customer>? = null
 )

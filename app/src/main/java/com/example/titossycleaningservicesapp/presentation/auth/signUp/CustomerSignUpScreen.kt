@@ -15,13 +15,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,9 +48,7 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.rememberImeState
-import com.example.titossycleaningservicesapp.presentation.utils.Authentication
-import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
-import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
+import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,7 +73,10 @@ fun CustomerSignUpScreen(
 
     LaunchedEffect(key1 = imeState.value) {
         if (imeState.value) {
-            scrollState.animateScrollTo(scrollState.maxValue, animationSpec = tween(300))
+            scrollState.animateScrollTo(
+                scrollState.maxValue,
+                animationSpec = tween(300)
+            )
         }
     }
 
@@ -105,17 +104,12 @@ fun CustomerSignUpScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                IconButton(onClick = {
-                    navController.navigate(RootNavRoutes.AUTH.route)
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBackIosNew,
-                        contentDescription = null
-                    )
+                NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
+                    navController.navigateUp()
                 }
 
                 Text(
-                    text = "Back to login",
+                    text = "back",
                     color = MaterialTheme.colorScheme.primary
                 )
             }

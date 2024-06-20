@@ -1,12 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="text-format-converter">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="jwt-encoder-decoder">
     <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="text-filter" id="1a368d84-a38c-4bbd-a376-2266f1eac525" name="Workbench">
+        <properties>
+          <property key="sourceText" type="INPUT" value="kotlin.String|[info] Application started&#10;[error] Error occurred while processing request" />
+          <property key="filteringNotContainingModeText" type="INPUT" value="kotlin.String|[info]" />
+          <property key="filteringContainingModeText" type="INPUT" value="kotlin.String|[error]" />
+          <property key="filteringRegexModeText" type="INPUT" value="kotlin.String|^\[error\].*$" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="json-schema-validator" id="ce4592a0-c474-41d2-898a-dcd1d13a7369" name="Workbench">
+        <properties>
+          <property key="dataText" type="INPUT" value="kotlin.String|{&#10;  &quot;firstName&quot;: &quot;John&quot;,&#10;  &quot;lastName&quot;: &quot;Doe&quot;,&#10;  &quot;age&quot;: 21&#10;}" />
+          <property key="schemaText" type="INPUT" value="kotlin.String|{&#10;  &quot;$id&quot;: &quot;https://example.com/person.schema.json&quot;,&#10;  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,&#10;  &quot;title&quot;: &quot;Person&quot;,&#10;  &quot;type&quot;: &quot;object&quot;,&#10;  &quot;properties&quot;: {&#10;    &quot;firstName&quot;: {&#10;      &quot;type&quot;: &quot;string&quot;,&#10;      &quot;description&quot;: &quot;The person's first name.&quot;&#10;    },&#10;    &quot;lastName&quot;: {&#10;      &quot;type&quot;: &quot;string&quot;,&#10;      &quot;description&quot;: &quot;The person's last name.&quot;&#10;    },&#10;    &quot;age&quot;: {&#10;      &quot;description&quot;: &quot;Age in years which must be equal to or greater than zero.&quot;,&#10;      &quot;type&quot;: &quot;integer&quot;,&#10;      &quot;minimum&quot;: 0&#10;    }&#10;  }&#10;}" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="time-conversion" id="d3727570-9813-49c2-8c60-5a9cf1c6056c" name="Workbench">
+        <properties>
+          <property key="nanoseconds" type="INPUT" value="java.math.BigDecimal|123460000000000" />
+          <property key="parsingLocale" type="CONFIGURATION" value="dev.turingcomplete.intellijdevelopertoolsplugin._internal.common.LocaleContainer|en-KE" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="text-format-converter" id="f465dafe-e2d5-40b8-b66f-abd780560e0c" name="Workbench">
+        <properties>
+          <property key="secondLanguage" type="CONFIGURATION" value="dev.turingcomplete.intellijdevelopertoolsplugin._internal.tool.ui.converter.CodeFormattingConverter$Language|JSON" />
+        </properties>
+      </developerToolConfiguration>
       <developerToolConfiguration developerToolId="regular-expression-matcher" id="e9bec1c9-2064-46b9-9c09-5d705d73f8fd" name="Workbench">
         <properties>
           <property key="regexOption" type="CONFIGURATION" value="kotlin.Int|130" />
         </properties>
       </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="d0667ec3-3440-462b-88e8-7380ea03755c" name="Workbench">
+        <properties>
+          <property key="headerText" type="INPUT" value="kotlin.String|{&#13;&#10;  &quot;alg&quot;:&quot;HS256&quot;,&#13;&#10;  &quot;typ&quot;:&quot;JWT&quot;&#13;&#10;}" />
+          <property key="payloadText" type="INPUT" value="kotlin.String|{&#13;&#10;  &quot;sub&quot;:&quot;91e60fa8-cd77-4a20-9d0a-45030999bb9f&quot;,&#13;&#10;  &quot;aud&quot;:&quot;http://0.0.0.0:8080/hello&quot;,&#13;&#10;  &quot;iss&quot;:&quot;http://0.0.0.0:8080/&quot;,&#13;&#10;  &quot;email&quot;:&quot;Josephine.Ward@gmail.com&quot;,&#13;&#10;  &quot;username&quot;:&quot;Jerel.Mante&quot;,&#13;&#10;  &quot;role&quot;:&quot;INVENTORY&quot;,&#13;&#10;  &quot;exp&quot;:1750330783&#13;&#10;}" />
+          <property key="secret" type="SECRET" value="kotlin.String|SAVED_IN_KEYSTORE" />
+          <property key="encodedText" type="INPUT" value="kotlin.String|ew0KICAiYWxnIjoiSFMyNTYiLA0KICAidHlwIjoiSldUIg0KfQ.ew0KICAic3ViIjoiOTFlNjBmYTgtY2Q3Ny00YTIwLTlkMGEtNDUwMzA5OTliYjlmIiwNCiAgImF1ZCI6Imh0dHA6Ly8wLjAuMC4wOjgwODAvaGVsbG8iLA0KICAiaXNzIjoiaHR0cDovLzAuMC4wLjA6ODA4MC8iLA0KICAiZW1haWwiOiJKb3NlcGhpbmUuV2FyZEBnbWFpbC5jb20iLA0KICAidXNlcm5hbWUiOiJKZXJlbC5NYW50ZSIsDQogICJyb2xlIjoiSU5WRU5UT1JZIiwNCiAgImV4cCI6MTc1MDMzMDc4Mw0KfQ.ZXcwS0lDQWlZV3huSWpvaVNGTXlOVFlpTEEwS0lDQWlkSGx3SWpvaVNsZFVJZzBLZlEuLkcwdFk2aG1ydGJNd2R6NkZ1cnBXSlhkZXNQNUZrYUo3WnBvNTk3ZktNYlU" />
+          <property key="privateKey" type="SECRET" value="kotlin.String|SAVED_IN_KEYSTORE" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="sql-formatting" id="193021c9-6628-4a49-839f-97a092bcab98" name="Workbench">
+        <properties>
+          <property key="sourceText" type="INPUT" value="kotlin.String|select c.id, c.name, o.address, o.orderedAt from customers c left join orders o ON (o.customerId = c.id) order by o.orderedAt" />
+        </properties>
+      </developerToolConfiguration>
     </developerToolsConfigurations>
+    <expandedGroupNodeIds />
   </component>
 </project>

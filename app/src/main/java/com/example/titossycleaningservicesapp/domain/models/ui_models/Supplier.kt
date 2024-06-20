@@ -1,16 +1,14 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
-import org.threeten.bp.LocalDateTime
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class Supplier(
     val id: UUID,
-    val username: String,
     val fullName: String,
     val phone: String,
-    val company: String,
-    val address: SupplierAddress,
+    val address: String,
     val email: String,
     val password: String,
     val status: ApprovalStatus,
@@ -18,8 +16,9 @@ data class Supplier(
     val updatedAt: LocalDateTime
 )
 
-data class SupplierAddress(
-    val county: String,
-    val region: String,
-    val postalCode: String
+data class SupplierUiState(
+    val isLoading: Boolean = false,
+    val errorMessage: String = "",
+    val suppliers: List<Supplier>? = null
 )
+

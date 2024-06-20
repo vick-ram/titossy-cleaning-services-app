@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signIn
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
@@ -53,7 +55,6 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
-import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
 @Composable
 fun SupplierSignInScreen(
@@ -62,23 +63,32 @@ fun SupplierSignInScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
     val context = LocalContext.current
+    val snackBarHostState = remember{ SnackbarHostState()}
 
     LaunchedEffect(supplierViewModel, context) {
         supplierViewModel.resultChannel.collect { result ->
             when (result) {
-                is AuthEvent.Error -> {
-                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
-                }
-
+                is AuthEvent.Error -> {}
                 is AuthEvent.Loading -> supplierViewModel.isLoading
                 is AuthEvent.Success -> {
-                    navController.popBackStack()
-                    navController.navigate(UserRoutes.Supplier.route)
+                    when(result.approvalStatus) {
+                        ApprovalStatus.PENDING -> {
+                            /*snackBarHostState.showSnackbar("Your account is under review")
+                            navController.navigate(Authentication.APPROVAL.route)
+                            supplierViewModel.clearToken()*/
+                        }
+                        ApprovalStatus.APPROVED -> {
+                            /*snackBarHostState.showSnackbar(result.message.toString())
+                            navController.popBackStack()
+                            navController.navigate(UserRoutes.Supplier.route)*/
+                        }
+                        ApprovalStatus.REJECTED -> {}
+                        null -> {}
+                    }
                 }
             }
         }
     }
-
 
 
     Box(Modifier.fillMaxSize()) {
@@ -90,21 +100,19 @@ fun SupplierSignInScreen(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp, top = 6.dp),
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_chevron_left_24),
-                        contentDescription = null
+                        painter = painterResource(id = R.drawable.nav_back),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Supplier SignIn",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "supplier",
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }

@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.navigation
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -7,9 +8,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -78,8 +76,12 @@ fun NavGraphBuilder.detailsGraph(
         composable(DetailsRoutes.BookingDetails.route) {
             BookingDetailsScreen(navController = navController)
         }
-        composable(DetailsRoutes.CheckOut.route) {
-            CheckOutScreen(navController = navController)
+        composable(DetailsRoutes.CheckOut.route  + "/{bookingId}") { backStack ->
+            val bookingId = backStack.arguments?.getString("bookingId")
+            Log.d("BokingID", "Bookingid: $bookingId")
+            bookingId?.let {
+                CheckOutScreen(bookingId = it, navController = navController)
+            }
         }
         composable(DetailsRoutes.Payment.route) {
             PaymentScreen(navController = navController)

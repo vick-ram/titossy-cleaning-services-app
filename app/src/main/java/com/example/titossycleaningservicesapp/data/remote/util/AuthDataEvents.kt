@@ -1,6 +1,7 @@
 package com.example.titossycleaningservicesapp.data.remote.util
 
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
+import java.lang.Exception
 
 sealed class AuthEvent {
     data object Loading : AuthEvent()

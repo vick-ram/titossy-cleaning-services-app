@@ -76,22 +76,33 @@ fun RootNavGraph(
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutCleaner = {
+                employeeAuthViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutManager = {
+                employeeAuthViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutSupplier = {
                 supplierViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutSupervisor = {
+                employeeAuthViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutFinance = {
+                employeeAuthViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             signOutInventory = {
+                employeeAuthViewModel.signOut()
+                navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
             startDestination = usersStartDestination

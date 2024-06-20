@@ -1,17 +1,23 @@
 package com.example.titossycleaningservicesapp.data.repository
 
+import android.util.Log
 import com.example.titossycleaningservicesapp.core.FileUtils
 import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.data.local.database.dao.SupplierDao
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
-import com.example.titossycleaningservicesapp.data.remote.dto.SupplierAddressDto
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
+import com.example.titossycleaningservicesapp.domain.models.requests.customer.CustomerSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
-import retrofit2.HttpException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.singleOrNull
 import java.util.UUID
 import javax.inject.Inject
 
@@ -25,10 +31,7 @@ class SupplierRepositoryImpl @Inject constructor(
         firstName: String,
         lastName: String,
         phone: String,
-        company: String,
-        county: String,
-        region: String,
-        postalCode: String,
+        address: String,
         email: String,
         password: String
     ): AuthEvent {
@@ -38,12 +41,7 @@ class SupplierRepositoryImpl @Inject constructor(
                 firstName = firstName,
                 lastName = lastName,
                 phone = phone,
-                company = company,
-                address = SupplierAddressDto(
-                    county = county,
-                    region = region,
-                    postalCode = postalCode
-                ),
+                address = address,
                 email = email,
                 password = password
             )
@@ -51,8 +49,9 @@ class SupplierRepositoryImpl @Inject constructor(
             val apiSupplier = apiService.supplierSignUp(supplier)
             when (apiSupplier.status) {
                 "success" -> {
-                    apiSupplier.data?.toSupplierEntity()?.let { supplierDao.insertSupplier(it) }
-                    AuthEvent.Success()
+                    val entitySupplier = apiSupplier.data?.toSupplierEntity()
+                    entitySupplier?.let { supplierDao.insertSupplier(it) }
+                    AuthEvent.Success(message = apiSupplier.message)
                 }
 
                 "error" -> {
@@ -68,36 +67,68 @@ class SupplierRepositoryImpl @Inject constructor(
             }
 
         } catch (e: Exception) {
+            e.printStackTrace()
             AuthEvent.Error(e.message.toString())
+        }
+    }
+
+    override fun getSupplierByEmail(email: String): Flow<Resource<Supplier>> {
+        return flow {
+            emit(Resource.Loading)
+            val supplierEntity = supplierDao.getSupplierByEmail(email).firstOrNull()
+
+            if (supplierEntity != null) {
+                val response = apiService.getSupplierByEmail(email)
+                when(response.status) {
+                    "success" -> {
+                        val entitySupplier = response.data?.toSupplierEntity()
+                        entitySupplier?.let { supplierDao.insertSupplier(it) }
+                    }
+                    "error" -> {
+                        if (response.error != null) {
+                            val errors = FileUtils.createErrorMessage(response.error)
+                            throw Exception(errors)
+                        } else {
+                            throw Exception("something occurred")
+                        }
+                    }
+                }
+            }
+            val supplier = supplierEntity?.toSupplier()
+            supplier?.let { emit(Resource.Success(it)) }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
         }
     }
 
     override suspend fun signInSupplier(email: String, password: String): AuthEvent {
         return try {
-            AuthEvent.Loading
-            val response = apiService.supplierSignIn(
-                SupplierSignInRequest(
-                    email, password
-                )
+            val supplier = SupplierSignInRequest(
+                email, password
             )
+            val response = apiService.supplierSignIn(supplier)
             when (response.status) {
                 "success" -> {
                     response.data?.let { dataStoreKeys.saveTokenToDataStore(it) }
-                    AuthEvent.Success()
+                    val supplierEntity = apiService.getSupplierByEmail(email).data?.toSupplierEntity()
+
+                    supplierEntity?.let {
+                        supplierDao.insertSupplier(it)
+                        dataStoreKeys.saveApprovalStatusToDataStore(it.status.name)
+                        AuthEvent.Success(response.message, it.status)
+                    } ?: throw Exception("cannot complete process")
                 }
 
                 "error" -> {
                     if (response.error != null) {
-                        val error = FileUtils.createErrorMessage(response.error)
-                        throw Exception(error)
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
                     } else {
-                        throw Exception("Could not process your request")
+                        throw Exception("something went wrong")
                     }
                 }
-
-                else -> {
-                    throw Exception("Something went wrong")
-                }
+                else -> throw Exception("Internal error")
             }
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
@@ -111,7 +142,9 @@ class SupplierRepositoryImpl @Inject constructor(
             when (response?.status) {
                 "success" -> {
                     response.data?.let { dataStoreKeys.clearToken() }
-                    AuthEvent.Success()
+                    AuthEvent.Success(
+                        message = response.message
+                    )
                 }
 
                 "error" -> {
@@ -138,10 +171,7 @@ class SupplierRepositoryImpl @Inject constructor(
         firstName: String,
         lastName: String,
         phone: String,
-        company: String,
-        county: String,
-        region: String,
-        postalCode: String,
+        address: String,
         email: String,
         password: String
     ): AuthEvent {
@@ -151,35 +181,90 @@ class SupplierRepositoryImpl @Inject constructor(
                 firstName = firstName,
                 lastName = lastName,
                 phone = phone,
-                company = company,
-                address = SupplierAddressDto(
-                    county = county,
-                    region = region,
-                    postalCode = postalCode
-                ),
+                address = address,
                 email = email,
                 password = password
             )
-            apiService.supplierUpdate(id.toString(), supplier)
-            AuthEvent.Success()
-        } catch (e: Exception) {
-            when (e) {
-                is HttpException -> {
-                    when (e.code()) {
-                        400 -> AuthEvent.Error(e.message())
-                        else -> AuthEvent.Error(e.message())
+            val response = apiService.supplierUpdate(id.toString(), supplier)
+            when(response.status) {
+                "success" -> {
+                    AuthEvent.Success(
+                        message = response.message
+                    )
+                }
+                "error" -> {
+                    if (response.error != null) {
+                        val errors = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errors)
+                    } else {
+                        throw Exception("Something went wrong")
                     }
                 }
-
                 else -> {
-                    AuthEvent.Error(e.message ?: "An unknown error occurred")
+                    throw Exception("Error")
                 }
             }
+        } catch (e: Exception) {
+            AuthEvent.Error(e.message.toString())
         }
     }
 
-    override suspend fun getSupplierById(id: UUID): Resource<Supplier> {
-        TODO("Not yet implemented")
+    override fun getAllSuppliers(): Flow<Resource<List<Supplier>>> {
+        return flow {
+            emit(Resource.Loading)
+            val dbSuppliers = supplierDao.getAllSuppliers().firstOrNull()
+
+            if (dbSuppliers.isNullOrEmpty()) {
+                val response = apiService.getSuppliers()
+                when(response.status) {
+                    "success" -> {
+                        val entitySuppliers = response.data?.map { it.toSupplierEntity() }
+                        entitySuppliers?.let { supplierDao.insertAllSuppliers(it) }
+                    }
+                    "error" -> {
+                        if (response.error != null) {
+                            val error = FileUtils.createErrorMessage(response.error)
+                            throw Exception(error)
+                        }
+                    }
+                }
+            } else {
+                val suppliers = dbSuppliers.map { it.toSupplier() }
+                emit(Resource.Success(suppliers))
+            }
+        }.catch { exception ->
+            exception.printStackTrace()
+            emit(Resource.Error(exception.message.toString()))
+        }
+    }
+
+    override suspend fun getSupplierById(id: UUID): Flow<Resource<Supplier>> {
+        return flow {
+            emit(Resource.Loading)
+            val dbSupplier = supplierDao.getSupplierById(id.toString()).singleOrNull()
+
+            if (dbSupplier == null) {
+                val response = apiService.getSupplierById(id.toString())
+                when(response.status) {
+                    "success" -> {
+                        val entitySupplier = response.data?.toSupplierEntity()
+                        entitySupplier?.let { supplierDao.insertSupplier(it) }
+                    }
+                    "error" -> {
+                        if (response.error != null) {
+                            val error = FileUtils.createErrorMessage(response.error)
+                            throw Exception(error)
+                        }
+                    }
+                }
+            } else {
+                val supplier = dbSupplier.toSupplier()
+                emit(Resource.Success(supplier))
+            }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
     }
 
 }

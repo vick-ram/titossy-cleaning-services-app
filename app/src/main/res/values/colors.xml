@@ -15,4 +15,9 @@
     <color name="blue_4">#1773E2</color>
     <color name="text_field">#F1FAEE</color>
     <color name="gray_300">#E0E0E0</color>
+    <color name="pending">#FFA500</color>
+    <color name="approved">#00CC00</color>
+    <color name="completed">#0099CC</color>
+    <color name="all_bookings">#999999</color>
+    <color name="dark_green">#013220</color>
 </resources>

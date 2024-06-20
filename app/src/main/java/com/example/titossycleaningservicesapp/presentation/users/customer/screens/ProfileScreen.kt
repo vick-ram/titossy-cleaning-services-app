@@ -2,8 +2,6 @@ package com.example.titossycleaningservicesapp.presentation.users.customer.scree
 
 import android.net.Uri
 import android.view.ViewTreeObserver
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -55,15 +53,12 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewM
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
-import java.util.UUID
 
 @Composable
 fun SettingsScreen(navController: NavHostController, paddingValues: PaddingValues) {
     val viewModel: CustomerAuthViewModel = hiltViewModel()
 
     var enabled by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    var selectedFileUri by remember { mutableStateOf<Uri>(Uri.EMPTY) }
     val scrollState = rememberScrollState()
     val imeState = rememberImeState()
 
@@ -72,16 +67,6 @@ fun SettingsScreen(navController: NavHostController, paddingValues: PaddingValue
             scrollState.scrollTo(scrollState.maxValue)
         }
     }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            uri?.let {
-                selectedFileUri = it
-                viewModel.updateProfilePicture(UUID.randomUUID(), it, context)
-            }
-        }
-    )
 
     Column(
         modifier = Modifier
@@ -156,17 +141,6 @@ fun SettingsScreen(navController: NavHostController, paddingValues: PaddingValue
                         contentScale = ContentScale.Crop
                     )
 
-                    IconButton(
-                        onClick = {
-                            launcher.launch("image/*")
-                        },
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = null
-                        )
-                    }
                 }
 
                 CustomTextField(

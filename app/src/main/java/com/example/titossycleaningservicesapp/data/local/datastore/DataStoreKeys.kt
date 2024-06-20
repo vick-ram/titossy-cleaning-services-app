@@ -11,6 +11,7 @@ import com.example.titossycleaningservicesapp.di.Constants.LOGIN_KEY
 import com.example.titossycleaningservicesapp.di.Constants.ONBOARDING_KEY
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,6 +21,7 @@ class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Prefere
     companion object {
         private val ONBOARDING_COMPLETED = booleanPreferencesKey(ONBOARDING_KEY)
         private val USER_TYPE = stringPreferencesKey("userType")
+        private val APPROVAL_STATUS = stringPreferencesKey("approval_status")
     }
 
     suspend fun saveTokenToDataStore(token: String) {
@@ -29,7 +31,7 @@ class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Prefere
     }
 
     suspend fun getTokenFromDataStore(): String? {
-        val prefs = dataStore.data.first()
+        val prefs = dataStore.data.distinctUntilChanged().first()
         return prefs[stringPreferencesKey(LOGIN_KEY)]
     }
 
@@ -70,6 +72,17 @@ class DataStoreKeys @Inject constructor(private val dataStore: DataStore<Prefere
     suspend fun getUserTypeFromDataStore(): String? {
         val prefs = dataStore.data.first()
         return prefs[USER_TYPE]
+    }
+
+    suspend fun saveApprovalStatusToDataStore(approvalStatus: String) {
+        dataStore.edit { key ->
+            key[APPROVAL_STATUS] = approvalStatus
+        }
+    }
+
+    suspend fun getApprovalStatusFromDataStore(): String? {
+        val prefs = dataStore.data.distinctUntilChanged().first()
+        return prefs[APPROVAL_STATUS]
     }
 
 }

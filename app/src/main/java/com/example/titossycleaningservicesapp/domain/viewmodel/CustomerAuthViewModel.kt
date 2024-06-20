@@ -1,7 +1,5 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
-import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -111,20 +109,6 @@ class CustomerAuthViewModel @Inject constructor(
     fun signOut() = viewModelScope.launch {
         isLoading = true
         val result = customerRepository.signOutCustomer()
-        sendEvent(result)
-        isLoading = false
-    }
-
-    fun updateProfilePicture(
-        customerId: UUID,
-        profilePicture: Uri,
-        context: Context
-    ) = viewModelScope.launch {
-        isLoading = true
-        val result = customerRepository
-            .updateCustomerProfilePicture(
-                customerId, profilePicture, context
-            )
         sendEvent(result)
         isLoading = false
     }

@@ -1,10 +1,7 @@
 package com.example.titossycleaningservicesapp.data.repository
 
-import android.content.Context
-import android.net.Uri
 import com.example.titossycleaningservicesapp.core.FileUtils
 import com.example.titossycleaningservicesapp.core.Resource
-import com.example.titossycleaningservicesapp.data.local.database.dao.AddressDao
 import com.example.titossycleaningservicesapp.data.local.database.dao.CustomerDao
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
@@ -13,15 +10,10 @@ import com.example.titossycleaningservicesapp.domain.models.requests.customer.Cu
 import com.example.titossycleaningservicesapp.domain.models.requests.customer.CustomerSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Customer
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import java.util.UUID
 import javax.inject.Inject
 
@@ -29,7 +21,6 @@ class CustomerRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val customerDao: CustomerDao,
     private val dataStore: DataStoreKeys,
-    private val addressDao: AddressDao
 ) : CustomerRepository {
     override suspend fun createCustomer(
         username: String,
@@ -53,19 +44,23 @@ class CustomerRepositoryImpl @Inject constructor(
             val response = apiService.customerSignUp(customer)
             when (response.status) {
                 "success" -> {
-                    response.data?.toCustomerEntity()?.customer?.let {
-                        customerDao.insertCustomer(it)
-                    }
+                    val entityCustomer = response.data?.toCustomerEntity()
+                    entityCustomer?.let { customerDao.insertCustomer(it) }
+                    AuthEvent.Success(response.message)
                 }
 
                 "error" -> {
                     if (response.error != null) {
                         val errorMessage = FileUtils.createErrorMessage(response.error)
                         throw Exception(errorMessage)
+                    } else {
+                        throw Exception("Something went wrong")
                     }
                 }
+                else -> {
+                    throw Exception("Unknown error")
+                }
             }
-            AuthEvent.Success(response.message)
         } catch (e: Exception) {
             e.printStackTrace()
             AuthEvent.Error(e.message.toString())
@@ -87,13 +82,14 @@ class CustomerRepositoryImpl @Inject constructor(
                 "success" -> {
                     response.data?.let { dataStore.saveTokenToDataStore(it) }
                     val customerEntity = when {
-                        email != null -> apiService.getCustomerByEmail(email).data?.toCustomerEntity()?.customer
-                        username != null -> apiService.getCustomerByUsername(username).data?.toCustomerEntity()?.customer
+                        email != null -> apiService.getCustomerByEmail(email).data?.toCustomerEntity()
+                        username != null -> apiService.getCustomerByUsername(username).data?.toCustomerEntity()
                         else -> null
                     }
 
                     customerEntity?.let {
                         customerDao.insertCustomer(it)
+                        dataStore.saveApprovalStatusToDataStore(it.status.name)
                         AuthEvent.Success(response.message, it.status)
                     } ?: throw Exception("cannot complete process")
                 }
@@ -108,15 +104,6 @@ class CustomerRepositoryImpl @Inject constructor(
                 }
                 else -> throw Exception("Internal error")
             }
-
-            /*val customerFromDb = (email ?: username)?.let {
-                customerDao.getCustomerByUsernameOrEmail(
-                    it
-                )
-            }
-            val customerStatus = customerFromDb?.customer?.status
-
-            AuthEvent.Success(response.message, customerStatus)*/
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
         }
@@ -133,6 +120,7 @@ class CustomerRepositoryImpl @Inject constructor(
 
                 "error" -> {
                     if (response.error != null) {
+                        dataStore.clearToken()
                         val errorMessage = FileUtils.createErrorMessage(response.error)
                         throw Exception(errorMessage)
                     }
@@ -166,7 +154,7 @@ class CustomerRepositoryImpl @Inject constructor(
             val response = apiService.updateCustomer(customerId.toString(), customer)
             when (response.status) {
                 "success" -> {
-                    response.data?.toCustomerEntity()?.customer?.let {
+                    response.data?.toCustomerEntity()?.let {
                         customerDao.updateCustomer(
                             customerId,
                             username,
@@ -190,42 +178,6 @@ class CustomerRepositoryImpl @Inject constructor(
             AuthEvent.Error(e.message.toString())
         }
     }
-
-    override suspend fun updateCustomerProfilePicture(
-        customerId: UUID,
-        profilePicture: Uri,
-        context: Context
-    ): AuthEvent = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val file = FileUtils.getFileFromUri(context, profilePicture)
-            val requestFile = file!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
-            val response = apiService.updateCustomerProfilePicture(customerId.toString(), filePart)
-            when (response.status) {
-                "success" -> {
-                    response.data?.toCustomerEntity()?.customer?.let {
-                        it.profilePic?.let { it1 ->
-                            customerDao.updateCustomerProfilePicture(
-                                customerId,
-                                it1
-                            )
-                        }
-                    }
-                }
-
-                "error" -> {
-                    if (response.error != null) {
-                        val errorMessage = FileUtils.createErrorMessage(response.error)
-                        throw Exception(errorMessage)
-                    }
-                }
-            }
-            AuthEvent.Success(response.message)
-        } catch (e: Exception) {
-            AuthEvent.Error(e.message.toString())
-        }
-    }
-
     override fun getCustomers(): Flow<Resource<List<Customer>>> {
         return flow {
             emit(Resource.Loading)
@@ -235,13 +187,8 @@ class CustomerRepositoryImpl @Inject constructor(
                 val response = apiService.getCustomers()
                 when (response.status) {
                     "success" -> {
-                        val customers = response.data?.mapNotNull { it.toCustomerEntity().customer }
+                        val customers = response.data?.map { it.toCustomerEntity() }
                         customers?.let { customerDao.insertCustomers(it) }
-
-                        response.data?.forEach { customer ->
-                            val addresses = customer.address.map { it.toAddressEntity() }
-                            addressDao.insertAddresses(addresses)
-                        }
                     }
 
                     "error" -> {
@@ -253,7 +200,7 @@ class CustomerRepositoryImpl @Inject constructor(
                 }
             }
             val customers = customersFromDb.let { entityCustomers ->
-                entityCustomers?.mapNotNull { it.toCustomerWithAddress() }
+                entityCustomers?.map { it.toCustomer() }
             }
             customers?.let { emit(Resource.Success(it)) }
         }.catch { e ->
@@ -270,12 +217,8 @@ class CustomerRepositoryImpl @Inject constructor(
                 val response = apiService.getCustomerById(id.toString())
                 when (response.status) {
                     "success" -> {
-                        response.data?.toCustomerEntity()?.customer?.let {
+                        response.data?.toCustomerEntity()?.let {
                             customerDao.insertCustomer(it)
-                        }
-                        response.data?.address?.let {
-                            val addresses = it.map { address -> address.toAddressEntity() }
-                            addressDao.insertAddresses(addresses)
                         }
                     }
 
@@ -287,7 +230,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 }
             }
-            customerFromDb?.toCustomerWithAddress()?.let { emit(Resource.Success(it)) }
+            customerFromDb?.toCustomer()?.let { emit(Resource.Success(it)) }
         }.catch { e ->
             emit(Resource.Error(e.message.toString()))
         }
@@ -302,12 +245,8 @@ class CustomerRepositoryImpl @Inject constructor(
                 val response = apiService.getCustomerByUsername(username)
                 when (response.status) {
                     "success" -> {
-                        response.data?.toCustomerEntity()?.customer?.let {
+                        response.data?.toCustomerEntity()?.let {
                             customerDao.insertCustomer(it)
-                        }
-                        response.data?.address?.let {
-                            val addresses = it.map { address -> address.toAddressEntity() }
-                            addressDao.insertAddresses(addresses)
                         }
                     }
 
@@ -319,7 +258,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 }
             }
-            customerFromDb?.toCustomerWithAddress()?.let { emit(Resource.Success(it)) }
+            customerFromDb?.toCustomer()?.let { emit(Resource.Success(it)) }
         }.catch { e ->
             emit(Resource.Error(e.message.toString()))
         }
@@ -329,7 +268,7 @@ class CustomerRepositoryImpl @Inject constructor(
         return flow<Resource<Customer>> {
             emit(Resource.Loading)
             val customerFromDb = customerDao.getCustomerByEmail(email)
-            val customer = customerFromDb?.toCustomerWithAddress()
+            val customer = customerFromDb?.toCustomer()
             customer?.let { Resource.Success(it) }
 
             if (customerFromDb == null) {
@@ -337,13 +276,8 @@ class CustomerRepositoryImpl @Inject constructor(
                 val response = apiService.getCustomerByEmail(email)
                 when (response.status) {
                     "success" -> {
-                        response.data?.toCustomerEntity()?.customer?.let {
+                        response.data?.toCustomerEntity()?.let {
                             customerDao.insertCustomer(it)
-                        }
-
-                        response.data?.address?.let {
-                            val addresses = it.map { address -> address.toAddressEntity() }
-                            addressDao.insertAddresses(addresses)
                         }
                     }
 

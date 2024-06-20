@@ -6,18 +6,20 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.example.titossycleaningservicesapp.data.local.database.entities.ServiceAddonEntity
 import com.example.titossycleaningservicesapp.data.local.database.entities.ServiceEntity
-import com.example.titossycleaningservicesapp.data.local.database.entities.ServiceWithAddOns
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ServiceDao {
     @Transaction
     @Query("SELECT * FROM services")
-    fun getAllServices(): Flow<List<ServiceWithAddOns>>
+    fun getAllServices(): Flow<List<ServiceEntity>>
+    @Transaction
+    @Query("SELECT * FROM services_addons WHERE service_id = :serviceId")
+    fun getServiceAddons(serviceId: String): Flow<List<ServiceAddonEntity>>
 
     @Transaction
     @Query("SELECT * FROM services WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%'")
-    fun searchServices(query: String): Flow<List<ServiceWithAddOns>>
+    fun searchServices(query: String): Flow<List<ServiceEntity>>
 
     @Transaction
     @Upsert

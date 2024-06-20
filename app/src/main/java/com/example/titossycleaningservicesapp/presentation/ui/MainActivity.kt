@@ -5,17 +5,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.presentation.navigation.rootGraph.RootNavGraph
-import com.example.titossycleaningservicesapp.presentation.ui.theme.TitossyCleaningServicesAppTheme
+import com.example.titossycleaningservicesapp.presentation.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,24 +33,33 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
-            !mainViewModel.isLoading.value
+            !mainViewModel.isReady.value
         }
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            TitossyCleaningServicesAppTheme {
+            AppTheme {
                 val startDestination by mainViewModel.startDestination
-                Surface(
-                   modifier = Modifier
-                       .fillMaxSize()
-                       .safeDrawingPadding()
-                ) {
-                    RootNavGraph(
-                        navController = navController,
-                        mainViewModel = mainViewModel,
-                        startDestination = startDestination,
-                        dataStoreKeys = dataStoreKeys
-                    )
+                if (mainViewModel.isReady.collectAsState().value) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                    ) {
+                        RootNavGraph(
+                            navController = navController,
+                            mainViewModel = mainViewModel,
+                            startDestination = startDestination,
+                            dataStoreKeys = dataStoreKeys
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }

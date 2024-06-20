@@ -5,12 +5,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.ui_models.SupplierUiState
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -25,17 +31,22 @@ class SupplierAuthViewModel @Inject constructor(
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var phone by mutableStateOf("")
-    var company by mutableStateOf("")
     var email by mutableStateOf("")
     var password by mutableStateOf("")
-    var county by mutableStateOf("")
-    var region by mutableStateOf("")
-    var postalCode by mutableStateOf("")
+    var address by mutableStateOf("")
 
     private val _resultChannel = Channel<AuthEvent>(Channel.BUFFERED)
     val resultChannel = _resultChannel.receiveAsFlow()
+    private val _supplierUiState = MutableStateFlow(SupplierUiState(isLoading = true))
+    val supplierUiState: StateFlow<SupplierUiState> = _supplierUiState
 
     var isLoading by mutableStateOf(false)
+
+
+    init {
+        fetchSuppliers()
+    }
+
 
     private fun sendEvent(event: AuthEvent) = viewModelScope.launch {
         _resultChannel.send(event)
@@ -58,10 +69,7 @@ class SupplierAuthViewModel @Inject constructor(
             firstName,
             lastName,
             phone,
-            company,
-            county,
-            region,
-            postalCode,
+            address,
             email,
             password
         )
@@ -77,10 +85,7 @@ class SupplierAuthViewModel @Inject constructor(
             firstName,
             lastName,
             phone,
-            company,
-            county,
-            region,
-            postalCode,
+            address,
             email,
             password
         )
@@ -110,21 +115,8 @@ class SupplierAuthViewModel @Inject constructor(
     fun onPhoneChange(newPhone: String) {
         phone = newPhone
     }
-
-    fun onCompanyChange(newCompany: String) {
-        company = newCompany
-    }
-
-    fun onCountyChange(newCounty: String) {
-        county = newCounty
-    }
-
-    fun onRegionChange(newRegion: String) {
-        region = newRegion
-    }
-
-    fun onPostalCodeChange(newPostalCode: String) {
-        postalCode = newPostalCode
+    fun onAddressChange(newAddress: String) {
+        address = newAddress
     }
 
     fun onEmailChange(newEmail: String) {
@@ -133,6 +125,40 @@ class SupplierAuthViewModel @Inject constructor(
 
     fun onPasswordChange(newPassword: String) {
         password = newPassword
+    }
+
+    fun fetchSuppliers() = viewModelScope.launch {
+        supplierRepository.getAllSuppliers()
+            .collectLatest { resource ->
+                when(resource){
+                    is Resource.Error -> {
+                        _supplierUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.message.toString()
+                            )
+                        }
+                    }
+                    is Resource.Loading -> {
+                        _supplierUiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                    is Resource.Success -> {
+                        _supplierUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                suppliers = resource.data
+                            )
+                        }
+                    }
+                }
+            }
+    }
+    fun clearToken() = viewModelScope.launch {
+        dataStoreKeys.clearToken()
     }
 
     override fun onCleared() {

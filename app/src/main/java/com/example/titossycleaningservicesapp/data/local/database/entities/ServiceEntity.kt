@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.data.local.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Service
@@ -18,9 +19,23 @@ data class ServiceEntity(
     @ColumnInfo("image_url") val image: String,
     @ColumnInfo("created_at") val createdAt: String,
     @ColumnInfo("updated_at") val updatedAt: String,
-)
+) {
+    fun toServiceModel() = Service(
+        id = UUID.fromString(id),
+        name = name, description = description,
+        price =  price.toBigDecimal(),
+        image = image
+    )
+}
 
-@Entity("services_addons")
+@Entity(
+    tableName = "services_addons",
+    foreignKeys = [ForeignKey(
+        entity = ServiceEntity::class,
+        parentColumns = ["service_id"],
+        childColumns = ["service_id"]
+    )]
+)
 data class ServiceAddonEntity(
     @ColumnInfo("service_addon_id") @PrimaryKey val id: String,
     @ColumnInfo("service_id") val serviceId: String,
@@ -30,33 +45,13 @@ data class ServiceAddonEntity(
     @ColumnInfo("image_url") val image: String,
     @ColumnInfo("created_at") val createdAt: String,
     @ColumnInfo("updated_at") val updatedAt: String,
-)
-
-data class ServiceWithAddOns(
-    @Embedded val service: ServiceEntity?,
-    @Relation(
-        parentColumn = "service_id",
-        entityColumn = "service_id"
-    )
-    val addOns: List<ServiceAddonEntity>? = null
 ) {
-    fun toService() = service?.let { service ->
-        Service(
-            id = UUID.fromString(service.id),
-            name = service.name,
-            description = service.description,
-            price = service.price.toBigDecimal(),
-            image = service.image,
-            addOns = addOns?.map { addOn ->
-                ServiceAddOn(
-                    id = UUID.fromString(addOn.id),
-                    serviceId = UUID.fromString(addOn.serviceId),
-                    name = addOn.name,
-                    description = addOn.description,
-                    price = addOn.price.toBigDecimal(),
-                    image = addOn.image
-                )
-            }
-        )
-    }
+    fun toServiceAddonModel() = ServiceAddOn(
+        id = UUID.fromString(id),
+        serviceId = UUID.fromString(serviceId),
+        name = name,
+        description = description,
+        price = price.toBigDecimal(),
+        image = image
+    )
 }

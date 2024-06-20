@@ -1,15 +1,19 @@
 package com.example.titossycleaningservicesapp.di
 
-import com.example.titossycleaningservicesapp.data.repository.AddressRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.BookingRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.CartRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.CustomerPaymentRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.CustomerRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.EmployeeRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.ProductRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ServiceRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.SupplierRepositoryImpl
-import com.example.titossycleaningservicesapp.domain.repository.AddressRepository
+import com.example.titossycleaningservicesapp.domain.repository.BookingRepository
 import com.example.titossycleaningservicesapp.domain.repository.CartRepository
+import com.example.titossycleaningservicesapp.domain.repository.CustomerPaymentRepository
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
+import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
 import com.example.titossycleaningservicesapp.domain.repository.ServiceRepository
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
 import dagger.Binds
@@ -27,16 +31,19 @@ abstract class RepositoryModule {
     @Binds
     abstract fun bindCustomerRepository(customerRepositoryImpl: CustomerRepositoryImpl): CustomerRepository
 
-
     @Binds
     abstract fun bindEmployeeRepository(repo: EmployeeRepositoryImpl): EmployeeRepository
-
-    @Binds
-    abstract fun bindAddressRepository(addressRepository: AddressRepositoryImpl): AddressRepository
 
     @Binds
     abstract fun bindServiceRepository(serviceRepositoryImpl: ServiceRepositoryImpl): ServiceRepository
 
     @Binds
     abstract fun bindCartRepository(cartRepositoryImpl: CartRepositoryImpl): CartRepository
+    @Binds
+    abstract fun bindBookingRepository(bookingRepositoryImpl: BookingRepositoryImpl): BookingRepository
+    @Binds
+    abstract fun bindCustomerPayment(customerPaymentRepositoryImpl: CustomerPaymentRepositoryImpl) : CustomerPaymentRepository
+
+    @Binds
+    abstract fun bindProductCartRepository(productRepositoryImpl: ProductRepositoryImpl) : ProductRepository
 }

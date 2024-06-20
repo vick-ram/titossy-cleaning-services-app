@@ -37,7 +37,15 @@ class EmployeeRepositoryImpl @Inject constructor(
             when (apiResponse.status) {
                 "success" -> {
                     apiResponse.data?.let { dataStoreKeys.saveTokenToDataStore(it) }
-                    AuthEvent.Success()
+                    val employeeEntity = apiService.getEmployeeByEmail(email).data?.toEmployee()
+                    employeeEntity?.let {
+                        employeeDao.insertEmployee(it)
+                        dataStoreKeys.saveApprovalStatusToDataStore(it.approvalStatus)
+                        AuthEvent.Success(
+                            apiResponse.message,
+                            ApprovalStatus.valueOf(it.approvalStatus)
+                        )
+                    } ?: throw Exception("Employee not found")
                 }
 
                 "error" -> {
@@ -63,12 +71,13 @@ class EmployeeRepositoryImpl @Inject constructor(
 
             when (apiResponse?.status) {
                 "success" -> {
-                    dataStoreKeys.clearToken()
+                    apiResponse.data?.let { dataStoreKeys.clearToken() }
                     AuthEvent.Success()
                 }
 
                 "error" -> {
                     if (apiResponse.error != null) {
+                        dataStoreKeys.clearToken()
                         val error = FileUtils.createErrorMessage(apiResponse.error)
                         throw Exception(error)
                     } else {
@@ -80,6 +89,8 @@ class EmployeeRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
+        } finally {
+            dataStoreKeys.clearToken()
         }
     }
 
@@ -107,6 +118,7 @@ class EmployeeRepositoryImpl @Inject constructor(
                         throw Exception("Something went wrong")
                     }
                 }
+
                 else -> throw Exception("Error: ${apResponse.statusCode}")
             }
         } catch (e: Exception) {
@@ -114,7 +126,37 @@ class EmployeeRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getEmployeeById(id: UUID): Flow<Resource<Employee>> {
+    override fun getAllEmployees(): Flow<Resource<List<Employee>>> {
+        return flow {
+            emit(Resource.Loading)
+            val employeeFromDb = employeeDao.getAllEmployees().firstOrNull()
+            if (employeeFromDb.isNullOrEmpty()) {
+                val response = apiService.getEmployees()
+                when (response.status) {
+                    "success" -> {
+                        val employeeEntity = response.data?.map { it.toEmployee() }
+                        employeeEntity?.let {
+                            employeeDao.insertEmployees(it)
+                        }
+                    }
+
+                    "error" -> {
+                        if (response.error != null) {
+                            val errorMessage = FileUtils.createErrorMessage(response.error)
+                            throw Exception(errorMessage)
+                        }
+                    }
+                }
+            } else {
+                val e = employeeFromDb.map { it.toEmployee() }
+                emit(Resource.Success(e))
+            }
+        }.catch { exceptions ->
+            emit(Resource.Error(exceptions.message.toString()))
+        }
+    }
+
+    override fun getEmployeeById(id: UUID): Flow<Resource<Employee>> {
         return flow {
             emit(Resource.Loading)
             val dbEmployee = employeeDao.getEmployeeById(id).firstOrNull()
@@ -142,7 +184,7 @@ class EmployeeRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getEmployeesByStatus(status: String): Flow<Resource<List<Employee>>> {
+    override fun getEmployeesByStatus(status: String): Flow<Resource<List<Employee>>> {
         return flow {
             emit(Resource.Loading)
             val dbEmployees = employeeDao.getEmployeesByStatus(status).firstOrNull()
@@ -167,6 +209,30 @@ class EmployeeRepositoryImpl @Inject constructor(
             employees?.let { emit(Resource.Success(it)) }
 
         }.catch { e ->
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
+
+    override fun getEmployeeByEmail(email: String): Flow<Resource<Employee>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.getEmployeeByEmail(email)
+            when (response.status) {
+                "success" -> {
+                    val employeeEntity = response.data?.toEmployee()
+                    val employee = employeeEntity?.toEmployee()
+                    employee?.let { emit(Resource.Success(it)) }
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
+                    }
+                }
+            }
+        }.catch { e ->
+            e.printStackTrace()
             emit(Resource.Error(e.message.toString()))
         }
     }
