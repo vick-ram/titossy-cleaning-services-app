@@ -17,8 +17,7 @@ data class SupplierDto(
     val createdAt: String,
     val updatedAt: String
 ) {
-    fun toSupplierEntity(): SupplierEntity {
-        return SupplierEntity(
+    fun toSupplierEntity() = SupplierEntity(
             id = UUID.fromString(id),
             fullName = fullName,
             phone = phone,
@@ -29,5 +28,4 @@ data class SupplierDto(
             createdAt = LocalDateTime.parse(updatedAt, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             updatedAt = LocalDateTime.parse(updatedAt, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         )
-    }
 }

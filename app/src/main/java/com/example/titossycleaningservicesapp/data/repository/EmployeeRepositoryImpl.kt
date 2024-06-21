@@ -5,20 +5,17 @@ import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.data.local.database.dao.EmployeeDao
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
-import com.example.titossycleaningservicesapp.data.remote.dto.EmployeeDto
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.Availability
 import com.example.titossycleaningservicesapp.domain.models.requests.employee.EmployeeAvailability
 import com.example.titossycleaningservicesapp.domain.models.requests.employee.EmployeeSignInRequest
-import com.example.titossycleaningservicesapp.domain.models.requests.employee.EmployeeStatusUpdate
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Employee
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import retrofit2.HttpException
 import java.util.UUID
 import javax.inject.Inject
 

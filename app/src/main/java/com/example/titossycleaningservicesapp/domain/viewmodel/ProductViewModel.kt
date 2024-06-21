@@ -9,8 +9,10 @@ import com.example.titossycleaningservicesapp.domain.models.requests.po.ProductU
 import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,6 +33,11 @@ class ProductViewModel @Inject constructor(
 
     fun fetchProducts() = viewModelScope.launch {
         productRepository.getAllProducts()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000L),
+                initialValue = Resource.Loading
+            )
             .collect {resource ->
                 when(resource) {
                     is Resource.Error -> {

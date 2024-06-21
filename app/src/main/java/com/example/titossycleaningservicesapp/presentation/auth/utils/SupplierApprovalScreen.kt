@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +35,7 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ApprovalScreen(navController: NavHostController) {
+fun SupplierApprovalScreen(navController: NavHostController) {
     var user by remember { mutableStateOf<Pair<String, String>?>(null) }
     val mainViewModel: MainViewModel = hiltViewModel()
 
@@ -65,9 +66,16 @@ fun ApprovalScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
             Text(
-                text = "Welcome, ${user?.first}!",
+                text = "Welcome!",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text =  user?.second ?: "",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -91,7 +99,7 @@ fun ApprovalScreen(navController: NavHostController) {
                    .fillMaxWidth(0.8f),
                 contentPadding = PaddingValues(16.dp),
                 onClick = { navController.popBackStack() },
-                shape = RoundedCornerShape(50),
+                shape = RectangleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )

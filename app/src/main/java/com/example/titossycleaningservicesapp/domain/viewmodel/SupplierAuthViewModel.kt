@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -27,18 +28,11 @@ class SupplierAuthViewModel @Inject constructor(
     private val dataStoreKeys: DataStoreKeys
 ) : ViewModel() {
 
-    var username by mutableStateOf("")
-    var firstName by mutableStateOf("")
-    var lastName by mutableStateOf("")
-    var phone by mutableStateOf("")
-    var email by mutableStateOf("")
-    var password by mutableStateOf("")
-    var address by mutableStateOf("")
-
     private val _resultChannel = Channel<AuthEvent>(Channel.BUFFERED)
     val resultChannel = _resultChannel.receiveAsFlow()
+
     private val _supplierUiState = MutableStateFlow(SupplierUiState(isLoading = true))
-    val supplierUiState: StateFlow<SupplierUiState> = _supplierUiState
+    val supplierUiState: StateFlow<SupplierUiState> = _supplierUiState.asStateFlow()
 
     var isLoading by mutableStateOf(false)
 
@@ -47,12 +41,11 @@ class SupplierAuthViewModel @Inject constructor(
         fetchSuppliers()
     }
 
-
     private fun sendEvent(event: AuthEvent) = viewModelScope.launch {
         _resultChannel.send(event)
     }
 
-    fun signIn() = viewModelScope.launch {
+    fun signIn(email: String, password: String) = viewModelScope.launch {
         isLoading = true
         val result = supplierRepository.signInSupplier(email, password)
         if (result is AuthEvent.Success) {
@@ -62,10 +55,16 @@ class SupplierAuthViewModel @Inject constructor(
         isLoading = false
     }
 
-    fun signUp() = viewModelScope.launch {
+    fun signUp(
+        firstName: String,
+        lastName: String,
+        phone: String,
+        address: String,
+        email: String,
+        password: String,
+    ) = viewModelScope.launch {
         isLoading = true
         val result = supplierRepository.createSupplier(
-            username,
             firstName,
             lastName,
             phone,
@@ -77,11 +76,18 @@ class SupplierAuthViewModel @Inject constructor(
         isLoading = false
     }
 
-    fun update(id: UUID) = viewModelScope.launch {
+    fun update(
+        id: UUID,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        address: String,
+        email: String,
+        password: String,
+    ) = viewModelScope.launch {
         isLoading = true
         val result = supplierRepository.updateSupplier(
             id,
-            username,
             firstName,
             lastName,
             phone,
@@ -98,33 +104,6 @@ class SupplierAuthViewModel @Inject constructor(
         val result = supplierRepository.signOutSupplier()
         sendEvent(result)
         isLoading = false
-    }
-
-    fun onUsernameChange(newUsername: String) {
-        username = newUsername
-    }
-
-    fun onFirstNameChange(newFirstName: String) {
-        firstName = newFirstName
-    }
-
-    fun onLastNameChange(newLastName: String) {
-        lastName = newLastName
-    }
-
-    fun onPhoneChange(newPhone: String) {
-        phone = newPhone
-    }
-    fun onAddressChange(newAddress: String) {
-        address = newAddress
-    }
-
-    fun onEmailChange(newEmail: String) {
-        email = newEmail
-    }
-
-    fun onPasswordChange(newPassword: String) {
-        password = newPassword
     }
 
     fun fetchSuppliers() = viewModelScope.launch {
@@ -157,6 +136,7 @@ class SupplierAuthViewModel @Inject constructor(
                 }
             }
     }
+
     fun clearToken() = viewModelScope.launch {
         dataStoreKeys.clearToken()
     }

@@ -9,15 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.authGraph.authNavGraph
 import com.example.titossycleaningservicesapp.presentation.ui.OnBoardingScreen
 import com.example.titossycleaningservicesapp.presentation.users.navigation.usersNavigation
@@ -33,14 +29,11 @@ fun RootNavGraph(
     dataStoreKeys: DataStoreKeys
 ) {
 
-    val customerAuthViewModel: CustomerAuthViewModel = hiltViewModel()
-    val employeeAuthViewModel: EmployeeViewModel = hiltViewModel()
-    val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
     var userType by rememberSaveable { mutableStateOf<String?>(null) }
-    LaunchedEffect(key1 = dataStoreKeys) {
+
+    LaunchedEffect(key1 = Unit) {
         userType = dataStoreKeys.getUserTypeFromDataStore()
     }
-
     val usersStartDestination = when(userType) {
         "MANAGER" -> UserRoutes.Manager.route
         "INVENTORY" -> UserRoutes.Inventory.route
@@ -67,45 +60,15 @@ fun RootNavGraph(
                 }
             )
         }
-        authNavGraph(navController, customerAuthViewModel)
+        authNavGraph(navController)
         usersNavigation(
-            signOutCustomer = {
-                customerAuthViewModel.signOut()
-                navController.popBackStack()
-                employeeAuthViewModel.signOut()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            signOutCleaner = {
-                employeeAuthViewModel.signOut()
+            signOut = {
+                mainViewModel.signOut()
                 navController.popBackStack()
                 navController.navigate(Authentication.LOGIN.route)
             },
-            signOutManager = {
-                employeeAuthViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            signOutSupplier = {
-                supplierViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            signOutSupervisor = {
-                employeeAuthViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            signOutFinance = {
-                employeeAuthViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            signOutInventory = {
-                employeeAuthViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate(Authentication.LOGIN.route)
-            },
-            startDestination = usersStartDestination
+            startDestination = usersStartDestination,
+            mainViewModel = mainViewModel
         )
     }
 }

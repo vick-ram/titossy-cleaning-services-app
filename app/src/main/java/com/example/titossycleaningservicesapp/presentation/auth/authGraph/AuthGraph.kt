@@ -12,12 +12,12 @@ import com.example.titossycleaningservicesapp.presentation.auth.signUp.CustomerS
 import com.example.titossycleaningservicesapp.presentation.auth.signUp.SignUpSuccessful
 import com.example.titossycleaningservicesapp.presentation.auth.signUp.SupplierSignUpScreen
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ApprovalScreen
+import com.example.titossycleaningservicesapp.presentation.auth.utils.SupplierApprovalScreen
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 
 fun NavGraphBuilder.authNavGraph(
-    navController: NavHostController,
-    customerAuthViewModel: CustomerAuthViewModel,
+    navController: NavHostController
 ) {
     navigation(
         route = RootNavRoutes.AUTH.route,
@@ -26,8 +26,7 @@ fun NavGraphBuilder.authNavGraph(
         composable(Authentication.LOGIN.route) {
             CustomerSignInScreen(
                 navController = navController,
-                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) },
-                signInViewModel = customerAuthViewModel
+                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) }
             )
         }
         composable(Authentication.SIGNUP.route) {
@@ -36,15 +35,14 @@ fun NavGraphBuilder.authNavGraph(
                 backToLogin = { navController.navigate(Authentication.LOGIN.route) },
             )
         }
-        composable("success") {
-            SignUpSuccessful(navController = navController)
-        }
         composable(Authentication.SUPPLIER_SIGNUP.route) {
             SupplierSignUpScreen(navController = navController)
         }
 
         composable(Authentication.SUPPLIER.route) {
-            SupplierSignInScreen(navController)
+            SupplierSignInScreen(
+                navController = navController,
+            )
         }
 
         composable(Authentication.EMPLOYEE.route) {
@@ -52,6 +50,9 @@ fun NavGraphBuilder.authNavGraph(
         }
         composable(Authentication.APPROVAL.route) {
             ApprovalScreen(navController)
+        }
+        composable(Authentication.SUPPLIER_APPROVAL.route) {
+            SupplierApprovalScreen(navController)
         }
     }
 }

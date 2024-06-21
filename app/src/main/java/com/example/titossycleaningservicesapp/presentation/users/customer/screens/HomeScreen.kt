@@ -160,9 +160,7 @@ fun HomeScreen(
                             )
                             DropdownMenuItem(
                                 text = { Text(text = "Logout") },
-                                onClick = {
-                                    onSignOut()
-                                }
+                                onClick = onSignOut
                             )
                         }
                     }

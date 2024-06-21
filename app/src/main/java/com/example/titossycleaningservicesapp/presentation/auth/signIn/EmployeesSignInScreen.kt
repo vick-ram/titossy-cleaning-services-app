@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.Roles
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
@@ -45,8 +46,8 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
+import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
 @Composable
@@ -72,28 +73,43 @@ fun EmployeesSignIn(navController: NavHostController) {
                     val role = signInViewModel.employeeRole()
                     when (role) {
                         Roles.MANAGER.name -> {
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Manager.route)
+                            navController.navigate(UserRoutes.Manager.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         Roles.FINANCE.name -> {
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Finance.route)
+                            navController.navigate(UserRoutes.Finance.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         Roles.SUPERVISOR.name -> {
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Supervisor.route)
+                            navController.navigate(UserRoutes.Supervisor.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         Roles.INVENTORY.name -> {
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Inventory.route)
+                            navController.navigate(UserRoutes.Inventory.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         Roles.CLEANER.name -> {
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Cleaner.route)
+                            navController.navigate(UserRoutes.Cleaner.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         else -> {}
@@ -196,6 +212,12 @@ fun EmployeesSignIn(navController: NavHostController) {
                 }
             }
         }
-        CustomIndeterminateProgressIndicator(isLoading = signInViewModel.isLoading)
+        //CustomIndeterminateProgressIndicator(isLoading = signInViewModel.isLoading)
+        CustomProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp),
+            isLoading = signInViewModel.isLoading
+        )
     }
 }

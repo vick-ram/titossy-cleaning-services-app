@@ -8,7 +8,6 @@ import java.util.UUID
 
 interface SupplierRepository {
     suspend fun createSupplier(
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -21,7 +20,6 @@ interface SupplierRepository {
     suspend fun signOutSupplier(): AuthEvent
     suspend fun updateSupplier(
         id: UUID,
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,

@@ -16,6 +16,7 @@ sealed class Authentication(val route: String) {
     data object SUPPLIER_SIGNUP : Authentication("supplier_sign_up")
     data object SUPPLIER : Authentication("supplier_sign_in")
     data object APPROVAL: Authentication("waiting_approval")
+    data object SUPPLIER_APPROVAL: Authentication("supplier_approval")
 }
 
 /*Navigation user routes*/

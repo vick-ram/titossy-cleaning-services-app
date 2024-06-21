@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.LoadingScreen
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
@@ -50,25 +51,26 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
+import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 import kotlinx.coroutines.launch
 
 @Composable
 fun CustomerSignInScreen(
-    toSignUpScreen: (() -> Unit)? = null,
-    navController: NavHostController,
-    signInViewModel: CustomerAuthViewModel
+    toSignUpScreen: () -> Unit,
+    navController: NavHostController
 ) {
+    val customerViewModel: CustomerAuthViewModel = hiltViewModel()
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val passwordState by signInViewModel.passwordState.collectAsState()
-    val passwordErrorMessage by signInViewModel.passwordErrorMessage.collectAsState()
+    val passwordState by customerViewModel.passwordState.collectAsState()
+    val passwordErrorMessage by customerViewModel.passwordErrorMessage.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
 
-    LaunchedEffect(signInViewModel, context) {
-        signInViewModel.authEvent.collect { result ->
+    LaunchedEffect(customerViewModel, context) {
+        customerViewModel.authEvent.collect { result ->
             when (result) {
                 is AuthEvent.Success -> {
                     val customerStatus = result.approvalStatus
@@ -79,8 +81,11 @@ fun CustomerSignInScreen(
 
                         ApprovalStatus.APPROVED -> {
                             snackBarHostState.showSnackbar(result.message.toString())
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Customer.route)
+                            navController.navigate(UserRoutes.Customer.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
 
                         ApprovalStatus.REJECTED -> {
@@ -93,7 +98,7 @@ fun CustomerSignInScreen(
 
                 is AuthEvent.Error -> {}
 
-                AuthEvent.Loading -> signInViewModel.isLoading
+                AuthEvent.Loading -> customerViewModel.isLoading
             }
         }
     }
@@ -128,9 +133,9 @@ fun CustomerSignInScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     CustomTextField(
-                        value = signInViewModel.email,
+                        value = customerViewModel.email,
                         onValueChange = {
-                            signInViewModel.email = it
+                            customerViewModel.email = it
                         },
                         modifier = Modifier,
                         label = "username or email",
@@ -142,10 +147,10 @@ fun CustomerSignInScreen(
                     )
 
                     CustomTextField(
-                        value = signInViewModel.password,
+                        value = customerViewModel.password,
                         onValueChange = {
-                            signInViewModel.password = it
-                            signInViewModel.onPasswordChange(it)
+                            customerViewModel.password = it
+                            customerViewModel.onPasswordChange(it)
                         },
                         modifier = Modifier,
                         label = "Password",
@@ -173,7 +178,7 @@ fun CustomerSignInScreen(
                         text = "Sign In",
                         onClick = {
                             scope.launch {
-                                signInViewModel.signIn()
+                                customerViewModel.signIn()
                             }
                         },
                         modifier = Modifier.padding(16.dp),
@@ -185,7 +190,7 @@ fun CustomerSignInScreen(
 
             CustomButton(
                 text = "Sign Up",
-                onClick = toSignUpScreen!!,
+                onClick = toSignUpScreen,
                 modifier = Modifier.padding(horizontal = 32.dp),
                 enabled = true
             )
@@ -195,7 +200,7 @@ fun CustomerSignInScreen(
                 navigateToEmployee = { navController.navigate(Authentication.EMPLOYEE.route) }
             )
         }
-        LoadingScreen(isLoading = signInViewModel.isLoading)
+        LoadingScreen(isLoading = customerViewModel.isLoading)
         SnackbarHost(
             hostState = snackBarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)

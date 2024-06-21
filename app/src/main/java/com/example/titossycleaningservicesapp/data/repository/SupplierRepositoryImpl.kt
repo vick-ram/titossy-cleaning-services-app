@@ -1,14 +1,11 @@
 package com.example.titossycleaningservicesapp.data.repository
 
-import android.util.Log
 import com.example.titossycleaningservicesapp.core.FileUtils
 import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.data.local.database.dao.SupplierDao
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
-import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
-import com.example.titossycleaningservicesapp.domain.models.requests.customer.CustomerSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
@@ -27,7 +24,6 @@ class SupplierRepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : SupplierRepository {
     override suspend fun createSupplier(
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -37,7 +33,6 @@ class SupplierRepositoryImpl @Inject constructor(
     ): AuthEvent {
         return try {
             val supplier = SupplierSignUpRequest(
-                username = username,
                 firstName = firstName,
                 lastName = lastName,
                 phone = phone,
@@ -102,7 +97,10 @@ class SupplierRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signInSupplier(email: String, password: String): AuthEvent {
+    override suspend fun signInSupplier(
+        email: String,
+        password: String
+    ): AuthEvent {
         return try {
             val supplier = SupplierSignInRequest(
                 email, password
@@ -167,7 +165,6 @@ class SupplierRepositoryImpl @Inject constructor(
 
     override suspend fun updateSupplier(
         id: UUID,
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -177,7 +174,6 @@ class SupplierRepositoryImpl @Inject constructor(
     ): AuthEvent {
         return try {
             val supplier = SupplierSignUpRequest(
-                username = username,
                 firstName = firstName,
                 lastName = lastName,
                 phone = phone,

@@ -17,19 +17,27 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,11 +45,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,20 +68,24 @@ fun PurchaseOrderScreen(
     quantity: String
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    var showDateDialog by rememberSaveable { mutableStateOf(false) }
     var selected by rememberSaveable { mutableStateOf("") }
-    var searchQuery by rememberSaveable { mutableStateOf("") }
     val productViewModel: ProductViewModel = hiltViewModel()
-    val productUiState by productViewModel.productDataUiState.collectAsState()
+    val productUiState by productViewModel.productDataUiState.collectAsStateWithLifecycle()
     val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
-    val supplierState by supplierViewModel.supplierUiState.collectAsState()
+    val supplierState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     val product = productUiState.products?.find { it.productId == productId }
 
-    val filteredSuppliers = supplierState.suppliers?.filter { supplier ->
-        supplier.fullName.contains(searchQuery, ignoreCase = true)
-    }
+    val datePickerState = rememberDatePickerState()
+    val confirmEnabled = remember { derivedStateOf { datePickerState.selectedDateMillis != null}}
+    var selectedDate by rememberSaveable { mutableStateOf(LocalDateTime.now()) }
+
 
     LaunchedEffect(supplierState) {
         supplierViewModel.fetchSuppliers()
+    }
+    LaunchedEffect(productUiState) {
+        productViewModel.fetchProductCart()
     }
 
     Column(
@@ -104,12 +123,12 @@ fun PurchaseOrderScreen(
                     )
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clip(MaterialTheme.shapes.small)
-                    .clickable { },
+                    .clickable { showDateDialog = true },
             ) {
                 Text(
                     modifier = modifier
                         .padding(4.dp),
-                    text = "24/10/2024",
+                    text = selectedDate.formatToNairobiTime(),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -120,11 +139,11 @@ fun PurchaseOrderScreen(
 
         CartTableHeader()
         Spacer(modifier = Modifier.height(8.dp))
-        product?.let {
+        /*product?.let {
             PurchaseOrderTableData(
                 product = it, quantity = quantity
             )
-        }
+        }*/
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
             modifier = modifier
@@ -147,7 +166,7 @@ fun PurchaseOrderScreen(
             Text(
                 modifier = modifier
                     .padding(end = 16.dp),
-                text = "Supplier",
+                text = "Select Supplier",
                 style = MaterialTheme.typography.bodyLarge.copy()
             )
             ExposedDropdownMenuBox(
@@ -158,24 +177,24 @@ fun PurchaseOrderScreen(
             ) {
 
                 TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Select supplier") },
+                    value = selected,
+                    onValueChange = { selected = it },
+                    label = { },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
-                        .zIndex(1f),
+                        .padding(16.dp)
+                        .menuAnchor(),
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                     },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                    readOnly = true
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = modifier.zIndex(2f)
+                    onDismissRequest = { expanded = false }
                 ) {
-                    filteredSuppliers?.let { suppliers ->
+                    supplierState.suppliers?.let { suppliers ->
                         suppliers.forEach { supplier ->
                             DropdownMenuItem(
                                 text = { Text(text = supplier.fullName) },
@@ -207,4 +226,46 @@ fun PurchaseOrderScreen(
             Text(text = "Create Purchase Order")
         }
     }
+
+    if (showDateDialog) {
+        DatePickerDialog(
+            onDismissRequest = { showDateDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        selectedDate = datePickerState.selectedDateMillis?.toLocalDateTimeInNairobi()
+                        showDateDialog = false
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text(text = "Ok")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDateDialog = false }
+                ) {
+                    Text(text = "Cancel")
+                }
+            },
+
+        ) {
+            DatePicker(
+                state = datePickerState
+            )
+        }
+    }
+}
+
+
+fun Long.toLocalDateTimeInNairobi(): LocalDateTime {
+    val zoneId = ZoneId.of("Africa/Nairobi")
+    return LocalDateTime.ofInstant(Instant.ofEpochMilli(this), zoneId)
+}
+
+fun LocalDateTime.formatToNairobiTime(): String {
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a", Locale.ENGLISH)
+    val zoneId = ZoneId.of("Africa/Nairobi")
+    val zonedDateTime = this.atZone(zoneId)
+    return formatter.format(zonedDateTime)
 }

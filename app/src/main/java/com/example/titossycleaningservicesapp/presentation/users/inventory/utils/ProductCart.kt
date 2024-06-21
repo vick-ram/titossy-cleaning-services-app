@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
+import com.example.titossycleaningservicesapp.domain.models.ui_models.ProductInCart
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -74,7 +75,7 @@ fun CartTableHeader(modifier: Modifier = Modifier) {
 @Composable
 fun PurchaseOrderTableData(
     modifier: Modifier = Modifier,
-    product: Product,
+    product: ProductInCart,
     quantity: String
 ) {
     Row {

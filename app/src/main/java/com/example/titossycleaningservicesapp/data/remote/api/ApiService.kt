@@ -256,12 +256,16 @@ interface ApiService {
     suspend fun getProducts() : ApiResponse<List<ProductDto>>
 
     @POST(PRODUCT_CART)
-    suspend fun addProductToCart(addProductToCart: AddProductToCart) : ApiResponse<String>
+    suspend fun addProductToCart(
+        @Body addProductToCart: AddProductToCart
+    ) : ApiResponse<String>
 
     @GET(PRODUCT_CART)
     suspend fun getProductCart(): ApiResponse<List<ProductCartDto>>
 
     @DELETE(PRODUCT_CART_ID)
-    suspend fun removeProductFromCart(@Path("productId") productId: UUID) : ApiResponse<String>
+    suspend fun removeProductFromCart(
+        @Path("productId") productId: UUID
+    ) : ApiResponse<String>
 
 }

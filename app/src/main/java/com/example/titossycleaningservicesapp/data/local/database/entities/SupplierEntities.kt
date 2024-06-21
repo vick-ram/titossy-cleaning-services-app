@@ -20,8 +20,7 @@ data class SupplierEntity(
     @ColumnInfo("created_at") val createdAt: LocalDateTime,
     @ColumnInfo("updated_at") val updatedAt: LocalDateTime,
 ) {
-    fun toSupplier(): Supplier {
-        return Supplier(
+    fun toSupplier() = Supplier(
             id = id,
             fullName = fullName,
             phone = phone,
@@ -32,5 +31,5 @@ data class SupplierEntity(
             createdAt = createdAt,
             updatedAt = updatedAt
         )
-    }
+
 }

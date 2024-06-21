@@ -18,9 +18,11 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
@@ -55,41 +59,58 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomText
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.CustomIndeterminateProgressIndicator
+import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
+import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
+import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
 @Composable
 fun SupplierSignInScreen(
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
+    val supplierUiState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val snackBarHostState = remember{ SnackbarHostState()}
+    val snackBarHostState = remember { SnackbarHostState() }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(supplierUiState, supplierViewModel) {
+        supplierViewModel.fetchSuppliers()
+    }
 
     LaunchedEffect(supplierViewModel, context) {
         supplierViewModel.resultChannel.collect { result ->
             when (result) {
-                is AuthEvent.Error -> {}
+                is AuthEvent.Error -> {
+                    supplierViewModel.clearToken()
+                }
+
                 is AuthEvent.Loading -> supplierViewModel.isLoading
                 is AuthEvent.Success -> {
-                    when(result.approvalStatus) {
+                    when (result.approvalStatus) {
                         ApprovalStatus.PENDING -> {
-                            /*snackBarHostState.showSnackbar("Your account is under review")
-                            navController.navigate(Authentication.APPROVAL.route)
-                            supplierViewModel.clearToken()*/
+                            navController.navigate(Authentication.SUPPLIER_APPROVAL.route)
                         }
+
                         ApprovalStatus.APPROVED -> {
-                            /*snackBarHostState.showSnackbar(result.message.toString())
-                            navController.popBackStack()
-                            navController.navigate(UserRoutes.Supplier.route)*/
+                            snackBarHostState.showSnackbar(result.message.toString())
+                            navController.navigate(UserRoutes.Supplier.route) {
+                                popUpTo(RootNavRoutes.AUTH.route) {
+                                    inclusive = true
+                                }
+                            }
                         }
+
                         ApprovalStatus.REJECTED -> {}
-                        null -> {}
+                        null -> {
+                            supplierViewModel.clearToken()
+                        }
                     }
                 }
             }
         }
     }
-
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -103,17 +124,17 @@ fun SupplierSignInScreen(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.nav_back),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                NavigationIcon(
+                    icon = Icons.Rounded.ChevronLeft,
+                    onClick = { navController.navigateUp() })
+
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "supplier",
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 )
             }
 
@@ -139,9 +160,9 @@ fun SupplierSignInScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     CustomTextField(
-                        value = supplierViewModel.email,
-                        onValueChange = { supplierViewModel.onEmailChange(it) },
-                        modifier = Modifier,
+                        value = email,
+                        onValueChange = { email = it },
+                        modifier = Modifier.fillMaxWidth(),
                         label = "email",
                         leadingIcon = Icons.Filled.Person,
                         keyBoardOptions = KeyboardOptions(
@@ -151,9 +172,9 @@ fun SupplierSignInScreen(
                     )
 
                     CustomTextField(
-                        value = supplierViewModel.password,
-                        onValueChange = { supplierViewModel.onPasswordChange(it) },
-                        modifier = Modifier,
+                        value = password,
+                        onValueChange = { password = it },
+                        modifier = Modifier.fillMaxWidth(),
                         label = "Password",
                         leadingIcon = Icons.Filled.Lock,
                         keyBoardOptions = KeyboardOptions(
@@ -176,7 +197,7 @@ fun SupplierSignInScreen(
                     CustomButton(
                         text = "Sign In",
                         onClick = {
-                            supplierViewModel.signIn()
+                            supplierViewModel.signIn(email, password)
                         },
                         modifier = Modifier.padding(16.dp),
                         enabled = true
@@ -215,5 +236,9 @@ fun SupplierSignInScreen(
             }
         }
         CustomIndeterminateProgressIndicator(isLoading = supplierViewModel.isLoading)
+        SnackbarHost(
+            hostState = snackBarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }

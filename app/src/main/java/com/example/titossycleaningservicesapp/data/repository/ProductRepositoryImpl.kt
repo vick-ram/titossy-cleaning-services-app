@@ -85,7 +85,10 @@ class ProductRepositoryImpl @Inject constructor(
        return flow {
            emit(Resource.Loading)
            val response = apiService.addProductToCart(
-               AddProductToCart(productId = UUID.fromString(productId), quantity)
+               AddProductToCart(
+                   productId = UUID.fromString(productId),
+                   quantity = quantity
+               )
            )
            when(response.status) {
                "success" -> {
