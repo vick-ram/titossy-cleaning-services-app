@@ -10,12 +10,20 @@ import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.ContactScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.ProfileScreen
+import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.PurchaseOrderDetailsScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.util.NavRoutes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValues, pagerState: PagerState) {
-    NavHost(navController = navController, startDestination = NavRoutes.Home.route) {
+fun NavigationGraph(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    pagerState: PagerState
+) {
+    NavHost(
+        navController = navController,
+        startDestination = NavRoutes.Home.route
+    ) {
         composable(NavRoutes.Home.route) {
             HomeScreen(navController, paddingValues, pagerState)
         }
@@ -24,6 +32,14 @@ fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValu
         }
         composable(NavRoutes.Profile.route) {
             ProfileScreen(navController, paddingValues, pagerState)
+        }
+        composable("purchaseOrderDetails/{purchaseOrderId}") { backStackEntry ->
+            val purchaseOrderId = backStackEntry.arguments?.getString("purchaseOrderId").toString()
+            PurchaseOrderDetailsScreen(
+                purchaseOrderId = purchaseOrderId,
+                paddingValues = paddingValues,
+                navController = navController
+            )
         }
     }
 }

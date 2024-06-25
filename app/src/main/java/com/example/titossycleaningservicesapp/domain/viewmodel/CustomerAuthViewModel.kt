@@ -69,6 +69,8 @@ class CustomerAuthViewModel @Inject constructor(
     private val _customerUiState = MutableStateFlow(CustomerState(isLoading = true))
     val customerUiState: StateFlow<CustomerState> = _customerUiState
 
+
+
     init {
         getCustomers()
     }
@@ -206,6 +208,7 @@ class CustomerAuthViewModel @Inject constructor(
                 _customerUiState.value = state
             }
     }
+
 
     fun onPasswordChange(newPassword: String) {
         viewModelScope.launch {

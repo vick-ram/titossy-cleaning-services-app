@@ -2,12 +2,13 @@ package com.example.titossycleaningservicesapp.domain.models.requests.po
 
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
 import com.example.titossycleaningservicesapp.domain.models.ui_models.ProductCart
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class PurchaseOrderRequest(
     val supplierId: String,
-    val orderDate: String,
-    val expectedDate: String,
+    val expectedDate: LocalDate,
     val products: MutableList<PurchaseOrderItemRequest>? = null
 )
 

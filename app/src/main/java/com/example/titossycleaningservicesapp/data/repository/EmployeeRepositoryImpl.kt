@@ -12,10 +12,12 @@ import com.example.titossycleaningservicesapp.domain.models.requests.employee.Em
 import com.example.titossycleaningservicesapp.domain.models.requests.employee.EmployeeSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Employee
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.util.UUID
 import javax.inject.Inject
 
@@ -145,10 +147,11 @@ class EmployeeRepositoryImpl @Inject constructor(
                     }
                 }
             } else {
-                val e = employeeFromDb.map { it.toEmployee() }
-                emit(Resource.Success(e))
+                val employees = employeeFromDb.map { it.toEmployee() }
+                emit(Resource.Success(employees))
             }
-        }.catch { exceptions ->
+        }.flowOn(Dispatchers.IO)
+            .catch { exceptions ->
             emit(Resource.Error(exceptions.message.toString()))
         }
     }

@@ -41,7 +41,9 @@ class ProductRepositoryImpl @Inject constructor(
     override fun deleteProductFromCart(productId: String): Flow<Resource<String>> {
         return flow {
             emit(Resource.Loading)
-            val response = apiService.removeProductFromCart(UUID.fromString(productId))
+            val response = apiService.removeProductFromCart(
+                productId = UUID.fromString(productId)
+            )
             when(response.status){
                 "success" -> {
                     val message = response.data
@@ -81,7 +83,10 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun addProductToPurchase(productId: String, quantity: Int): Flow<Resource<String>> {
+    override fun addProductToPurchase(
+        productId: String,
+        quantity: Int
+    ): Flow<Resource<String>> {
        return flow {
            emit(Resource.Loading)
            val response = apiService.addProductToCart(

@@ -17,7 +17,9 @@
     <color name="gray_300">#E0E0E0</color>
     <color name="pending">#FFA500</color>
     <color name="approved">#00CC00</color>
+    <color name="in_progress">#0ADCDC</color>
     <color name="completed">#0099CC</color>
     <color name="all_bookings">#999999</color>
-    <color name="dark_green">#013220</color>
+    <color name="cancelled">#C3190C</color>
+    <color name="dark_green">#3bbc4d</color>
 </resources>

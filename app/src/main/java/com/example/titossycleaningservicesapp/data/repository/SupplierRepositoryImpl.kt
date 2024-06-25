@@ -10,11 +10,13 @@ import com.example.titossycleaningservicesapp.domain.models.requests.supplier.Su
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.singleOrNull
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -214,8 +216,10 @@ class SupplierRepositoryImpl @Inject constructor(
                 val response = apiService.getSuppliers()
                 when(response.status) {
                     "success" -> {
-                        val entitySuppliers = response.data?.map { it.toSupplierEntity() }
-                        entitySuppliers?.let { supplierDao.insertAllSuppliers(it) }
+                        withContext(Dispatchers.IO) {
+                            val entitySuppliers = response.data?.map { it.toSupplierEntity() }
+                            entitySuppliers?.let { supplierDao.insertAllSuppliers(it) }
+                        }
                     }
                     "error" -> {
                         if (response.error != null) {

@@ -8,6 +8,8 @@ import com.example.titossycleaningservicesapp.domain.repository.CustomerPaymentR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,34 +24,25 @@ class CustomerPaymentViewModel @Inject constructor(
     fun makePayment(bookingId: String, phoneNumber: String, transactionCode: String) =
         viewModelScope.launch {
             customerPaymentRepository.makePayment(bookingId, phoneNumber, transactionCode)
-                .collect { resource ->
+                .map { resource ->
                     when (resource) {
-                        is Resource.Error -> {
-                            _customerPaymentUiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    errorMessage = resource.message.toString()
-                                )
-                            }
-                        }
+                        is Resource.Error -> CustomerPaymentUIState(
+                            isLoading = false,
+                            errorMessage = resource.message.toString()
+                        )
 
-                        is Resource.Loading -> {
-                            _customerPaymentUiState.update {
-                                it.copy(
-                                    isLoading = true
-                                )
-                            }
-                        }
+                        is Resource.Loading -> CustomerPaymentUIState(
+                            isLoading = true
+                        )
 
-                        is Resource.Success -> {
-                            _customerPaymentUiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    customerPayment = resource.data
-                                )
-                            }
-                        }
+                        is Resource.Success -> CustomerPaymentUIState(
+                            isLoading = false,
+                            successMessage = resource.data.toString()
+                        )
                     }
+                }
+                .collect { state ->
+                    _customerPaymentUiState.update { state }
                 }
         }
 
@@ -101,7 +94,7 @@ class CustomerPaymentViewModel @Inject constructor(
         customerPaymentRepository.updatePaymentStatus(
             paymentId, status
         )
-            .collect { resource ->
+            .collectLatest { resource ->
                 when (resource) {
                     is Resource.Error -> {
                         _customerPaymentUiState.update {

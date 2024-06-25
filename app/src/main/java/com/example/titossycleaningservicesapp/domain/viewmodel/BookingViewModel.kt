@@ -11,9 +11,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,39 +31,37 @@ class BookingViewModel @Inject constructor(
 
     fun fetchBookings() = viewModelScope.launch {
         bookingRepository.getBookings()
-            .collectLatest { resource ->
-            when (resource) {
-                is Resource.Error -> {
-                    _bookingUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = resource.message.toString()
-                        )
-                    }
-                }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000L),
+                initialValue = Resource.Loading
+            )
+            .map { resource ->
+                when (resource) {
+                    is Resource.Error -> BookingUiState(
+                        isLoading = false,
+                        errorMessage = resource.message.toString()
+                    )
 
-                is Resource.Loading -> {
-                    _bookingUiState.update {
-                        it.copy(isLoading = true)
-                    }
-                }
+                    is Resource.Loading -> BookingUiState(
+                        isLoading = true
+                    )
 
-                is Resource.Success -> {
-                    _bookingUiState.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            bookings = state.bookings
-                        )
-                    }
+                    is Resource.Success -> BookingUiState(
+                        isLoading = false,
+                        bookings = resource.data
+                    )
                 }
             }
-        }
+            .collect { state ->
+                _bookingUiState.value = state
+            }
     }
 
     fun searchBookings(query: String) {
         job.cancel()
         job = viewModelScope.launch {
-            delay(300)
+            delay(300L)
             bookingRepository.searchBooking(query)
                 .map { resource ->
                     when (resource) {
@@ -130,6 +130,7 @@ class BookingViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Success -> {
                         _bookingUiState.update {
                             it.copy(
@@ -142,7 +143,10 @@ class BookingViewModel @Inject constructor(
             }
     }
 
-    fun updateBooking(bookingId: String, bookingRequest: BookingRequest) = viewModelScope.launch {
+    fun updateBooking(
+        bookingId: String,
+        bookingRequest: BookingRequest
+    ) = viewModelScope.launch {
         bookingRepository.updateBooking(
             bookingId = bookingId,
             bookingDate = bookingRequest.bookingDate,

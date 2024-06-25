@@ -39,10 +39,15 @@ object ApiConstants {
     const val PAYMENT = "api/payment"
     const val CUSTOMER_PAYMENT = "$PAYMENT/customer"
     const val CUSTOMER_PAYMENT_ID = "$PAYMENT/customer/{id}"
+    const val SUPPLIER_PAYMENT = "$PAYMENT/supplier"
+    const val SUPPLIER_PAYMENT_ID = "$PAYMENT/supplier/{id}"
 
     const val PRODUCT = "api/product"
     const val PRODUCT_ID = "$PRODUCT/{id}"
 
     const val PRODUCT_CART = "$PRODUCT/cart"
     const val PRODUCT_CART_ID = "$PRODUCT/cart/productId"
+
+    const val ORDER = "api/order"
+    const val ORDER_ID = "$ORDER/{id}"
 }

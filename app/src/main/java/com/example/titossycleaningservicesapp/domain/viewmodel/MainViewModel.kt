@@ -62,6 +62,13 @@ class MainViewModel @Inject constructor(
         return Pair(username ?: "", email ?: "")
     }
 
+    suspend fun readUserId() : String? {
+        val token = dataStoreKeys.getTokenFromDataStore()
+        val decodeToken = token?.let { decodeToken(it) }
+        val userId = decodeToken?.get("sub") as? String
+        return userId
+    }
+
     fun signOut() = viewModelScope.launch {
         dataStoreKeys.clearToken()
     }

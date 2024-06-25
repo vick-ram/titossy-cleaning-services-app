@@ -1,8 +1,8 @@
 package com.example.titossycleaningservicesapp.presentation.users.supplier.screens
 
+import android.widget.Toast
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,37 +13,38 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.domain.models.OrderStatus
+import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
+import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -53,202 +54,223 @@ fun HomeScreen(
     paddingValues: PaddingValues,
     pagerState: PagerState
 ) {
+    val context = LocalContext.current
+    val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
+    val purchaseOrderUiState by purchaseOrderViewModel.purchaseOrderDataUiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(purchaseOrderViewModel) {
+        purchaseOrderViewModel.fetchPurchaseOrders()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(paddingValues)
+            .padding(horizontal = 16.dp)
     ) {
 
-        val tabTitles = listOf("Pending", "Completed")
+        val tabTitles = listOf("ALL", "DELIVERED")
         val scope = rememberCoroutineScope()
 
         TabRow(selectedTabIndex = pagerState.currentPage) {
             tabTitles.forEachIndexed { index, title ->
                 Tab(
-                    text = { Text(title) },
+                    text = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = if (pagerState.currentPage == index) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    },
                     selected = pagerState.currentPage == index,
                     onClick = {
-                        scope.launch { pagerState.animateScrollToPage(index) }
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                page = index,
+                                animationSpec = tween(2000)
+                            )
+                        }
                     }
                 )
             }
         }
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
+        when {
+            purchaseOrderUiState.isLoading -> Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CustomProgressIndicator(isLoading = true)
+            }
+
+            purchaseOrderUiState.purchaseOrders != null -> {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) { page ->
+                    when (page) {
+                        0 -> AllPurchaseOrdersContent(
+                            purchaseOrders = purchaseOrderUiState.purchaseOrders!!,
+                            onPurchaseOrderItemClick = {
+                                navController.navigate("purchaseOrderDetails" + "/" + it.purchaseOrderId)
+                            },
+                            onStatusClick = {
+                                purchaseOrderViewModel.updateOrderStatus(
+                                    id = it.purchaseOrderId,
+                                    status = OrderStatus.PROCESSING.name
+                                )
+                            }
+                        )
+
+                        1 -> CompletedOrdersContent(
+                            purchaseOrders = purchaseOrderUiState.purchaseOrders!!.filter {
+                                it.orderStatus == OrderStatus.DELIVERED
+                            },
+                            onPurchaseOrderItemClick = {},
+                            onStatusClick = {}
+                        )
+                    }
+                }
+            }
+
+            purchaseOrderUiState.errorMessage.isNotEmpty() -> {
+                Toast.makeText(
+                    context,
+                    purchaseOrderUiState.errorMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+        }
+    }
+}
+
+@Composable
+fun CompletedOrdersContent(
+    modifier: Modifier = Modifier,
+    purchaseOrders: List<PurchaseOrder>,
+    onPurchaseOrderItemClick: (PurchaseOrder) -> Unit,
+    onStatusClick: (PurchaseOrder) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        LazyColumn(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(paddingValues),
-            contentPadding = paddingValues
-        ) { page ->
-            when (page) {
-                0 -> PendingOrdersContent()
-                1 -> CompletedOrdersContent()
+                .padding(horizontal = 16.dp),
+        ) {
+            items(purchaseOrders) { purchaseOrder ->
+                PurchaseOrderCard(
+                    purchaseOrder = purchaseOrder,
+                    onDetailsClick = onPurchaseOrderItemClick,
+                    onStatusClick = onStatusClick
+                )
             }
         }
     }
 }
 
 @Composable
-fun CompletedOrdersContent() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "COMPLETED ORDERS")
+fun AllPurchaseOrdersContent(
+    modifier: Modifier = Modifier,
+    purchaseOrders: List<PurchaseOrder>,
+    onPurchaseOrderItemClick: (PurchaseOrder) -> Unit,
+    onStatusClick: (PurchaseOrder) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        LazyColumn {
+            items(purchaseOrders) { purchaseOrder ->
+                PurchaseOrderCard(
+                    purchaseOrder = purchaseOrder,
+                    onDetailsClick = onPurchaseOrderItemClick,
+                    onStatusClick = onStatusClick
+                )
+            }
+        }
     }
 }
 
-@Composable
-fun PendingOrdersContent() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "PENDING ORDERS")
-    }
-}
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun OrdersCard() {
-    ElevatedCard(
+fun PurchaseOrderCard(
+    purchaseOrder: PurchaseOrder,
+    onDetailsClick: (PurchaseOrder) -> Unit,
+    onStatusClick: (PurchaseOrder) -> Unit
+) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
-            .padding(16.dp),
-        onClick = { /*TODO*/ },
-        elevation = CardDefaults.elevatedCardElevation(
-            pressedElevation = 2.dp,
-            focusedElevation = 4.dp,
-            hoveredElevation = 5.dp
-        )
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                modifier = Modifier
-                    .size(width = 150.dp, height = 200.dp)
-                    .padding(end = 8.dp),
-                painter = painterResource(id = R.drawable.cleaning_6837687_640),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    modifier = Modifier,
-                    text = "Detergent",
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                        lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
-                        textAlign = TextAlign.Center
-                    )
+                    text = "Purchase Order #${purchaseOrder.purchaseOrderId}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    modifier = Modifier,
-                    text = "Used fo washing and bla bla floor",
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight,
-                        textAlign = TextAlign.Center
-                    )
+                    text = "Supplier: ${purchaseOrder.supplier}",
+                    style = MaterialTheme.typography.bodyLarge
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "In Stock: 20",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.W300,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
-
-    ProductInventoryCard(
-        imageUrl = R.drawable.cleaning1,
-        productName = "Product Name",
-        productSKU = "SKU12345",
-        quantityInStock = 10,
-        onInfoClick = {}
-    )
-}
-
-@Composable
-fun ProductInventoryCard(
-    imageUrl: Int,
-    productName: String,
-    productSKU: String,
-    quantityInStock: Int,
-    onInfoClick: () -> Unit
-) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = imageUrl),
-                contentDescription = "Product Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = productName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "SKU: $productSKU",
-                fontSize = 16.sp
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Available: $quantityInStock",
-                    fontSize = 18.sp,
-                    color = if (quantityInStock == 0) Color.Red else Color.Green
-                )
-
-                Button(
-                    modifier = Modifier.padding(end = 8.dp),
-                    onClick = { /*TODO*/ },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF007bff),
-                        contentColor = Color.White
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "More info")
+                    Text(
+                        text = "Status: ",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    TextButton(
+                        onClick = { onStatusClick(purchaseOrder) }
+                    ) {
+                        Text(
+                            text = purchaseOrder.orderStatus.name,
+                            color = when (purchaseOrder.orderStatus) {
+                                OrderStatus.PENDING -> Color(0xFFFFEB3B)
+                                OrderStatus.PROCESSING -> Color(0xFF4CAF50)
+                                OrderStatus.SHIPPED -> Color(0xFF2196F3)
+                                OrderStatus.DELIVERED -> Color(0xFF4CAF50)
+                                OrderStatus.CANCELLED -> Color(0xFFF44336)
+                            },
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
                 }
             }
+            IconButton(
+                onClick = { onDetailsClick(purchaseOrder) }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Details",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
+
+
+
 

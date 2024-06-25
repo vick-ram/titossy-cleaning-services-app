@@ -17,9 +17,9 @@ import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 fun NavGraphBuilder.usersNavigation(
     signOut: () -> Unit,
     startDestination: String,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    onHomeClick: () -> Unit
 ) {
-
     navigation(
         route = RootNavRoutes.HOME.route,
         startDestination = startDestination
@@ -34,7 +34,7 @@ fun NavGraphBuilder.usersNavigation(
             FinanceNavigationDrawer(signOut)
         }
         composable(UserRoutes.Supervisor.route) {
-            SupervisorNavigationDrawer(signOut)
+            SupervisorNavigationDrawer(signOut, mainViewModel)
         }
         composable(UserRoutes.Cleaner.route) {
             CleanerNavigationDrawer(signOut)
@@ -43,7 +43,7 @@ fun NavGraphBuilder.usersNavigation(
             SupplierNavigationDrawer(signOut, mainViewModel)
         }
         composable(UserRoutes.Customer.route) {
-            CustomerBottomNavigation(signOut)
+            CustomerBottomNavigation(onSignOut = signOut, onHomeClick = onHomeClick)
         }
     }
 }

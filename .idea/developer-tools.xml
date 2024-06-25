@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="jwt-encoder-decoder">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="color-picker">
     <developerToolsConfigurations>
       <developerToolConfiguration developerToolId="text-filter" id="1a368d84-a38c-4bbd-a376-2266f1eac525" name="Workbench">
         <properties>
@@ -44,6 +44,11 @@
       <developerToolConfiguration developerToolId="sql-formatting" id="193021c9-6628-4a49-839f-97a092bcab98" name="Workbench">
         <properties>
           <property key="sourceText" type="INPUT" value="kotlin.String|select c.id, c.name, o.address, o.orderedAt from customers c left join orders o ON (o.customerId = c.id) order by o.orderedAt" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="color-picker" id="b4d24492-9760-4831-b722-38181216f431" name="Workbench">
+        <properties>
+          <property key="selectedColor" type="INPUT" value="com.intellij.ui.JBColor|-3991284" />
         </properties>
       </developerToolConfiguration>
     </developerToolsConfigurations>

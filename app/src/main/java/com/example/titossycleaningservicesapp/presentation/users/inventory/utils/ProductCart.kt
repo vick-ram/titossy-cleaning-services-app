@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
+import com.example.titossycleaningservicesapp.domain.models.ui_models.ProductCart
 import com.example.titossycleaningservicesapp.domain.models.ui_models.ProductInCart
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -27,7 +28,7 @@ fun CartTableHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -75,24 +76,32 @@ fun CartTableHeader(modifier: Modifier = Modifier) {
 @Composable
 fun PurchaseOrderTableData(
     modifier: Modifier = Modifier,
-    product: ProductInCart,
-    quantity: String
+    product: ProductCart
 ) {
-    Row {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
         Text(
             modifier = modifier
-                .weight(1f),
-            text = product.name
+                .weight(1f)
+                .padding(8.dp),
+            text = product.product.name
         )
         Text(
             modifier = modifier
-                .weight(1f),
-            text = product.stock.toString()
+                .weight(1f)
+                .padding(8.dp)
+                .align(Alignment.CenterVertically),
+            text = product.product.stock.toString()
         )
         Text(
             modifier = modifier
-                .weight(1f),
-            text = quantity
+                .weight(1f)
+                .padding(8.dp)
+                .align(Alignment.CenterVertically),
+            text = product.quantity.toString()
         )
     }
 }

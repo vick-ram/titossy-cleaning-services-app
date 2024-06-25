@@ -4,11 +4,14 @@ package com.example.titossycleaningservicesapp.presentation.users.customer.scree
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,7 +24,6 @@ import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +37,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,11 +50,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CartItem
 import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
@@ -67,48 +72,62 @@ fun ServiceDetailsScreen(
     serviceId: String,
     navController: NavHostController,
 ) {
-
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val viewModel: ServiceViewModel = hiltViewModel()
     val cartState by viewModel.cartUiState.collectAsState()
-    val cartDataState by viewModel.cartDataUiState.collectAsState()
-    val context = LocalContext.current
-    var isLoading by remember { mutableStateOf(false) }
+    val cartDataState by viewModel.cartDataUiState.collectAsStateWithLifecycle()
+    var isLoading by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val serviceUiState by viewModel.serviceState.collectAsState()
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val serviceUiState by viewModel.serviceState.collectAsStateWithLifecycle()
     val service = serviceUiState.services.find { it.id.toString() == serviceId }
-    val cartClearState by viewModel.cartClearState.collectAsState()
-    val serviceAddonUiState by viewModel.serviceAddonState.collectAsState()
+    val cartClearState by viewModel.cartClearState.collectAsStateWithLifecycle()
+    val serviceAddonUiState by viewModel.serviceAddonState.collectAsStateWithLifecycle()
 
 
-    LaunchedEffect(key1 = cartState) {
+    LaunchedEffect(key1 = viewModel) {
         when {
             cartState.loading -> isLoading = true
             cartState.message.isNotEmpty() -> {
                 isLoading = false
-                //Toast.makeText(context, cartState.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    cartState.message,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             cartState.error.isNotEmpty() -> {
                 isLoading = false
-                //Toast.makeText(context, cartState.error, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    cartState.error,
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
-    LaunchedEffect(key1 = cartClearState) {
+    LaunchedEffect(cartClearState, viewModel) {
         when {
             cartClearState.loading -> isLoading = true
             cartClearState.message.isNotEmpty() -> {
                 isLoading = false
-                //Toast.makeText(context, cartClearState.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    cartClearState.message,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             cartClearState.error.isNotEmpty() -> {
                 isLoading = false
-                //Toast.makeText(context, cartClearState.error, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    cartClearState.error,
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -179,8 +198,9 @@ fun ServiceDetailsScreen(
                 sheetMaxWidth = BottomSheetDefaults.SheetMaxWidth
             ) {
                 when {
-                    cartDataState.loading -> CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    cartDataState.loading -> CustomProgressIndicator(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        isLoading = true
                     )
 
                     cartDataState.cartItems.isNotEmpty() -> {
@@ -195,13 +215,13 @@ fun ServiceDetailsScreen(
                                 ServiceCardInCart(cartItem = cartItem) {
                                     when (cartItem) {
                                         is CartItem.ServiceAddonCartItem -> {
-                                            viewModel.removeServiceAddonFromCart(cartItem.id)
-                                            viewModel.fetchCartItems()
+                                            viewModel.removeServiceAddonFromCart(it.id)
+                                                .also { viewModel.fetchCartItems() }
                                         }
 
                                         is CartItem.ServiceCartItem -> {
-                                            viewModel.removeServiceFromCart(cartItem.id)
-                                            viewModel.fetchCartItems()
+                                            viewModel.removeServiceFromCart(it.id)
+                                                .also { viewModel.fetchCartItems() }
                                         }
                                     }
                                 }
@@ -210,7 +230,11 @@ fun ServiceDetailsScreen(
                     }
 
                     cartDataState.error.isNotEmpty() -> {
-                        //Toast.makeText(context, cartDataState.error, Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            cartDataState.error,
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
                 Button(
@@ -355,13 +379,25 @@ fun ServiceDetailsScreen(
                     }
 
                     serviceAddonUiState.isLoading -> {
-                        CircularProgressIndicator()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(1f)
+                                .padding(16.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
+                            content = { CustomProgressIndicator(isLoading = true)}
+                        )
                     }
 
                     serviceAddonUiState.error != null -> {
                         val errorMessage = serviceAddonUiState.error?.getContentIfNotHandled()
                         if (errorMessage != null) {
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                errorMessage,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
 
                     }
@@ -370,135 +406,3 @@ fun ServiceDetailsScreen(
         }
     }
 }
-
-/*private fun showDatePicker(onDateSelected: (String) -> Unit, context: Context) {
-    val calendar = Calendar.getInstance()
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _, year, monthOfYear, dayOfMonth ->
-            val selectedDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
-                .format(DateTimeFormatter.ISO_LOCAL_DATE)
-            onDateSelected(selectedDate)
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
-    datePickerDialog.show()
-}
-
-
-private fun showTimePicker(onTimeSelected: (String) -> Unit, context: Context) {
-    val calendar = Calendar.getInstance()
-    val timePickerDialog = TimePickerDialog(
-        context,
-        { _, hourOfDay, minuteOfHour ->
-            val selectedTime = LocalTime.of(hourOfDay, minuteOfHour)
-                .format(DateTimeFormatter.ISO_LOCAL_TIME)
-            onTimeSelected(selectedTime)
-        },
-        calendar.get(Calendar.HOUR_OF_DAY),
-        calendar.get(Calendar.MINUTE),
-        true
-    )
-    timePickerDialog.show()
-}
-
-enum class Frequency {
-    ONE_TIME, WEEKLY, BIWEEKLY, MONTHLY
-}
-
-@Composable
-fun CustomRadioButton(
-    modifier: Modifier = Modifier,
-    values: List<String>,
-    selected: String,
-    onSelected: (String) -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        values.chunked(2)
-            .forEach { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    row.forEach { value ->
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = value == selected,
-                                onClick = { onSelected(value) }
-                            )
-                            Text(text = value)
-                        }
-                    }
-                }
-            }
-    }
-}
-
-@Composable
-fun AdditionalInstructions(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(100.dp),
-        placeholder = {
-            Text(
-                text = "Additional instructions..",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    )
-}
-
-@Composable
-fun BookingAddressField(
-    modifier: Modifier = Modifier,
-    value: String, onValueChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        modifier = modifier
-            .fillMaxWidth(),
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = "Enter booking address",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.76f)
-            )
-        },
-        shape = MaterialTheme.shapes.small
-    )
-}
-
-@Composable
-fun BookingItemTitle(modifier: Modifier = Modifier, value: String) {
-    Text(
-        modifier = modifier,
-        text = value,
-        style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    )
-}*/
-
-
-
-
-

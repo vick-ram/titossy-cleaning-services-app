@@ -2,6 +2,7 @@ package com.example.titossycleaningservicesapp.presentation.auth.utils
 
 import android.graphics.Paint
 import android.graphics.PathMeasure
+import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -72,6 +73,7 @@ fun AuthCurve(title: String) {
                     color = onSurfaceColor.toArgb()
                     textAlign = Paint.Align.CENTER
                     textSize = 28.dp.toPx()
+                    typeface = Typeface.DEFAULT_BOLD
                 }
             )
 

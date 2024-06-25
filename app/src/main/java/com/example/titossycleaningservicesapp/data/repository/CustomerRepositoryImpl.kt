@@ -10,10 +10,12 @@ import com.example.titossycleaningservicesapp.domain.models.requests.customer.Cu
 import com.example.titossycleaningservicesapp.domain.models.requests.customer.CustomerSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Customer
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.util.UUID
 import javax.inject.Inject
 
@@ -203,7 +205,8 @@ class CustomerRepositoryImpl @Inject constructor(
                 entityCustomers?.map { it.toCustomer() }
             }
             customers?.let { emit(Resource.Success(it)) }
-        }.catch { e ->
+        }.flowOn(Dispatchers.IO)
+            .catch { e ->
             emit(Resource.Error(e.message.toString()))
         }
     }

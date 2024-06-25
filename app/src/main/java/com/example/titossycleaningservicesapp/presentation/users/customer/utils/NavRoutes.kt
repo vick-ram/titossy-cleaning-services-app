@@ -57,6 +57,5 @@ sealed class DetailsRoutes(val route: String) {
     data object Details : DetailsRoutes("serviceDetails")
     data object BookingDetails: DetailsRoutes("bookingDetails")
     data object CheckOut : DetailsRoutes("checkOut")
-    data object Payment : DetailsRoutes("payment")
     data object BookingSuccess: DetailsRoutes("bookingSuccess")
 }

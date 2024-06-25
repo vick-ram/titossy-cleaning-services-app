@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.presentation.users.supervisor.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,68 +9,101 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingStatus
+import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.util.BookingRoutes
 
 @Composable
-fun HomeScreen(navController: NavHostController, paddingValues: PaddingValues) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    paddingValues: PaddingValues
+) {
+
+    val bookingViewModel: BookingViewModel = hiltViewModel()
+    val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
+    val allBookings = bookingUiState.bookings?.size
+    val pendingBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.PENDING }?.size
+    val approvedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.APPROVED }?.size
+    val inProgressBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size
+    val completedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size
+
+    LaunchedEffect(key1 = bookingViewModel) {
+        bookingViewModel.fetchBookings()
+    }
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(paddingValues)
             .padding(16.dp)
     ) {
+        Spacer(modifier = modifier.height(16.dp))
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ElevatedCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(4.dp),
+                modifier = modifier
+                    .weight(1f),
                 onClick = { navController.navigate(BookingRoutes.AllBookings.route) },
                 elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 4.dp
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
                 ),
-                colors = CardDefaults.elevatedCardColors()
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Image(
-                    modifier = Modifier.height(154.dp),
-                    painter = painterResource(id = R.drawable.all_bookings),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.FilterList,
+                    contentDescription = "all bookings",
+                    tint = colorResource(id = R.color.all_bookings)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
-                    text = "22",
+                    text = "$allBookings",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
                     text = "ALL",
@@ -81,33 +113,36 @@ fun HomeScreen(navController: NavHostController, paddingValues: PaddingValues) {
                 )
             }
             ElevatedCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(4.dp),
+                modifier = modifier
+                    .weight(1f),
                 onClick = { navController.navigate(BookingRoutes.PendingBookings.route) },
                 elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 4.dp
-                )
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Image(
-                    modifier = Modifier.height(154.dp),
-                    painter = painterResource(id = R.drawable.pending_bookings),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.HourglassEmpty,
+                    contentDescription = "pending bookings",
+                    tint = colorResource(id = R.color.pending)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
-                    text = "5",
+                    text = "$pendingBookings",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
                     text = "PENDING",
@@ -117,42 +152,47 @@ fun HomeScreen(navController: NavHostController, paddingValues: PaddingValues) {
                 )
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = modifier.height(16.dp))
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ElevatedCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(4.dp),
-                onClick = { navController.navigate(BookingRoutes.ApprovedBookings.route) },
+                modifier = modifier
+                    .weight(1f),
+                onClick = {
+                    navController.navigate(BookingRoutes.InProgressBookings.route)
+                          },
                 elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 4.dp
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
                 ),
-                colors = CardDefaults.elevatedCardColors()
+                colors = CardDefaults.elevatedCardColors(),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Image(
-                    modifier = Modifier.height(154.dp),
-                    painter = painterResource(id = R.drawable.pending_bookings),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "approved bookings",
+                    tint = colorResource(id = R.color.approved)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
-                    text = "3",
+                    text = "$inProgressBookings",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
                     text = "APPROVED",
@@ -162,33 +202,38 @@ fun HomeScreen(navController: NavHostController, paddingValues: PaddingValues) {
                 )
             }
             ElevatedCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .shadow(4.dp),
-                onClick = {  navController.navigate(BookingRoutes.CompletedBookings.route)  },
+                modifier = modifier
+                    .weight(1f),
+                onClick = {
+                    navController.navigate(BookingRoutes.CompletedBookings.route)
+                },
                 elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 4.dp
-                )
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Image(
-                    modifier = Modifier.height(154.dp),
-                    painter = painterResource(id = R.drawable.completed_booking),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.CheckBox,
+                    contentDescription = "completed bookings",
+                    tint = colorResource(id = R.color.completed)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
-                    text = "10",
+                    text = "$completedBookings",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
                     text = "COMPLETED",
@@ -197,6 +242,47 @@ fun HomeScreen(navController: NavHostController, paddingValues: PaddingValues) {
                     textAlign = TextAlign.Center
                 )
             }
+        }
+        ElevatedCard(
+            modifier = modifier
+                .fillMaxWidth(.45f),
+            onClick = {
+                navController.navigate(BookingRoutes.CompletedBookings.route)
+            },
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 6.dp
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Icon(
+                modifier = modifier
+                    .padding(top = 4.dp)
+                    .size(60.dp)
+                    .align(Alignment.CenterHorizontally),
+                imageVector = Icons.Filled.CheckBox,
+                contentDescription = "approved bookings",
+                tint = colorResource(id = R.color.approved)
+            )
+            Spacer(modifier = modifier.height(8.dp))
+            Text(
+                modifier = modifier
+                    .padding(8.dp)
+                    .align(Alignment.CenterHorizontally),
+                text = "$approvedBookings",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Spacer(modifier = modifier.height(8.dp))
+            Text(
+                modifier = modifier
+                    .padding(8.dp)
+                    .align(Alignment.CenterHorizontally),
+                text = "APPROVED",
+                color = colorResource(id = R.color.approved),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.utils
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +60,8 @@ fun ServiceCardInCart(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val itemName = cartItem.name
             val itemPrice = cartItem.price
@@ -105,14 +106,14 @@ fun ServiceCardInCart(
             }
 
             Text(
-                modifier = Modifier.padding(end = 4.dp),
+                modifier = Modifier,
                 text = "$qty",
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold
                 )
             )
 
-            Button(
+            TextButton(
                 modifier = Modifier,
                 onClick = { onRemove(cartItem) }
             ) {

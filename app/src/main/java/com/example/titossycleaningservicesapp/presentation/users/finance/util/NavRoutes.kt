@@ -12,5 +12,4 @@ sealed class NavRoutes(val route: String, val title: String, val icon: ImageVect
     data object Home : NavRoutes("home", "Home", Icons.Default.Home)
     data object Contact : NavRoutes("contact", "Contact", Icons.AutoMirrored.Default.ContactSupport)
     data object Profile : NavRoutes("profile", "Profile", Icons.Default.AccountCircle)
-    data object LogOut : NavRoutes("logout", "LogOut", Icons.AutoMirrored.Default.Logout)
 }

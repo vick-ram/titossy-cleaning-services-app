@@ -6,6 +6,7 @@ import com.example.titossycleaningservicesapp.data.repository.CustomerPaymentRep
 import com.example.titossycleaningservicesapp.data.repository.CustomerRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.EmployeeRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ProductRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.PurchaseOrderRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ServiceRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.SupplierRepositoryImpl
 import com.example.titossycleaningservicesapp.domain.repository.BookingRepository
@@ -14,6 +15,7 @@ import com.example.titossycleaningservicesapp.domain.repository.CustomerPaymentR
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
 import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
+import com.example.titossycleaningservicesapp.domain.repository.PurchaseOrderRepository
 import com.example.titossycleaningservicesapp.domain.repository.ServiceRepository
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
 import dagger.Binds
@@ -26,24 +28,47 @@ import dagger.hilt.components.SingletonComponent
 abstract class RepositoryModule {
 
     @Binds
-    abstract fun bindSupplierRepository(repo: SupplierRepositoryImpl): SupplierRepository
+    abstract fun bindSupplierRepository(
+        repo: SupplierRepositoryImpl
+    ): SupplierRepository
 
     @Binds
-    abstract fun bindCustomerRepository(customerRepositoryImpl: CustomerRepositoryImpl): CustomerRepository
+    abstract fun bindCustomerRepository(
+        customerRepositoryImpl: CustomerRepositoryImpl
+    ): CustomerRepository
 
     @Binds
-    abstract fun bindEmployeeRepository(repo: EmployeeRepositoryImpl): EmployeeRepository
+    abstract fun bindEmployeeRepository(
+        repo: EmployeeRepositoryImpl
+    ): EmployeeRepository
 
     @Binds
-    abstract fun bindServiceRepository(serviceRepositoryImpl: ServiceRepositoryImpl): ServiceRepository
+    abstract fun bindServiceRepository(
+        serviceRepositoryImpl: ServiceRepositoryImpl
+    ): ServiceRepository
 
     @Binds
-    abstract fun bindCartRepository(cartRepositoryImpl: CartRepositoryImpl): CartRepository
-    @Binds
-    abstract fun bindBookingRepository(bookingRepositoryImpl: BookingRepositoryImpl): BookingRepository
-    @Binds
-    abstract fun bindCustomerPayment(customerPaymentRepositoryImpl: CustomerPaymentRepositoryImpl) : CustomerPaymentRepository
+    abstract fun bindCartRepository(
+        cartRepositoryImpl: CartRepositoryImpl
+    ): CartRepository
 
     @Binds
-    abstract fun bindProductCartRepository(productRepositoryImpl: ProductRepositoryImpl) : ProductRepository
+    abstract fun bindBookingRepository(
+        bookingRepositoryImpl: BookingRepositoryImpl
+    ): BookingRepository
+
+    @Binds
+    abstract fun bindCustomerPayment(
+        customerPaymentRepositoryImpl: CustomerPaymentRepositoryImpl
+    ): CustomerPaymentRepository
+
+    @Binds
+    abstract fun bindProductCartRepository(
+        productRepositoryImpl: ProductRepositoryImpl
+    ): ProductRepository
+
+    @Binds
+    abstract fun bindPurchaseOrder(
+        purchaseOrderRepositoryImpl: PurchaseOrderRepositoryImpl
+    ): PurchaseOrderRepository
 }

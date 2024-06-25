@@ -29,7 +29,10 @@ class CartRepositoryImpl @Inject constructor(
                     emit(Resource.Success(response.message))
                 }
                 "error" -> {
-                    throw Exception(response.error.toString())
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    }
                 }
             }
         }.catch { e ->
@@ -51,8 +54,10 @@ class CartRepositoryImpl @Inject constructor(
                     emit(Resource.Success(response.message))
                 }
                 "error" -> {
-                    val error = FileUtils.createErrorMessage(response.error)
-                    throw Exception(error)
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    }
                 }
             }
         }.catch { e ->
@@ -69,8 +74,10 @@ class CartRepositoryImpl @Inject constructor(
                     emit(Resource.Success(response.message))
                 }
                 "error" -> {
-                    val errorMessage = FileUtils.createErrorMessage(response.error)
-                    throw Exception(errorMessage)
+                    if (response.error != null) {
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
+                    }
                 }
             }
         }.catch { e ->
@@ -87,8 +94,10 @@ class CartRepositoryImpl @Inject constructor(
                     emit(Resource.Success(response.message))
                 }
                 "error" -> {
-                    val errorMessage = FileUtils.createErrorMessage(response.error)
-                    throw Exception(errorMessage)
+                    if (response.error != null){
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
+                    }
                 }
             }
         }.catch { e ->

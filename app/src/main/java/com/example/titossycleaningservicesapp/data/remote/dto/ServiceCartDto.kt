@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.data.remote.dto
 
-import android.util.Log
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CartItem
 import java.util.UUID
 
@@ -11,11 +10,10 @@ data class ServiceCartDto(
     val total: String
 ) {
     fun toCartItem(): CartItem {
-        Log.d("ServiceCartDto", "Converting to CartItem with quantity: ${service?.quantity} and ${addOns?.quantity}")
         return when {
             service != null -> {
                 CartItem.ServiceCartItem(
-                    id = UUID.fromString(customerId),
+                    id = UUID.fromString(service.id),
                     name = service.name,
                     price = service.price.toBigDecimal(),
                     thumbnail = service.thumbnail,
@@ -26,7 +24,7 @@ data class ServiceCartDto(
 
             addOns != null -> {
                 CartItem.ServiceAddonCartItem(
-                    id = UUID.fromString(customerId),
+                    id = UUID.fromString(addOns.id),
                     name = addOns.name,
                     price = addOns.price.toBigDecimal(),
                     thumbnail = addOns.thumbnail,

@@ -60,6 +60,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
 import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.presentation.utils.CustomSearch
@@ -75,8 +76,7 @@ fun HomeScreen(
     val productViewModel: ProductViewModel = hiltViewModel()
     val productsState by productViewModel.productDataUiState.collectAsState()
     val pUiState by productViewModel.productUiState.collectAsState()
-
-    val search = remember { mutableStateOf(TextFieldValue("")) }
+    val search = rememberSaveable { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(productsState, productViewModel) {
         productViewModel.fetchProducts()
@@ -85,6 +85,7 @@ fun HomeScreen(
     LaunchedEffect(pUiState) {
         when {
             pUiState.isLoading -> {}
+
             pUiState.successMessage.isNotEmpty() -> {
                 Toast.makeText(
                     context,
@@ -92,6 +93,7 @@ fun HomeScreen(
                     Toast.LENGTH_SHORT
                 ).show()
             }
+
             pUiState.errorMessage.isNotEmpty() -> {}
         }
     }
@@ -127,7 +129,7 @@ fun HomeScreen(
                                         productId = product.productId,
                                         quantity = quantity.toInt()
                                     )
-                                    navController.navigate("purchaseOrder/${product.productId}/$quantity")
+                                    navController.navigate("purchaseOrder")
                                 },
                                 onDelete = { productViewModel.deleteProduct(it.productId) }
                             )
@@ -137,15 +139,23 @@ fun HomeScreen(
                 }
             }
 
-            productsState.isLoading -> CircularProgressIndicator(
-                modifier = modifier.align(Alignment.CenterHorizontally)
-            )
+            productsState.isLoading -> {
+                Box(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CustomProgressIndicator(isLoading = true)
+                }
+            }
 
             productsState.errorMessage.isNotEmpty() -> {
                 Log.d(TAG, "HomeScreen: ${productsState.errorMessage}")
             }
         }
     }
+    CustomProgressIndicator(isLoading = productsState.isLoading)
 }
 
 @Composable
@@ -295,7 +305,8 @@ fun ProductCard(
                         onClick = {
                             onRestock(quantity)
                             showDialog = false
-                        }
+                        },
+                        enabled = quantity.isNotEmpty()
                     ) {
                         Text(text = "OK")
                     }

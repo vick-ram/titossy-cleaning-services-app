@@ -12,33 +12,38 @@ data class BookingDto(
     val customer: String,
     val bookingDateTime: String,
     val frequency: String,
-    val additionalInstructions: String?,
-    val address: String?,
-    val bookingServiceAddOns: List<BookingServiceAddOnsDto>?,
+    val additionalInstructions: String,
+    val address: String,
+    val bookingServiceAddOns: List<BookingServiceAddOnsDto>,
     val totalAmount: String,
     val paid: Boolean,
     val bookingStatus: String,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
 ) {
-    fun toBooking() = Booking(
-        bookingId = bookingId,
-        customer = customer,
-        bookingDateTime = LocalDateTime.parse(bookingDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-        frequency = Frequency.valueOf(frequency),
-        additionalInstructions = additionalInstructions,
-        address = address,
-        bookingServiceAddons = bookingServiceAddOns?.map { it.toBookingServiceAddons() },
-        totalAmount = totalAmount,
-        paid = paid,
-        bookingStatus = BookingStatus.valueOf(bookingStatus),
-        createdAt = createdAt,
-    )
+    fun toBooking(): Booking {
+        return Booking(
+            bookingId = bookingId,
+            customer = customer,
+            bookingDateTime = LocalDateTime.parse(
+                bookingDateTime,
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            ),
+            frequency = Frequency.valueOf(frequency),
+            additionalInstructions = additionalInstructions,
+            address = address,
+            bookingServiceAddons = bookingServiceAddOns.map
+            { it.toBookingServiceAddons() },
+            totalAmount = totalAmount.toBigDecimal(),
+            paid = paid,
+            bookingStatus = BookingStatus.valueOf(bookingStatus),
+        )
+    }
 }
 
 data class BookingServiceAddOnsDto(
     val service: String?,
-    val serviceAddOn: String?,
+    val serviceAddOn: String? = null,
     val quantity: Int,
     val subtotal: String,
 ) {

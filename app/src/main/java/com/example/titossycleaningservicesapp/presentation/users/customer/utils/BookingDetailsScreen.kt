@@ -5,25 +5,30 @@ package com.example.titossycleaningservicesapp.presentation.users.customer.utils
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +52,6 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.domain.models.Frequency
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingRequest
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
 import com.example.titossycleaningservicesapp.presentation.utils.BookingTimeCard
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import java.time.LocalDate
@@ -55,7 +60,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @Composable
-fun BookingDetailsScreen(
+fun BookingDataScreen(
     navController: NavHostController,
 ) {
     val bookingViewModel: BookingViewModel = hiltViewModel()
@@ -65,9 +70,9 @@ fun BookingDetailsScreen(
     var selectedDate by remember { mutableStateOf("") }
     var selectedTime by remember { mutableStateOf("") }
     val frequency = Frequency.entries.toTypedArray().map { it.toString() }
-    var selectedFrequency by remember { mutableStateOf(Frequency.ONE_TIME.name) }
-    var instructions by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
+    var selectedFrequency by rememberSaveable { mutableStateOf(Frequency.ONE_TIME.name) }
+    var instructions by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(bookingUiState.booking) {
         bookingUiState.booking?.let { booking ->
@@ -86,12 +91,16 @@ fun BookingDetailsScreen(
                     )
                 },
                 navigationIcon = {
-                    NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
-                        navController.navigateUp()
-                    }
+                    NavigationIcon(
+                        icon = Icons.Outlined.ChevronLeft,
+                        onClick = {navController.navigateUp()}
+                    )
                 },
                 actions = {
-                    NavigationIcon(icon = Icons.Outlined.MoreVert, onClick = {})
+                    NavigationIcon(
+                        icon = Icons.Outlined.MoreVert,
+                        onClick = {}
+                    )
                 }
             )
         }
@@ -113,35 +122,50 @@ fun BookingDetailsScreen(
                 .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            BookingItemTitle(
-                modifier = Modifier.padding(top = 8.dp),
-                value = "Please choose a date & Time you would like the service to be done:"
-            )
-            BookingTimeCard(
-                selectedDate = selectedDate,
-                selectedTime = selectedTime,
-                onDateSelected = {
-                    showDatePicker(
-                        onDateSelected = { selectedDate = it },
-                        context = context
-                    )
-                },
-                onTimeSelected = {
-                    showTimePicker(
-                        onTimeSelected = { selectedTime = it },
-                        context = context
-                    )
-                }
-            )
-            BookingItemTitle(value = "Choose the frequency of your booking: ")
-            CustomRadioButton(
-                values = frequency,
-                selected = selectedFrequency,
-                onSelected = { selectedFrequency = it })
-            BookingItemTitle(value = "Type any additional instructions you would like our team to consider:")
-            AdditionalInstructions(value = instructions, onValueChange = { instructions = it })
-            BookingItemTitle(value = "Type the location address you would our team to report to:")
-            BookingAddressField(value = address, onValueChange = { address = it })
+            BookingItemSection(title = "Choose date & time:") {
+                BookingTimeCard(
+                    selectedDate = selectedDate,
+                    selectedTime = selectedTime,
+                    onDateSelected = {
+                        showDatePicker(
+                            onDateSelected = { selectedDate = it },
+                            context = context
+                        )
+                    },
+                    onTimeSelected = {
+                        showTimePicker(
+                            onTimeSelected = { selectedTime = it },
+                            context = context
+                        )
+                    }
+                )
+            }
+            BookingItemSection(title = "Choose Frequency") {
+                CustomRadioButton(
+                    values = frequency,
+                    selected = selectedFrequency,
+                    onSelected = { selectedFrequency = it }
+                )
+            }
+            BookingItemSection(title = "Additional Instructions") {
+                AdditionalInstructions(
+                    value = instructions,
+                    onValueChange = { instructions = it }
+                )
+            }
+            /*BookingItemSection(title = "Booking Location") {
+                BookingAddressField(
+                    value = address,
+                    onValueChange = { address = it }
+                )
+            }*/
+            BookingItemSection(title = "Booking Location") {
+                BookingInput(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = "Enter booking address"
+                )
+            }
             Button(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -150,15 +174,40 @@ fun BookingDetailsScreen(
                 shape = RectangleShape,
                 onClick = {
                     bookingViewModel.createBooking(bookingRequest)
-                    //serviceViewModel.clearCart()
                 },
                 contentPadding = PaddingValues(16.dp),
-                enabled = selectedDate.isNotEmpty() && selectedTime.isNotEmpty() && address.isNotEmpty()
+                enabled = selectedDate.isNotEmpty()
+                        && selectedTime.isNotEmpty()
+                        && address.isNotEmpty()
             ) { Text(text = "Proceed to checkout") }
         }
     }
 }
 
+
+
+@Composable
+fun BookingItemSection(
+    modifier: Modifier = Modifier,
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content()
+    }
+}
 
 
 private fun showDatePicker(onDateSelected: (String) -> Unit, context: Context) {
@@ -174,6 +223,7 @@ private fun showDatePicker(onDateSelected: (String) -> Unit, context: Context) {
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
+    datePickerDialog.datePicker.minDate = calendar.timeInMillis
     datePickerDialog.show()
 }
 
@@ -184,8 +234,16 @@ private fun showTimePicker(onTimeSelected: (String) -> Unit, context: Context) {
         context,
         { _, hourOfDay, minuteOfHour ->
             val selectedTime = LocalTime.of(hourOfDay, minuteOfHour)
-                .format(DateTimeFormatter.ISO_LOCAL_TIME)
-            onTimeSelected(selectedTime)
+            val currentTime = LocalTime.now()
+            if (selectedTime.isBefore(currentTime)) {
+                Toast.makeText(
+                    context,
+                    "Please select a future time",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                onTimeSelected(selectedTime.format(DateTimeFormatter.ISO_LOCAL_TIME))
+            }
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
@@ -237,38 +295,93 @@ fun AdditionalInstructions(
     value: String,
     onValueChange: (String) -> Unit
 ) {
-    OutlinedTextField(
+    BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp),
-        placeholder = {
-            Text(
-                text = "Additional instructions..",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            .height(120.dp),
+        textStyle = MaterialTheme.typography.bodyLarge,
+        decorationBox = { innerTextField ->
+            if (value.isEmpty()) {
+                Text(
+                    text = "Any additional instructions..",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                    )
+                )
+            }
+            innerTextField()
         }
     )
 }
 
 @Composable
+fun BookingInput(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String? = null,
+    maxLines: Int = 1,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        BasicTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = MaterialTheme.typography.bodyLarge,
+            maxLines = maxLines,
+            keyboardOptions = keyboardOptions,
+            decorationBox = { innerTextField ->
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (label != null) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        )
+    }
+}
+
+@Composable
 fun BookingAddressField(
     modifier: Modifier = Modifier,
-    value: String, onValueChange: (String) -> Unit
+    value: String,
+    onValueChange: (String) -> Unit
 ) {
-    OutlinedTextField(
+    BasicTextField(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(56.dp),
         value = value,
         onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = "Enter booking address",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.76f)
-            )
-        },
-        shape = MaterialTheme.shapes.small
+        textStyle = MaterialTheme.typography.bodyLarge,
+        decorationBox = {innerTextField ->
+            if (value.isEmpty()) {
+                Text(
+                    text = "Enter booking address",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                    )
+                )
+            }
+            innerTextField()
+        }
     )
 }
 

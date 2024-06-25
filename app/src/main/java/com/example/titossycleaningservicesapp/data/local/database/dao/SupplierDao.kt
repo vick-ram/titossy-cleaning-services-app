@@ -21,12 +21,15 @@ interface SupplierDao {
     @Insert(entity = SupplierEntity::class, OnConflictStrategy.REPLACE)
     fun insertAllSuppliers(suppliers: List<SupplierEntity>)
 
+    @Transaction
     @Query("SELECT * FROM suppliers")
     fun getAllSuppliers(): Flow<List<SupplierEntity>>
 
+    @Transaction
     @Query("SELECT * FROM suppliers WHERE supplier_id = :id")
     fun getSupplierById(id: String): Flow<SupplierEntity>
 
+    @Transaction
     @Query("SELECT * FROM suppliers WHERE email = :email")
     fun getSupplierByEmail(email: String): Flow<SupplierEntity>
 

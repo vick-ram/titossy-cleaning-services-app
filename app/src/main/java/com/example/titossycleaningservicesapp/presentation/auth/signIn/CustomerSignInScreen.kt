@@ -39,9 +39,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.core.LoadingScreen
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
@@ -67,7 +68,6 @@ fun CustomerSignInScreen(
     val passwordState by customerViewModel.passwordState.collectAsState()
     val passwordErrorMessage by customerViewModel.passwordErrorMessage.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
-
 
     LaunchedEffect(customerViewModel, context) {
         customerViewModel.authEvent.collect { result ->
@@ -128,7 +128,8 @@ fun CustomerSignInScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    AuthCurve(title = "Login")
+                    AuthCurve(
+                        title = "Login")
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -196,11 +197,20 @@ fun CustomerSignInScreen(
             )
 
             BottomSection(
-                navigateToSupplier = { navController.navigate(Authentication.SUPPLIER.route) },
-                navigateToEmployee = { navController.navigate(Authentication.EMPLOYEE.route) }
+                navigateToSupplier = {
+                    navController.navigate(Authentication.SUPPLIER.route)
+                },
+                navigateToEmployee = {
+                    navController.navigate(Authentication.EMPLOYEE.route)
+                }
             )
         }
-        LoadingScreen(isLoading = customerViewModel.isLoading)
+        CustomProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp),
+            isLoading = customerViewModel.isLoading
+        )
         SnackbarHost(
             hostState = snackBarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -223,16 +233,20 @@ fun BottomSection(
     ) {
         Text(
             text = "Are you a supplier?",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.W700
+            )
         )
         TextButton(
             onClick = navigateToSupplier
         ) {
             Text(
-                text = "Sign In/Sign Up",
+                text = "Sign In",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                     fontStyle = FontStyle.Italic
                 )
             )
@@ -247,7 +261,10 @@ fun BottomSection(
     ) {
         Text(
             text = "Are you an employee/staff?",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.W700
+            )
         )
         TextButton(
             onClick = navigateToEmployee
@@ -256,7 +273,8 @@ fun BottomSection(
                 text = "Sign In",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                     fontStyle = FontStyle.Italic
                 )
             )

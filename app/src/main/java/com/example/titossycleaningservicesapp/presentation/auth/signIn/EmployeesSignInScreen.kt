@@ -212,7 +212,6 @@ fun EmployeesSignIn(navController: NavHostController) {
                 }
             }
         }
-        //CustomIndeterminateProgressIndicator(isLoading = signInViewModel.isLoading)
         CustomProgressIndicator(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

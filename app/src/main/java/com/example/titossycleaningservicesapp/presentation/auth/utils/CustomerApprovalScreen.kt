@@ -38,6 +38,7 @@ fun ApprovalScreen(navController: NavHostController) {
     var user by remember { mutableStateOf<Pair<String, String>?>(null) }
     val mainViewModel: MainViewModel = hiltViewModel()
 
+
     LaunchedEffect(user) {
         val readUser = mainViewModel.readUserFromToken()
         user = readUser
@@ -67,9 +68,18 @@ fun ApprovalScreen(navController: NavHostController) {
         ) {
 
             Text(
-                text = "Welcome" + user?.first,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
+                text = "Welcome",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                ),
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = user?.first ?: "",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.primary
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(

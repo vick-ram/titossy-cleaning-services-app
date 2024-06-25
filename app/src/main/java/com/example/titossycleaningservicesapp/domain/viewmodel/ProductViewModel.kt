@@ -38,8 +38,8 @@ class ProductViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5000L),
                 initialValue = Resource.Loading
             )
-            .collect {resource ->
-                when(resource) {
+            .collect { resource ->
+                when (resource) {
                     is Resource.Error -> {
                         _productDataUiState.update {
                             it.copy(
@@ -48,6 +48,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     Resource.Loading -> {
                         _productDataUiState.update {
                             it.copy(
@@ -55,6 +56,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Success -> {
                         _productDataUiState.update {
                             it.copy(
@@ -69,8 +71,8 @@ class ProductViewModel @Inject constructor(
 
     fun fetchProductCart() = viewModelScope.launch {
         productRepository.getProductCart()
-            .collect {resource ->
-                when(resource) {
+            .collect { resource ->
+                when (resource) {
                     is Resource.Error -> {
                         _productCartUiState.update {
                             it.copy(
@@ -79,6 +81,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     Resource.Loading -> {
                         _productCartUiState.update {
                             it.copy(
@@ -86,6 +89,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Success -> {
                         _productCartUiState.update {
                             it.copy(
@@ -98,26 +102,26 @@ class ProductViewModel @Inject constructor(
             }
     }
 
-
-
     fun addProductToPurchaseOrder(
         productId: String,
         quantity: Int = 1
     ) = viewModelScope.launch {
         productRepository.addProductToPurchase(productId, quantity)
             .collectLatest { resource ->
-                when(resource) {
+                when (resource) {
                     is Resource.Error -> {
                         _productUiState.value = ProductUiState(
                             isLoading = false,
                             errorMessage = resource.message.toString()
                         )
                     }
+
                     is Resource.Loading -> {
                         _productUiState.value = ProductUiState(
                             isLoading = true
                         )
                     }
+
                     is Resource.Success -> {
                         _productUiState.value = ProductUiState(
                             isLoading = false,
@@ -131,7 +135,7 @@ class ProductViewModel @Inject constructor(
     fun deleteProduct(productId: String) = viewModelScope.launch {
         productRepository.deleteProductFromCart(productId)
             .collectLatest { resource ->
-                when(resource) {
+                when (resource) {
                     is Resource.Error -> {
                         _productUiState.update {
                             it.copy(
@@ -140,6 +144,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     Resource.Loading -> {
                         _productUiState.update {
                             it.copy(
@@ -147,6 +152,7 @@ class ProductViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Success -> {
                         _productUiState.update {
                             it.copy(

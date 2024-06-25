@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.presentation.auth.signUp
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -40,13 +41,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.rememberImeState
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
-import com.example.titossycleaningservicesapp.presentation.users.customer.screens.rememberImeState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 
@@ -56,7 +58,7 @@ fun SupplierSignUpScreen(
 ) {
     val signUpViewModel: SupplierAuthViewModel = hiltViewModel()
     val context = LocalContext.current
-    val passwordVisibility by remember { mutableStateOf(false) }
+    var passwordVisibility by remember { mutableStateOf(false) }
     val scrollSate = rememberScrollState()
     val imeState = rememberImeState()
 
@@ -94,138 +96,149 @@ fun SupplierSignUpScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollSate),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(modifier = Modifier
+        .fillMaxSize()
     ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
-                navController.navigateUp()
-            }
-        }
-
-        Surface(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp),
-            tonalElevation = 0.dp,
-            shadowElevation = 1.dp,
-            color = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Column(
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
+                    navController.navigateUp()
+                }
+            }
+
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .verticalScroll(scrollSate),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .verticalScroll(scrollSate)
+                    .padding(18.dp),
+                tonalElevation = 0.dp,
+                shadowElevation = 1.dp,
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                AuthCurve(title = "Register")
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AuthCurve(title = "Register")
 
-                CustomTextField(
-                    value = firstName,
-                    onValueChange = { firstName = it },
-                    modifier = Modifier,
-                    label = "First Name",
-                    leadingIcon = Icons.Filled.Person,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    CustomTextField(
+                        value = firstName,
+                        onValueChange = { firstName = it },
+                        modifier = Modifier,
+                        label = "First Name",
+                        leadingIcon = Icons.Filled.Person,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
                     )
-                )
 
-                CustomTextField(
-                    value = lastName,
-                    onValueChange = { lastName = it },
-                    modifier = Modifier,
-                    label = "Last Name",
-                    leadingIcon = Icons.Filled.Person,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                    CustomTextField(
+                        value = lastName,
+                        onValueChange = { lastName = it },
+                        modifier = Modifier,
+                        label = "Last Name",
+                        leadingIcon = Icons.Filled.Person,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
                     )
-                )
 
-                CustomTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    modifier = Modifier,
-                    label = "Phone",
-                    leadingIcon = Icons.Filled.Phone,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                    CustomTextField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        modifier = Modifier,
+                        label = "Phone",
+                        leadingIcon = Icons.Filled.Phone,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
                     )
-                )
 
-                CustomTextField(
-                    value = address,
-                    onValueChange = { address = it },
-                    modifier = Modifier,
-                    label = "Address",
-                    leadingIcon = Icons.Filled.LocationCity,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                    CustomTextField(
+                        value = address,
+                        onValueChange = { address = it },
+                        modifier = Modifier,
+                        label = "Address",
+                        leadingIcon = Icons.Filled.LocationOn,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
                     )
-                )
 
-                CustomTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    modifier = Modifier,
-                    label = "Email",
-                    leadingIcon = Icons.Filled.Email,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                    CustomTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        modifier = Modifier,
+                        label = "Email",
+                        leadingIcon = Icons.Filled.Email,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
                     )
-                )
 
-                CustomTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    modifier = Modifier,
-                    label = "Password",
-                    leadingIcon = Icons.Filled.Lock,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    trailingIcon = if (passwordVisibility) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    },
-                    visualTransformation = if (passwordVisibility) {
-                        VisualTransformation.None
-                    } else {
-                        PassWordTransformation()
-                    }
-                )
+                    CustomTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        modifier = Modifier,
+                        label = "Password",
+                        leadingIcon = Icons.Filled.Lock,
+                        keyBoardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        trailingIcon = if (passwordVisibility) {
+                            Icons.Filled.Visibility
+                        } else {
+                            Icons.Filled.VisibilityOff
+                        },
+                        onTrailingIconClicked = {passwordVisibility = !passwordVisibility},
+                        visualTransformation = if (passwordVisibility) {
+                            VisualTransformation.None
+                        } else {
+                            PassWordTransformation()
+                        }
+                    )
 
-                CustomButton(
-                    text = "Sign Up",
-                    onClick = { signUpViewModel.signUp(
-                        firstName, lastName, phone, address, email, password
-                    ) },
-                    modifier = Modifier,
-                    enabled = true
-                )
+                    CustomButton(
+                        text = "Sign Up",
+                        onClick = {
+                            signUpViewModel.signUp(
+                                firstName, lastName, phone, address, email, password
+                            )
+                        },
+                        modifier = Modifier,
+                        enabled = true
+                    )
+                }
             }
         }
+        CustomProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp),
+            isLoading = signUpViewModel.isLoading
+        )
     }
-
 }
 

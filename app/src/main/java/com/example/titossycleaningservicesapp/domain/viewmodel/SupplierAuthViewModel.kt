@@ -13,10 +13,12 @@ import com.example.titossycleaningservicesapp.domain.repository.SupplierReposito
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -108,7 +110,12 @@ class SupplierAuthViewModel @Inject constructor(
 
     fun fetchSuppliers() = viewModelScope.launch {
         supplierRepository.getAllSuppliers()
-            .collectLatest { resource ->
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000L),
+                initialValue = Resource.Loading
+            )
+            .collect { resource ->
                 when(resource){
                     is Resource.Error -> {
                         _supplierUiState.update {

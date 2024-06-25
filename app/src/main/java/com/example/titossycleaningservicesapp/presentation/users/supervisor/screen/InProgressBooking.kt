@@ -22,7 +22,7 @@ import com.example.titossycleaningservicesapp.domain.models.requests.booking.Boo
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
 
 @Composable
-fun CompletedBookingsScreen(
+fun InProgressBooking(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
@@ -30,8 +30,8 @@ fun CompletedBookingsScreen(
     val bookingViewModel: BookingViewModel = hiltViewModel()
     val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
 
-    val completedBookings =
-        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }
+    val inProgressBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }
 
     when {
         bookingUiState.isLoading -> {
@@ -45,7 +45,7 @@ fun CompletedBookingsScreen(
         }
 
         bookingUiState.bookings != null -> {
-            completedBookings?.let { bookings ->
+            inProgressBookings?.let { bookings ->
                 Column(
                     modifier = modifier
                         .fillMaxSize()

@@ -6,6 +6,7 @@ import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CART
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CLEAR_CART
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER_ID
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER_PAYMENT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER_PAYMENT_ID
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER_SIGN_IN
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.CUSTOMER_SIGN_OUT
@@ -16,6 +17,8 @@ import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLO
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_ID
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_SIGN_IN
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_SIGN_OUT
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER_ID
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.PAYMENT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.PRODUCT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.PRODUCT_CART
@@ -36,10 +39,12 @@ import com.example.titossycleaningservicesapp.data.remote.dto.CustomerPaymentDto
 import com.example.titossycleaningservicesapp.data.remote.dto.EmployeeDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductCartDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductDto
+import com.example.titossycleaningservicesapp.data.remote.dto.PurchaseOrderDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ServiceAddOnDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ServiceCartDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ServiceDto
 import com.example.titossycleaningservicesapp.data.remote.dto.SupplierDto
+import com.example.titossycleaningservicesapp.data.remote.dto.UpdateOrderStatus
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.UpdateBookingStatus
 import com.example.titossycleaningservicesapp.domain.models.requests.cart.AddServiceAddonToCart
@@ -51,6 +56,7 @@ import com.example.titossycleaningservicesapp.domain.models.requests.employee.Em
 import com.example.titossycleaningservicesapp.domain.models.requests.payment.CustomerPaymentRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.payment.CustomerPaymentStatusUpdate
 import com.example.titossycleaningservicesapp.domain.models.requests.po.AddProductToCart
+import com.example.titossycleaningservicesapp.domain.models.requests.po.PurchaseOrderRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import retrofit2.http.Body
@@ -182,22 +188,22 @@ interface ApiService {
      * Cart endpoints
      */
     @POST(SERVICE_CART)
-    suspend fun addServiceToCart(@Body service: AddServiceToCart): ApiResponse<Unit>
+    suspend fun addServiceToCart(@Body service: AddServiceToCart): ApiResponse<String>
 
     @POST(SERVICE_ADDON_CART)
-    suspend fun addServiceAddonToCart(@Body serviceAddon: AddServiceAddonToCart): ApiResponse<Unit>
+    suspend fun addServiceAddonToCart(@Body serviceAddon: AddServiceAddonToCart): ApiResponse<String>
 
     @GET(CART)
     suspend fun getCartItems(): ApiResponse<List<ServiceCartDto>>
 
     @DELETE(DELETE_SERVICE)
-    suspend fun removeService(@Path("id") id: String): ApiResponse<Unit>
+    suspend fun removeService(@Path("id") id: String): ApiResponse<String>
 
     @DELETE(DELETE_ADDON)
-    suspend fun removeAddon(@Path("id") id: String): ApiResponse<Unit>
+    suspend fun removeAddon(@Path("id") id: String): ApiResponse<String>
 
     @DELETE(CLEAR_CART)
-    suspend fun clearCart(): ApiResponse<Unit>
+    suspend fun clearCart(): ApiResponse<String>
 
 
     /**
@@ -222,7 +228,9 @@ interface ApiService {
 
     @GET(BOOKING)
     suspend fun getBookings(): ApiResponse<List<BookingDto>>
-    suspend fun searchBookings(@Query("") query: String): ApiResponse<List<BookingDto>>
+
+    @GET(BOOKING)
+    suspend fun searchBookings(@Query("search") query: String): ApiResponse<List<BookingDto>>
 
     @GET(BOOKING_ID)
     suspend fun getBookingById(@Path("id") id: String): ApiResponse<BookingDto>
@@ -231,10 +239,12 @@ interface ApiService {
     suspend fun deleteBooking(@Path("id") id: String): ApiResponse<String>
 
 
-    @POST(PAYMENT)
-    suspend fun createPayment(@Body customerPayment: CustomerPaymentRequest): ApiResponse<CustomerPaymentDto>
+    @POST(CUSTOMER_PAYMENT)
+    suspend fun createPayment(
+        @Body customerPayment: CustomerPaymentRequest
+    ): ApiResponse<CustomerPaymentDto>
 
-    @GET(PAYMENT)
+    @GET(CUSTOMER_PAYMENT)
     suspend fun getCustomerPayment(): ApiResponse<List<CustomerPaymentDto>>
 
     @PUT(CUSTOMER_PAYMENT_ID)
@@ -266,6 +276,26 @@ interface ApiService {
     @DELETE(PRODUCT_CART_ID)
     suspend fun removeProductFromCart(
         @Path("productId") productId: UUID
+    ) : ApiResponse<String>
+
+
+    @POST(ORDER)
+    suspend fun createPurchaseOrder(
+        @Body purchaseOrder: PurchaseOrderRequest
+    ) : ApiResponse<PurchaseOrderDto>
+
+    @GET(ORDER)
+    suspend fun getPurchaseOrders(): ApiResponse<List<PurchaseOrderDto>>
+
+    @GET(ORDER)
+    suspend fun getCompletedPurchaseOrders(
+        @Query("status") status: String
+    ): ApiResponse<List<PurchaseOrderDto>>
+
+    @PATCH(ORDER_ID)
+    suspend fun updateOrderStatus(
+        @Path("id") id: String,
+        @Body orderStatus: UpdateOrderStatus
     ) : ApiResponse<String>
 
 }

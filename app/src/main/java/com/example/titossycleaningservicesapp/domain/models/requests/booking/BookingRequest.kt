@@ -15,5 +15,5 @@ data class UpdateBookingStatus(
 )
 
 enum class BookingStatus {
-    PENDING, IN_PROGRESS, CANCELLED, COMPLETED
+    PENDING, APPROVED, IN_PROGRESS, COMPLETED, CANCELLED,
 }
