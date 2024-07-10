@@ -14,6 +14,7 @@ interface EmployeeRepository {
     suspend fun signOutEmployee(): AuthEvent
     suspend fun updateAvailability(id: UUID, availability: String): AuthEvent
     fun getAllEmployees() : Flow<Resource<List<Employee>>>
+    fun getEmployeesByRole(role: String) : Flow<Resource<List<Employee>>>
     fun getEmployeeById(id: UUID): Flow<Resource<Employee>>
     fun getEmployeesByStatus(status: String): Flow<Resource<List<Employee>>>
     fun getEmployeeByEmail(email: String): Flow<Resource<Employee>>

@@ -1,8 +1,7 @@
 package com.example.titossycleaningservicesapp.presentation.users.supplier.screens
 
 import android.widget.Toast
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,94 +11,93 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.SmallSearchField
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     paddingValues: PaddingValues,
-    pagerState: PagerState
 ) {
     val context = LocalContext.current
     val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
     val purchaseOrderUiState by purchaseOrderViewModel.purchaseOrderDataUiState.collectAsStateWithLifecycle()
+    var search by rememberSaveable { mutableStateOf("") }
+    val purchaseOrderStatus by purchaseOrderViewModel.purchaseOrderStatus.collectAsStateWithLifecycle()
+
 
     LaunchedEffect(purchaseOrderViewModel) {
         purchaseOrderViewModel.fetchPurchaseOrders()
     }
 
+    LaunchedEffect(key1 = purchaseOrderStatus) {
+        when {
+            purchaseOrderStatus.isLoading -> delay(100L)
+            purchaseOrderStatus.successMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    length = Toast.LENGTH_LONG,
+                    message = purchaseOrderStatus.successMessage
+                )
+            }
+
+            purchaseOrderStatus.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = purchaseOrderStatus.errorMessage
+                )
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(paddingValues)
             .padding(horizontal = 16.dp)
     ) {
 
-        val tabTitles = listOf("ALL", "DELIVERED")
-        val scope = rememberCoroutineScope()
-
-        TabRow(selectedTabIndex = pagerState.currentPage) {
-            tabTitles.forEachIndexed { index, title ->
-                Tab(
-                    text = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                color = if (pagerState.currentPage == index) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
-                                },
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    },
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(
-                                page = index,
-                                animationSpec = tween(2000)
-                            )
-                        }
-                    }
-                )
-            }
-        }
+        SmallSearchField(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            value = search,
+            onValueChange = { search = it },
+            width = 1f,
+            shape = MaterialTheme.shapes.extraLarge,
+            height = 56.dp,
+            iconSize = 32.dp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         when {
             purchaseOrderUiState.isLoading -> Box(
                 modifier = Modifier
@@ -110,99 +108,53 @@ fun HomeScreen(
             }
 
             purchaseOrderUiState.purchaseOrders != null -> {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) { page ->
-                    when (page) {
-                        0 -> AllPurchaseOrdersContent(
-                            purchaseOrders = purchaseOrderUiState.purchaseOrders!!,
-                            onPurchaseOrderItemClick = {
-                                navController.navigate("purchaseOrderDetails" + "/" + it.purchaseOrderId)
-                            },
-                            onStatusClick = {
-                                purchaseOrderViewModel.updateOrderStatus(
-                                    id = it.purchaseOrderId,
-                                    status = OrderStatus.PROCESSING.name
-                                )
-                            }
-                        )
-
-                        1 -> CompletedOrdersContent(
-                            purchaseOrders = purchaseOrderUiState.purchaseOrders!!.filter {
-                                it.orderStatus == OrderStatus.DELIVERED
-                            },
-                            onPurchaseOrderItemClick = {},
-                            onStatusClick = {}
-                        )
+                purchaseOrderUiState.purchaseOrders?.filter {
+                    it.orderStatus.name.contains(
+                        search,
+                        ignoreCase = true
+                    )
+                }?.let { purchaseOrders ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(purchaseOrders) { purchaseOrder ->
+                            PurchaseOrderCard(
+                                purchaseOrder = purchaseOrder,
+                                onDetailsClick = { navController.navigate("purchaseOrderDetails" + "/" + it.purchaseOrderId) },
+                                onStatusClick = {
+                                    if (it.orderStatus == OrderStatus.APPROVED) {
+                                        purchaseOrderViewModel.updateOrderStatus(
+                                            id = it.purchaseOrderId,
+                                            status = OrderStatus.PROCESSING.name
+                                        )
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
 
             purchaseOrderUiState.errorMessage.isNotEmpty() -> {
-                Toast.makeText(
-                    context,
-                    purchaseOrderUiState.errorMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-        }
-    }
-}
-
-@Composable
-fun CompletedOrdersContent(
-    modifier: Modifier = Modifier,
-    purchaseOrders: List<PurchaseOrder>,
-    onPurchaseOrderItemClick: (PurchaseOrder) -> Unit,
-    onStatusClick: (PurchaseOrder) -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            items(purchaseOrders) { purchaseOrder ->
-                PurchaseOrderCard(
-                    purchaseOrder = purchaseOrder,
-                    onDetailsClick = onPurchaseOrderItemClick,
-                    onStatusClick = onStatusClick
+                showToast(
+                    context = context,
+                    message = purchaseOrderUiState.errorMessage
                 )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Oops... something went wrong",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
 }
-
-@Composable
-fun AllPurchaseOrdersContent(
-    modifier: Modifier = Modifier,
-    purchaseOrders: List<PurchaseOrder>,
-    onPurchaseOrderItemClick: (PurchaseOrder) -> Unit,
-    onStatusClick: (PurchaseOrder) -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        LazyColumn {
-            items(purchaseOrders) { purchaseOrder ->
-                PurchaseOrderCard(
-                    purchaseOrder = purchaseOrder,
-                    onDetailsClick = onPurchaseOrderItemClick,
-                    onStatusClick = onStatusClick
-                )
-            }
-        }
-    }
-}
-
 
 @Composable
 fun PurchaseOrderCard(
@@ -225,7 +177,9 @@ fun PurchaseOrderCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Purchase Order #${purchaseOrder.purchaseOrderId}",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -247,30 +201,26 @@ fun PurchaseOrderCard(
                             text = purchaseOrder.orderStatus.name,
                             color = when (purchaseOrder.orderStatus) {
                                 OrderStatus.PENDING -> Color(0xFFFFEB3B)
+                                OrderStatus.APPROVED -> colorResource(id = R.color.approved)
                                 OrderStatus.PROCESSING -> Color(0xFF4CAF50)
                                 OrderStatus.SHIPPED -> Color(0xFF2196F3)
                                 OrderStatus.DELIVERED -> Color(0xFF4CAF50)
                                 OrderStatus.CANCELLED -> Color(0xFFF44336)
                             },
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
 
                 }
             }
-            IconButton(
-                onClick = { onDetailsClick(purchaseOrder) }
+            OutlinedButton(
+                onClick = { onDetailsClick(purchaseOrder)  }
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Details",
-                    modifier = Modifier.size(24.dp)
-                )
+                Text(text = "View Details")
             }
         }
     }
 }
-
-
-
 

@@ -15,13 +15,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CustomerPaymentViewModel @Inject constructor(
+class PaymentViewModel @Inject constructor(
     private val customerPaymentRepository: CustomerPaymentRepository
 ) : ViewModel() {
     private val _customerPaymentUiState = MutableStateFlow(CustomerPaymentUIState(isLoading = true))
     val customerPaymentUIState = _customerPaymentUiState.asStateFlow()
 
-    fun makePayment(bookingId: String, phoneNumber: String, transactionCode: String) =
+    fun makePayment(
+        bookingId: String,
+        phoneNumber: String,
+        transactionCode: String
+    ) =
         viewModelScope.launch {
             customerPaymentRepository.makePayment(bookingId, phoneNumber, transactionCode)
                 .map { resource ->

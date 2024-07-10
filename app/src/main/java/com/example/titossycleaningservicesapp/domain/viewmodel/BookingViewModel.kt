@@ -5,11 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.UpdateBookingStatus
+import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingAssignmentUiState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingAssignmentUpdateUiState
 import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingUiState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingUpdateUiState
 import com.example.titossycleaningservicesapp.domain.repository.BookingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +28,20 @@ class BookingViewModel @Inject constructor(
     private val _bookingUiState = MutableStateFlow(BookingUiState(isLoading = true))
     val bookingUiState = _bookingUiState.asStateFlow()
 
-    private lateinit var job: Job
+    private val _bookingUpdateUiState = MutableStateFlow(BookingUpdateUiState())
+    val bookingUpdate = _bookingUpdateUiState.asStateFlow()
+
+    private val _bookingAssignmentState =
+        MutableStateFlow(BookingAssignmentUiState(isLoading = true))
+    val bookingAssignmentUiState = _bookingAssignmentState.asStateFlow()
+
+    private val _bookingAssignmentUpdateUiState =
+        MutableStateFlow(BookingAssignmentUpdateUiState(isLoading = true))
+    val bookingAssignmentUpdateUiState = _bookingAssignmentUpdateUiState.asStateFlow()
+
+    init {
+        fetchBookings()
+    }
 
     fun fetchBookings() = viewModelScope.launch {
         bookingRepository.getBookings()
@@ -54,37 +68,24 @@ class BookingViewModel @Inject constructor(
                 }
             }
             .collect { state ->
-                _bookingUiState.value = state
+                _bookingUiState.update {
+                    it.copy(
+                        isLoading = state.isLoading,
+                        errorMessage = state.errorMessage,
+                        bookings = state.bookings
+                    )
+                }
             }
+        _bookingUiState.update { it.copy(isLoading = false) }
     }
 
-    fun searchBookings(query: String) {
-        job.cancel()
-        job = viewModelScope.launch {
-            delay(300L)
-            bookingRepository.searchBooking(query)
-                .map { resource ->
-                    when (resource) {
-                        is Resource.Error -> BookingUiState(
-                            isLoading = false,
-                            errorMessage = resource.message.toString()
-                        )
-
-                        is Resource.Loading -> BookingUiState(isLoading = true)
-                        is Resource.Success -> BookingUiState(
-                            isLoading = false,
-                            bookings = resource.data
-                        )
-                    }
-                }
-                .collectLatest { state ->
-                    _bookingUiState.value = state
-                }
-        }
-    }
-
-    fun fetchBookingByID(bookingId: String) = viewModelScope.launch {
-        bookingRepository.getBookingById(bookingId)
+    fun fetchCustomerBookings() = viewModelScope.launch {
+        bookingRepository.getCustomerBookings()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000L),
+                initialValue = Resource.Loading
+            )
             .map { resource ->
                 when (resource) {
                     is Resource.Error -> BookingUiState(
@@ -92,16 +93,26 @@ class BookingViewModel @Inject constructor(
                         errorMessage = resource.message.toString()
                     )
 
-                    is Resource.Loading -> BookingUiState(isLoading = true)
+                    is Resource.Loading -> BookingUiState(
+                        isLoading = true
+                    )
+
                     is Resource.Success -> BookingUiState(
                         isLoading = false,
-                        booking = resource.data
+                        bookings = resource.data
                     )
                 }
             }
-            .collectLatest { state ->
-                _bookingUiState.value = state
+            .collect { state ->
+                _bookingUiState.update {
+                    it.copy(
+                        isLoading = state.isLoading,
+                        errorMessage = state.errorMessage,
+                        bookings = state.bookings
+                    )
+                }
             }
+        _bookingUiState.update { it.copy(isLoading = false) }
     }
 
     fun createBooking(bookingRequest: BookingRequest) = viewModelScope.launch {
@@ -112,7 +123,7 @@ class BookingViewModel @Inject constructor(
             instructions = bookingRequest.additionalInstructions,
             address = bookingRequest.address
         )
-            .collect { resource ->
+            .collectLatest { resource ->
                 when (resource) {
                     is Resource.Error -> {
                         _bookingUiState.update {
@@ -135,9 +146,11 @@ class BookingViewModel @Inject constructor(
                         _bookingUiState.update {
                             it.copy(
                                 isLoading = false,
-                                booking = resource.data
+                                isSuccess = resource.data?.message.toString(),
+                                booking = resource.data?.booking
                             )
                         }
+                        fetchBookings()
                     }
                 }
             }
@@ -178,11 +191,11 @@ class BookingViewModel @Inject constructor(
         bookingId: String,
         updateBookingStatus: UpdateBookingStatus
     ) = viewModelScope.launch {
-        bookingRepository.updateBookingStatus(bookingId, updateBookingStatus.bookingStatus)
-            .collect { resource ->
+        bookingRepository.updateBookingStatus(bookingId, updateBookingStatus.status)
+            .collectLatest { resource ->
                 when (resource) {
                     is Resource.Error -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(
                                 isLoading = false,
                                 errorMessage = resource.message.toString()
@@ -191,18 +204,20 @@ class BookingViewModel @Inject constructor(
                     }
 
                     is Resource.Loading -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(isLoading = true)
                         }
                     }
 
                     is Resource.Success -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(
                                 isLoading = false,
-                                isSuccess = resource.data.toString()
+                                successMessage = resource.data.toString()
                             )
                         }
+                        fetchBookings()
+                        fetchBookingAssignments(bookingId)
                     }
                 }
             }
@@ -213,7 +228,7 @@ class BookingViewModel @Inject constructor(
             .collect { resource ->
                 when (resource) {
                     is Resource.Error -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(
                                 isLoading = false,
                                 errorMessage = resource.message.toString()
@@ -222,21 +237,129 @@ class BookingViewModel @Inject constructor(
                     }
 
                     is Resource.Loading -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(isLoading = true)
                         }
                     }
 
                     is Resource.Success -> {
-                        _bookingUiState.update {
+                        _bookingUpdateUiState.update {
                             it.copy(
                                 isLoading = false,
-                                isSuccess = resource.data.toString()
+                                successMessage = resource.data.toString()
                             )
                         }
+                        fetchBookings()
                     }
                 }
             }
     }
 
+    fun assignBooking(
+        bookingId: String,
+        cleanerId: String
+    ) = viewModelScope.launch {
+        bookingRepository.assignBooking(
+            bookingId = bookingId,
+            cleanerId = cleanerId
+        )
+            .map { resource ->
+                when (resource) {
+                    is Resource.Error -> BookingAssignmentUpdateUiState(
+                        isLoading = false,
+                        errorMessage = resource.message.toString()
+                    )
+
+                    is Resource.Loading -> BookingAssignmentUpdateUiState(
+                        isLoading = true
+                    )
+
+                    is Resource.Success -> BookingAssignmentUpdateUiState(
+                        isLoading = false,
+                        successMessage = resource.data.toString()
+                    )
+                }
+            }
+            .collectLatest { state ->
+                _bookingAssignmentUpdateUiState.update {
+                    it.copy(
+                        isLoading = state.isLoading,
+                        errorMessage = state.errorMessage,
+                        successMessage = state.successMessage
+                    )
+                }
+                if (!state.isLoading && state.successMessage.isNotEmpty()) {
+                    fetchBookingAssignments(bookingId)
+                }
+            }
+    }
+
+    fun fetchBookingAssignments(bookingId: String) = viewModelScope.launch {
+        bookingRepository.getAssignedBookings(bookingId)
+            .map { resource ->
+                when (resource) {
+                    is Resource.Error -> BookingAssignmentUiState(
+                        isLoading = false,
+                        errorMessage = resource.message.toString()
+                    )
+
+                    is Resource.Loading -> BookingAssignmentUiState(
+                        isLoading = true
+                    )
+
+                    is Resource.Success -> BookingAssignmentUiState(
+                        isLoading = false,
+                        assignedBookings = resource.data
+                    )
+                }
+            }
+            .collect { state ->
+                _bookingAssignmentState.update {
+                    it.copy(
+                        isLoading = state.isLoading,
+                        errorMessage = state.errorMessage,
+                        assignedBookings = state.assignedBookings
+                    )
+                }
+            }
+    }
+
+    fun fetchCleanerAssignments() = viewModelScope.launch {
+        bookingRepository.getCleanerAssignments()
+            .map { resource ->
+                when (resource) {
+                    is Resource.Error -> BookingAssignmentUiState(
+                        isLoading = false,
+                        errorMessage = resource.message.toString()
+                    )
+
+                    is Resource.Loading -> BookingAssignmentUiState(
+                        isLoading = true
+                    )
+
+                    is Resource.Success -> BookingAssignmentUiState(
+                        isLoading = false,
+                        assignedBookings = resource.data
+                    )
+                }
+            }
+            .collect { state ->
+                _bookingAssignmentState.update {
+                    it.copy(
+                        isLoading = state.isLoading,
+                        errorMessage = state.errorMessage,
+                        assignedBookings = state.assignedBookings
+                    )
+                }
+            }
+    }
+
+    fun onStatusSwap() {
+        viewModelScope.launch {
+            _bookingAssignmentState.value = bookingAssignmentUiState.value.copy(
+                assignedBookings = _bookingAssignmentState.value.assignedBookings
+                    ?.sortedBy { it.bookingAssignment.bookingStatus }
+            )
+        }
+    }
 }

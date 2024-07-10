@@ -19,20 +19,20 @@ class CustomerPaymentRepositoryImpl @Inject constructor(
         bookingId: String,
         phoneNumber: String,
         transactionCode: String
-    ): Flow<Resource<CustomerPayment>> {
+    ): Flow<Resource<String>> {
         return flow {
             emit(Resource.Loading)
             val response = apiService.createPayment(
                 CustomerPaymentRequest(
                     bookingId = bookingId,
                     phoneNumber = phoneNumber,
-                    transactionId = transactionCode
+                    transactionCode = transactionCode
                 )
             )
             when(response.status) {
                 "success" -> {
-                    val customerPayment = response.data?.toCustomerPayment()
-                    customerPayment?.let { emit(Resource.Success(it)) }
+                    val message = response.message
+                    message?.let { emit(Resource.Success(it)) }
                 }
                 "error" -> {
                     if (response.error != null) {
@@ -60,13 +60,13 @@ class CustomerPaymentRepositoryImpl @Inject constructor(
                 CustomerPaymentRequest(
                     phoneNumber = phoneNumber,
                     bookingId = bookingId,
-                    transactionId = transactionCode
+                    transactionCode = transactionCode
                 )
             )
             when(response.status) {
                 "success" -> {
-                    val customerPaymentUpdate = response.data
-                    customerPaymentUpdate?.let { emit(Resource.Success(it)) }
+                    val message = response.message
+                    message?.let { emit(Resource.Success(it)) }
                 }
                 "error" -> {
                     if (response.error != null) {
@@ -93,7 +93,7 @@ class CustomerPaymentRepositoryImpl @Inject constructor(
 
             when(response.status) {
                 "success" -> {
-                    val customerPaymentUpdate = response.data
+                    val customerPaymentUpdate = response.message
                     customerPaymentUpdate?.let { emit(Resource.Success(it)) }
                 }
                 "error" -> {

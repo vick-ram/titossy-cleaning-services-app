@@ -50,6 +50,7 @@ class ServiceViewModel @Inject constructor(
 
     init {
         fetchServices()
+        fetchCartItems()
     }
 
     fun searchServices(query: String) {

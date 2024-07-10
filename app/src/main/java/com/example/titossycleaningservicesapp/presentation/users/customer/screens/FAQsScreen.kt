@@ -1,7 +1,8 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Arrangement
+import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,14 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,128 +30,165 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.core.FAQItem
 
+@OptIn(ExperimentalFoundationApi::class)
+@SuppressLint("SuspiciousIndentation")
 @Composable
-fun FAQsScreen(navController: NavHostController, paddingValues: PaddingValues) {
+fun FAQsScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    paddingValues: PaddingValues
+) {
     val dataItem = listOf(
-        RowItemData(
-            title = "What services does Tidiness Cleaning Services offer?",
-            content = "Tidiness Cleaning Services provides a comprehensive range of cleaning solutions, including residential cleaning, commercial cleaning, deep cleaning, and specialized services such as carpet and upholstery cleaning.",
+        FAQItem(
+            question = "What services does Tidiness Cleaning Services offer?",
+            answer = "Tidiness Cleaning Services provides a comprehensive range of " +
+                    "cleaning solutions, including residential cleaning, commercial cleaning, deep " +
+                    "cleaning, and specialized services such as carpet and upholstery cleaning.",
         ),
-        RowItemData(
-            title = "How can I request a cleaning service?",
-            content = "To request a cleaning service, simply visit our website and fill out the online booking form. You can also give us a call, and our friendly customer service team will assist you in scheduling a cleaning appointment."
+        FAQItem(
+            question = "How can I request a cleaning service?",
+            answer = "To request a cleaning service, simply visit our" +
+                    " website and fill out the online booking form. You can also give us a call, and our friendly" +
+                    " customer service team will assist you in scheduling a cleaning appointment."
         ),
-        RowItemData(
-            title = "Are your cleaning products environmentally friendly?",
-            content = "Yes, we prioritize the use of eco-friendly and non-toxic cleaning products. Our commitment to sustainability ensures a healthy and safe environment for our clients and their families."
+        FAQItem(
+            question = "Are your cleaning products environmentally friendly?",
+            answer = "Yes, we prioritize the use of eco-friendly and non-toxic cleaning products." +
+                    " Our commitment to sustainability ensures a healthy and safe environment for our " +
+                    "clients and their families."
         ),
-        RowItemData(
-            title = "How much does your cleaning service cost?",
-            content = "The cost of our cleaning services depends on various factors, including the size of the space, the type of cleaning required, and any additional services requested. Contact us for a personalized quote based on your specific needs."
+        FAQItem(
+            question = "How much does your cleaning service cost?",
+            answer = "The cost of our cleaning services depends on various factors," +
+                    " including the size of the space, the type of cleaning required," +
+                    " and any additional services requested. Contact us for a personalized quote based on your specific needs."
         ),
-        RowItemData(
-            title = "Are your cleaners background-checked and insured?",
-            content = "Absolutely. All our professional cleaners undergo thorough background checks, and we ensure they are fully insured for your peace of mind. Your security and satisfaction are our top priorities."
+        FAQItem(
+            question = "Are your cleaners background-checked and insured?",
+            answer = "Absolutely. All our professional cleaners undergo thorough background" +
+                    " checks, and we ensure they are fully insured for your peace of mind. Your" +
+                    " security and satisfaction are our top priorities."
         ),
-        RowItemData(
-            title = "Can I schedule a one-time cleaning service, or do you offer recurring plans?",
-            content = "We offer both one-time cleaning services and customizable recurring plans. Whether you need a single deep clean or regular maintenance, we can tailor our services to fit your schedule and preferences."
+        FAQItem(
+            question = "Can I schedule a one-time cleaning service, or do you offer recurring plans?",
+            answer = "We offer both one-time cleaning services and customizable recurring plans." +
+                    " Whether you need a single deep clean or regular maintenance, we can tailor our" +
+                    " services to fit your schedule and preferences."
         ),
-        RowItemData(
-            title = "Do I need to provide cleaning supplies?",
-            content = "No need to worry about cleaning supplies. We bring our own high-quality and professional-grade cleaning equipment and products to ensure the best results."
+        FAQItem(
+            question = "Do I need to provide cleaning supplies?",
+            answer = "No need to worry about cleaning supplies. We bring our own high-quality" +
+                    " and professional-grade cleaning equipment and products to ensure the best results."
         ),
-        RowItemData(
-            title = "How can I provide feedback about my cleaning service?",
-            content = "We appreciate feedback from our valued clients. You can leave a review on our website or contact our customer service team directly to share your thoughts and suggestions."
+        FAQItem(
+            question = "How can I provide feedback about my cleaning service?",
+            answer = "We appreciate feedback from our valued clients. You can leave a review" +
+                    " on our website or contact our customer service team directly to share your" +
+                    " thoughts and suggestions."
         )
     )
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(8.dp)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            items(dataItem) { item ->
-                RowItemCard(
-                    title = item.title,
-                    content = item.content,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+         IconButton(onClick = { navController.navigateUp() }) {
+             Icon(
+                 modifier = modifier.size(32.dp),
+                 imageVector = Icons.Default.ChevronLeft,
+                 contentDescription = null
+             )
+         }
+            Spacer(modifier = modifier.width(8.dp))
+            Text(
+                text = "Back",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary
+                )
+            )
+            Spacer(modifier = modifier.width(32.dp))
+            Text(
+                text = "FAQs",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        }
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(
+                count = dataItem.size,
+                key = { it }
+            ) { index ->
+                val faqItem = dataItem[index]
+                FAQItemCard(
+                    modifier = modifier.animateItemPlacement(),
+                    faqItem = faqItem,
+                    onClick = {
+                        dataItem.mapIndexed { idx, item ->
+                            if (idx == index) item.copy(isExpanded = !item.isExpanded) else item
+                        }
+                    }
                 )
             }
         }
+    }
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RowItemCard(
-    title: String,
-    content: String,
-    modifier: Modifier
+fun FAQItemCard(
+    modifier: Modifier = Modifier,
+    faqItem: FAQItem,
+    onClick: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    ElevatedCard(
-        onClick = { expanded = !expanded },
+    var isExpanded by remember { mutableStateOf(faqItem.isExpanded) }
+
+    Card(
         modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable {
+                isExpanded = !isExpanded
+                onClick()
+            },
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Column(modifier = modifier.padding(16.dp)) {
+            Row {
                 Text(
-                    text = title,
-                    style = TextStyle(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                        letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
-                        textAlign = TextAlign.Start
+                    text = faqItem.question,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    IconButton(
-                        onClick = { expanded != expanded }
-                    ) {
-                        if (expanded) Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = null
-                        ) else Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = null
-                        )
-                    }
-                }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            AnimatedVisibility(visible = expanded) {
+            if (isExpanded) {
+                Spacer(modifier = modifier.height(8.dp))
                 Text(
-                    text = content,
-                    style = TextStyle(
-                        fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
-                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                        letterSpacing = MaterialTheme.typography.bodyMedium.letterSpacing,
-                        textAlign = TextAlign.Start
+                    text = faqItem.answer,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp
                     )
                 )
             }
         }
     }
 }
-
-data class RowItemData(
-    val title: String,
-    val content: String
-)

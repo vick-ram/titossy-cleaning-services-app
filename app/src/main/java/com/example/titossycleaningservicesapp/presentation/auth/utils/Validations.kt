@@ -38,7 +38,7 @@ object Validations {
 
     fun isValidName(name: String): ValidationState {
         return if (name.trim().isEmpty()) {
-            ValidationState.Invalid("$name cannot be empty")
+            ValidationState.Invalid("cannot be an empty field")
         } else {
             ValidationState.Valid
         }
@@ -49,30 +49,4 @@ sealed class ValidationState {
     data object Idle: ValidationState()
     data object Valid : ValidationState()
     data class Invalid(val message: String) : ValidationState()
-}
-
-enum class Greetings {
-    MORNING,
-    AFTERNOON,
-    EVENING,
-    NIGHT
-}
-
-fun getGreeting(): Greetings {
-    val currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-    return when (currentHour) {
-        in 0..11 -> Greetings.MORNING
-        in 12..15 -> Greetings.AFTERNOON
-        in 16..19 -> Greetings.EVENING
-        else -> Greetings.NIGHT
-    }
-}
-
-fun getGreetingMessage(): String {
-    return when (getGreeting()) {
-        Greetings.MORNING -> "Good Morning"
-        Greetings.AFTERNOON -> "Good Afternoon"
-        Greetings.EVENING -> "Good Evening"
-        Greetings.NIGHT -> "Good Night"
-    }
 }

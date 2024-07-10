@@ -16,7 +16,7 @@ data class SupplierEntity(
     @ColumnInfo("address") val address: String,
     @ColumnInfo("email") val email: String,
     @ColumnInfo("password") val password: String,
-    @ColumnInfo("status") val status: ApprovalStatus,
+    @ColumnInfo("status") var status: ApprovalStatus,
     @ColumnInfo("created_at") val createdAt: LocalDateTime,
     @ColumnInfo("updated_at") val updatedAt: LocalDateTime,
 ) {

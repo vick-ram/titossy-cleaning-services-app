@@ -53,7 +53,7 @@ import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
 import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -75,7 +75,7 @@ fun PurchaseOrderScreen(
     var selectedSupplier by rememberSaveable { mutableStateOf<Supplier?>(null) }
     val productViewModel: ProductViewModel = hiltViewModel()
     val productCartUiState by productViewModel.productCartUiState.collectAsStateWithLifecycle()
-    val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
+    val supplierViewModel: SupplierViewModel = hiltViewModel()
     val supplierState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
     val datePickerState = rememberDatePickerState()

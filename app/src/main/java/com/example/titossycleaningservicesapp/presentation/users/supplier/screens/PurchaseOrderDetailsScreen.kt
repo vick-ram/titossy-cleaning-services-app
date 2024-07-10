@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.users.supplier.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderItem
@@ -47,21 +49,38 @@ fun PurchaseOrderDetailsScreen(
     paddingValues: PaddingValues,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
     val purchaseOrderUiState by purchaseOrderViewModel.purchaseOrderDataUiState.collectAsStateWithLifecycle()
 
     val purchaseOrder =
         purchaseOrderUiState.purchaseOrders?.find { it.purchaseOrderId == purchaseOrderId }
+    val purchaseOrderStatus by purchaseOrderViewModel.purchaseOrderStatus.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = purchaseOrderId) {
-        purchaseOrderViewModel.fetchPurchaseOrders()
+    LaunchedEffect(purchaseOrderStatus) {
+        when {
+            purchaseOrderStatus.isLoading -> return@LaunchedEffect
+            purchaseOrderStatus.successMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    length = Toast.LENGTH_LONG,
+                    message = purchaseOrderStatus.successMessage
+                )
+                navController.navigateUp()
+            }
+            purchaseOrderStatus.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = purchaseOrderStatus.errorMessage
+                )
+            }
+        }
     }
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -78,7 +97,7 @@ fun PurchaseOrderDetailsScreen(
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Purchase Order Details",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineMedium
             )
         }
 
@@ -92,21 +111,28 @@ fun PurchaseOrderDetailsScreen(
                 }
             }
             item {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth(.7f)
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .padding(bottom = 16.dp),
-                    onClick = {
-                        purchaseOrderViewModel.updateOrderStatus(
-                            id = purchaseOrderId,
-                            status = OrderStatus.SHIPPED.name
-                        )
-                    },
-                    contentPadding = PaddingValues(16.dp),
-                    shape = MaterialTheme.shapes.extraSmall
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Approve")
+                    if (purchaseOrder?.orderStatus == OrderStatus.PROCESSING) {
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(.7f)
+                                .padding(bottom = 16.dp),
+                            onClick = {
+                                purchaseOrderViewModel.updateOrderStatus(
+                                    id = purchaseOrderId,
+                                    status = OrderStatus.SHIPPED.name
+                                )
+                            },
+                            contentPadding = PaddingValues(16.dp),
+                            shape = MaterialTheme.shapes.extraSmall
+                        ) {
+                            Text(text = "Dispatch")
+                        }
+                    }
                 }
             }
         }
@@ -143,6 +169,7 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
                         text = purchaseOrder.orderStatus.name,
                         color = when (purchaseOrder.orderStatus) {
                             OrderStatus.PENDING -> Color(0xFFFFEB3B)
+                            OrderStatus.APPROVED -> colorResource(id = R.color.approved)
                             OrderStatus.PROCESSING -> Color(0xFF4CAF50)
                             OrderStatus.SHIPPED -> Color(0xFF2196F3)
                             OrderStatus.DELIVERED -> Color(0xFF4CAF50)
@@ -162,7 +189,7 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
         Spacer(modifier = Modifier.height(8.dp))
         OrderRow("Employee", purchaseOrder.employee)
         OrderRow("Supplier", purchaseOrder.supplier)
-        OrderRow("Expected Date", purchaseOrder.expectedDate)
+        OrderRow("Expected Date", purchaseOrder.formattedDate)
         Spacer(modifier = Modifier.height(16.dp))
 
         // Items
@@ -181,8 +208,6 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-
-        // Total Amount
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),

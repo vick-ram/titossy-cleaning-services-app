@@ -13,18 +13,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChevronLeft
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,7 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
@@ -54,8 +56,7 @@ import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Booking
 import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingServiceAddOns
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerPaymentViewModel
-import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
+import com.example.titossycleaningservicesapp.domain.viewmodel.PaymentViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,10 +71,33 @@ fun CheckOutScreen(
     val booking = bookingUiState.bookings?.find { it.bookingId == bookingId }
     var phone by rememberSaveable { mutableStateOf("") }
     var transactionCode by rememberSaveable { mutableStateOf("") }
-    val paymentViewModel: CustomerPaymentViewModel = hiltViewModel()
+    val paymentViewModel: PaymentViewModel = hiltViewModel()
+    val customerPaymentUiState by paymentViewModel.customerPaymentUIState.collectAsState()
 
     LaunchedEffect(bookingId) {
         bookingViewModel.fetchBookings()
+    }
+
+    LaunchedEffect(key1 = customerPaymentUiState) {
+        when {
+            customerPaymentUiState.isLoading -> {}
+            customerPaymentUiState.successMessage.isNotEmpty() -> {
+                Toast.makeText(
+                    context,
+                    customerPaymentUiState.successMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+                showDialog = false
+                navController.navigate(DetailsRoutes.BookingSuccess.route)
+            }
+            customerPaymentUiState.errorMessage.isNotEmpty() -> {
+                Toast.makeText(
+                    context,
+                    customerPaymentUiState.errorMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     Scaffold(
@@ -81,16 +105,13 @@ fun CheckOutScreen(
             CenterAlignedTopAppBar(
                 title = { },
                 navigationIcon = {
-                    NavigationIcon(
-                        icon = Icons.Outlined.ChevronLeft,
-                        onClick = { navController.popBackStack() }
-                    )
-                },
-                actions = {
-                    NavigationIcon(
-                        icon = Icons.Outlined.MoreVert,
-                        onClick = {}
-                    )
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            imageVector = Icons.Default.ChevronLeft,
+                            contentDescription = null
+                        )
+                    }
                 }
             )
         }
@@ -137,8 +158,6 @@ fun CheckOutScreen(
                             phoneNumber = phone,
                             transactionCode = code
                         )
-                        showDialog = false
-                        navController.navigate(DetailsRoutes.BookingSuccess.route)
                     },
                     onCancel = { showDialog = false },
                     phone = phone,
@@ -313,38 +332,114 @@ fun TransactionDialog(
     onPhoneChange: (String) -> Unit,
     onTransactionChange: (String) -> Unit
 ) {
-    var transactionCodeError by rememberSaveable { mutableStateOf(false) }
-    var phoneError by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onCancel,
         title = { Text("Confirm Transaction") },
         text = {
-            PaymentCard(
-                phone = phone,
-                transactionCode = transactionCode,
-                amount = booking?.amount ?: "",
-                onPhoneChange = {newPhone ->
-                    phoneError = !(newPhone.startsWith("01") || newPhone.startsWith("07")) || newPhone.length != 10
-                    if (!phoneError) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Image(
+                    modifier = Modifier.size(100.dp),
+                    painter = painterResource(id = R.drawable.mpesa_logo),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    value = phone,
+                    onValueChange = { newPhone ->
                         onPhoneChange(newPhone)
-                    }
-                },
-                onTransactionChange = { newTransactionCode ->
-                    transactionCodeError = !(newTransactionCode.any { it.isDigit() } && newTransactionCode.length == 10)
-                    if (!transactionCodeError) {
+                    },
+                    placeholder = {
+                        Text(
+                            text = "0182630465 or 07..",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(
+                                    0.5f
+                                )
+                            )
+                        )
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = transactionCode,
+                    onValueChange = { newTransactionCode ->
                         onTransactionChange(newTransactionCode.uppercase())
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp)),
+                    placeholder = {
+                        Text(
+                            text = "GSQRWO63DMA",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(
+                                    0.5f
+                                )
+                            )
+                        )
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+                    )
 
-                },
-                phoneError = phoneError,
-                transactionError = transactionCodeError
-            )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = booking?.amount ?: "",
+                    onValueChange = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.background,
+                            RoundedCornerShape(8.dp)
+                        ),
+                    placeholder = {
+                        Text(
+                            text = "Amount",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(
+                                    0.5f
+                                )
+                            )
+                        )
+                    },
+                    readOnly = true,
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
+                    )
+                )
+            }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (!phoneError && !transactionCodeError) {
+                    if (phone.isNotEmpty() && transactionCode.isNotEmpty()) {
                         onConfirm(
                             phone,
                             transactionCode.uppercase()
@@ -359,150 +454,14 @@ fun TransactionDialog(
             TextButton(onClick = onCancel) {
                 Text("Cancel")
             }
-        }
+        },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PaymentCard(
-    modifier: Modifier = Modifier,
-    phone: String,
-    transactionCode: String,
-    amount: String,
-    onPhoneChange: (String) -> Unit,
-    onTransactionChange: (String) -> Unit,
-    phoneError: Boolean,
-    transactionError: Boolean
-) {
-    Card(
-        modifier = modifier
-            .padding(vertical = 16.dp)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Image(
-                painter = painterResource(id = R.drawable.mpesa_logo),
-                contentDescription = null,
-                contentScale = ContentScale.Fit
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = phone,
-                onValueChange = onPhoneChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp)),
-                placeholder = {
-                    Text(
-                        text = "Phone",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                0.5f
-                            )
-                        )
-                    )
-                },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-                ),
-                isError = phoneError,
-                supportingText = {
-                    Text(
-                        text = "Phone must begin with 01 or 07",
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 12.sp
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = transactionCode,
-                onValueChange = {
-                    if (it.length <= 10) {
-                        onTransactionChange(it.uppercase())
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp)),
-                placeholder = {
-                    Text(
-                        text = "Transaction Code",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                0.5f
-                            )
-                        )
-                    )
-                },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-                ),
-                isError = transactionError,
-                supportingText = {
-                    Text(
-                        text = "Transaction code must contain at least one digit",
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 12.sp
-                    )
-                }
-
-                )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = amount,
-                onValueChange = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .background(
-                        MaterialTheme.colorScheme.background,
-                        RoundedCornerShape(8.dp)
-                    ),
-                placeholder = {
-                    Text(
-                        text = "Amount",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                0.5f
-                            )
-                        )
-                    )
-                },
-                readOnly = true,
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(0.2f)
-                )
-            )
-        }
-    }
-}
 
 
 

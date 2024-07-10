@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.domain.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
+import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderStatusUiState
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderUiState
 import com.example.titossycleaningservicesapp.domain.repository.PurchaseOrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,13 @@ class PurchaseOrderViewModel @Inject constructor(
 
     private val _purchaseOrderDataUiState = MutableStateFlow(PurchaseOrderUiState(isLoading = true))
     val purchaseOrderDataUiState = _purchaseOrderDataUiState.asStateFlow()
+
+    private val _purchaseOrderStatus = MutableStateFlow(PurchaseOrderStatusUiState(isLoading = true))
+    val purchaseOrderStatus = _purchaseOrderStatus.asStateFlow()
+
+    init {
+        fetchPurchaseOrders()
+    }
 
     fun createPurchaseOrder(
         supplierId: String,
@@ -120,7 +128,7 @@ class PurchaseOrderViewModel @Inject constructor(
         ).collectLatest { res ->
             when (res) {
                 is Resource.Error -> {
-                    _purchaseOrderDataUiState.update {
+                    _purchaseOrderStatus.update {
                         it.copy(
                             isLoading = false,
                             errorMessage = res.message.toString()
@@ -129,7 +137,7 @@ class PurchaseOrderViewModel @Inject constructor(
                 }
 
                 is Resource.Loading -> {
-                    _purchaseOrderDataUiState.update {
+                    _purchaseOrderStatus.update {
                         it.copy(
                             isLoading = true
                         )
@@ -137,14 +145,16 @@ class PurchaseOrderViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-                    _purchaseOrderDataUiState.update {
+                    _purchaseOrderStatus.update {
                         it.copy(
                             isLoading = false,
                             successMessage = res.data.toString()
                         )
                     }
+                    fetchPurchaseOrders()
                 }
             }
         }
+        _purchaseOrderStatus.update { it.copy(isLoading = false) }
     }
 }

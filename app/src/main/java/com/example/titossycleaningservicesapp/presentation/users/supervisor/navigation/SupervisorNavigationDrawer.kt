@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,10 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.util.NavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.DrawerUserInfo
-import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +42,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SupervisorNavigationDrawer(
     signOutSupervisor: () -> Unit,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    employeeViewModel: EmployeeViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -65,6 +64,7 @@ fun SupervisorNavigationDrawer(
     }
 
     ModalNavigationDrawer(
+        gesturesEnabled = showAppBar,
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
@@ -111,32 +111,33 @@ fun SupervisorNavigationDrawer(
                                     )
                                 }
 
-                                NavRoutes.Profile.route -> {
-                                    Text(
-                                        text = "Profile",
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                }
+                                NavRoutes.Profile.route -> {}
                             }
                         },
                         navigationIcon = {
-                            NavigationIcon(
-                                icon = Icons.Rounded.Menu,
-                                onClick = {
-                                    scope.launch {
-                                        drawerState.apply {
-                                            if (isClosed) open() else close()
-                                        }
+                            IconButton(onClick = {
+                                scope.launch {
+                                    drawerState.apply {
+                                        if (isClosed) open() else close()
                                     }
                                 }
-                            )
+                            }) {
+                                Icon(
+                                    modifier = Modifier.size(32.dp),
+                                    imageVector = Icons.Rounded.Menu,
+                                    contentDescription = "menu"
+                                )
+                            }
                         },
                         actions = {
                             Box(modifier = Modifier) {
-                                NavigationIcon(
-                                    icon = Icons.Rounded.MoreVert,
-                                    onClick = { expanded = !expanded }
-                                )
+                                IconButton(onClick = { expanded = !expanded }) {
+                                    Icon(
+                                        modifier = Modifier.size(32.dp),
+                                        imageVector = Icons.Rounded.MoreVert,
+                                        contentDescription = "more"
+                                    )
+                                }
                                 DropdownMenu(
                                     expanded = expanded,
                                     onDismissRequest = { expanded = false }
@@ -158,7 +159,9 @@ fun SupervisorNavigationDrawer(
         ) { innerPadding ->
             NavigationGraph(
                 navController = navController,
-                paddingValues = innerPadding
+                paddingValues = innerPadding,
+                mainViewModel = mainViewModel,
+                employeeViewModel = employeeViewModel
             )
         }
     }

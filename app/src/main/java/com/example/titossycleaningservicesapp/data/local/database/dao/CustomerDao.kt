@@ -64,5 +64,9 @@ interface CustomerDao {
     @Query("SELECT * FROM customers WHERE email = :input OR username = :input")
     suspend fun getCustomerByUsernameOrEmail(input: String) : CustomerEntity?
 
+    @Transaction
+    @Query("DELETE FROM customers")
+    suspend fun deleteAllCustomers()
+
 
 }

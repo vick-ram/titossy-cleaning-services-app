@@ -14,6 +14,7 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.Validation
 import com.example.titossycleaningservicesapp.presentation.auth.utils.Validations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class CustomerAuthViewModel @Inject constructor(
+class CustomerViewModel @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val dataStoreKeys: DataStoreKeys
 ) : ViewModel() {
@@ -59,6 +60,24 @@ class CustomerAuthViewModel @Inject constructor(
     private val _emailErrorMessage = MutableStateFlow("")
     val emailErrorMessage: StateFlow<String> = _emailErrorMessage.asStateFlow()
 
+    private val _usernameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
+    val usernameState: StateFlow<ValidationState> = _usernameState.asStateFlow()
+
+    private val _usernameErrorMessage = MutableStateFlow("")
+    val usernameErrorMessage: StateFlow<String> = _usernameErrorMessage.asStateFlow()
+
+    private val _firstnameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
+    val firstnameState: StateFlow<ValidationState> = _firstnameState.asStateFlow()
+
+    private val _firstnameErrorMessage = MutableStateFlow("")
+    val firstnameErrorMessage: StateFlow<String> = _firstnameErrorMessage.asStateFlow()
+
+    private val _lastnameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
+    val lastnameState: StateFlow<ValidationState> = _lastnameState.asStateFlow()
+
+    private val _lastnameErrorMessage = MutableStateFlow("")
+    val lastnameErrorMessage: StateFlow<String> = _lastnameErrorMessage.asStateFlow()
+
     private val _authEvent = Channel<AuthEvent>(Channel.BUFFERED)
     val authEvent = _authEvent.receiveAsFlow()
 
@@ -69,10 +88,77 @@ class CustomerAuthViewModel @Inject constructor(
     private val _customerUiState = MutableStateFlow(CustomerState(isLoading = true))
     val customerUiState: StateFlow<CustomerState> = _customerUiState
 
-
-
     init {
         getCustomers()
+    }
+
+    fun onFieldChange(type: FieldType, newValue: String) = viewModelScope.launch {
+        when(type) {
+            FieldType.EMAIL -> {
+                email = newValue
+                _emailState.value = Validations.isEmailValid(newValue)
+                if (_emailState.value is ValidationState.Valid) {
+                    _emailErrorMessage.emit("")
+                } else if (_emailState.value is ValidationState.Invalid) {
+                    _emailErrorMessage.emit((_emailState.value as ValidationState.Invalid).message)
+                }
+            }
+            FieldType.PASSWORD -> {
+                password = newValue
+                _passwordState.value = Validations.isPasswordValid(newValue)
+                if (_passwordState.value is ValidationState.Valid) {
+                    _passwordErrorMessage.emit("")
+                } else if (_passwordState.value is ValidationState.Invalid) {
+                    _passwordErrorMessage.emit((_passwordState.value as ValidationState.Invalid).message)
+                }
+            }
+            FieldType.PHONE -> {
+                phone = newValue
+                _phoneState.value = Validations.isPhoneValid(newValue)
+                if (_phoneState.value is ValidationState.Valid) {
+                    _phoneErrorMessage.emit("")
+                } else if (_phoneState.value is ValidationState.Invalid) {
+                    _phoneErrorMessage.emit((_phoneState.value as ValidationState.Invalid).message)
+                }
+            }
+
+            FieldType.USERNAME -> {
+                username = newValue
+                _usernameState.value = Validations.isValidName(newValue)
+                if (_usernameState.value is ValidationState.Valid) {
+                    _usernameErrorMessage.emit("")
+                } else if (_usernameState.value is ValidationState.Invalid) {
+                    _usernameErrorMessage.emit((_usernameState.value as ValidationState.Invalid).message)
+                }
+            }
+            FieldType.FIRST_NAME -> {
+                firstName = newValue
+                _firstnameState.value = Validations.isValidName(newValue)
+                if (_firstnameState.value is ValidationState.Valid) {
+                    _firstnameErrorMessage.emit("")
+                } else if (_firstnameState.value is ValidationState.Invalid) {
+                    _firstnameErrorMessage.emit((_firstnameState.value as ValidationState.Invalid).message)
+                }
+            }
+            FieldType.LAST_NAME -> {
+                lastName = newValue
+                _lastnameState.value = Validations.isValidName(newValue)
+                if (_lastnameState.value is ValidationState.Valid) {
+                    _lastnameErrorMessage.emit("")
+                } else if (_lastnameState.value is ValidationState.Invalid) {
+                    _lastnameErrorMessage.emit((_lastnameState.value as ValidationState.Invalid).message)
+                }
+            }
+        }
+    }
+
+    private fun resetSignFields() {
+        username = ""
+        firstName = ""
+        lastName = ""
+        phone = ""
+        email = ""
+        password = ""
     }
 
 
@@ -86,6 +172,7 @@ class CustomerAuthViewModel @Inject constructor(
         )
         if (result is AuthEvent.Success) {
             dataStoreKeys.saveUserTypeToDataStore("CUSTOMER")
+            resetSignFields()
         }
         sendEvent(result)
         isLoading = false
@@ -95,6 +182,9 @@ class CustomerAuthViewModel @Inject constructor(
         isLoading = true
         val result =
             customerRepository.createCustomer(username, firstName, lastName, phone, email, password)
+        if (result is AuthEvent.Success) {
+            resetSignFields()
+        }
         sendEvent(result)
         isLoading = false
     }
@@ -120,7 +210,10 @@ class CustomerAuthViewModel @Inject constructor(
         result.collect { res ->
             when (res) {
                 is Resource.Error -> {
-                    _customerUiState.value = CustomerState(error = res.message)
+                    _customerUiState.value = CustomerState(
+                        isLoading = false,
+                        error = res.message
+                    )
                 }
 
                 Resource.Loading -> {
@@ -128,7 +221,10 @@ class CustomerAuthViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-                    _customerUiState.value = CustomerState(customer = res.data)
+                    _customerUiState.value = CustomerState(
+                        isLoading = false,
+                        customer = res.data
+                    )
                 }
             }
         }
@@ -139,7 +235,10 @@ class CustomerAuthViewModel @Inject constructor(
         result.collect { res ->
             when (res) {
                 is Resource.Error -> {
-                    _customerUiState.value = CustomerState(error = res.message)
+                    _customerUiState.value = CustomerState(
+                        isLoading = false,
+                        error = res.message
+                    )
                 }
 
                 Resource.Loading -> {
@@ -147,7 +246,10 @@ class CustomerAuthViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-                    _customerUiState.value = CustomerState(customer = res.data)
+                    _customerUiState.value = CustomerState(
+                        isLoading = false,
+                        customer = res.data
+                    )
                 }
             }
         }
@@ -209,38 +311,13 @@ class CustomerAuthViewModel @Inject constructor(
             }
     }
 
-
-    fun onPasswordChange(newPassword: String) {
-        viewModelScope.launch {
-            _passwordState.value = Validations.isPasswordValid(newPassword)
-            if (_passwordState.value is ValidationState.Valid) {
-                _passwordErrorMessage.emit("")
-            } else if (_passwordState.value is ValidationState.Invalid) {
-                _passwordErrorMessage.emit((_passwordState.value as ValidationState.Invalid).message)
-            }
-        }
-    }
-
-    fun onPhoneChange(newPhone: String) {
-        viewModelScope.launch {
-            _phoneState.value = Validations.isPhoneValid(newPhone)
-            if (_phoneState.value is ValidationState.Valid) {
-                _phoneErrorMessage.emit("")
-            } else if (_phoneState.value is ValidationState.Invalid) {
-                _phoneErrorMessage.emit((_phoneState.value as ValidationState.Invalid).message)
-            }
-        }
-    }
-
-    fun onEmailChange(newEmail: String) {
-        viewModelScope.launch {
-            _emailState.value = Validations.isEmailValid(newEmail)
-            if (_emailState.value is ValidationState.Valid) {
-                _emailErrorMessage.emit("")
-            } else if (_emailState.value is ValidationState.Invalid) {
-                _emailErrorMessage.emit((_emailState.value as ValidationState.Invalid).message)
-            }
-        }
+    enum class FieldType{
+        EMAIL,
+        PASSWORD,
+        PHONE,
+        USERNAME,
+        FIRST_NAME,
+        LAST_NAME
     }
 
     override fun onCleared() {

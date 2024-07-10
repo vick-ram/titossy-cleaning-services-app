@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
@@ -46,6 +47,7 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
+import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
@@ -56,6 +58,12 @@ fun EmployeesSignIn(navController: NavHostController) {
     var togglePasswordVisibility by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val signInViewModel: EmployeeViewModel = hiltViewModel()
+
+    val emailState by signInViewModel.emailState.collectAsStateWithLifecycle()
+    val passwordState by signInViewModel.passwordState.collectAsStateWithLifecycle()
+
+    val emailError by signInViewModel.emailError.collectAsStateWithLifecycle()
+    val passwordError by signInViewModel.passwordError.collectAsStateWithLifecycle()
 
     LaunchedEffect(signInViewModel, context) {
         signInViewModel.resultChannel.collect { result ->
@@ -166,19 +174,29 @@ fun EmployeesSignIn(navController: NavHostController) {
 
                     CustomTextField(
                         value = signInViewModel.email,
-                        onValueChange = { signInViewModel.onEmailChange(it) },
+                        onValueChange = {
+                            signInViewModel.onFieldChange(
+                                EmployeeViewModel.FieldType.EMAIL, it
+                            )
+                        },
                         modifier = Modifier,
                         label = "email",
                         leadingIcon = Icons.Filled.Person,
                         keyBoardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Next
-                        )
+                        ),
+                        errorMessage = emailError,
+                        isError = emailState is ValidationState.Invalid
                     )
 
                     CustomTextField(
                         value = signInViewModel.password,
-                        onValueChange = { signInViewModel.onPasswordChange(it) },
+                        onValueChange = {
+                            signInViewModel.onFieldChange(
+                                EmployeeViewModel.FieldType.PASSWORD, it
+                            )
+                                        },
                         modifier = Modifier,
                         label = "Password",
                         leadingIcon = Icons.Filled.Lock,
@@ -198,7 +216,9 @@ fun EmployeesSignIn(navController: NavHostController) {
                             VisualTransformation.None
                         } else {
                             PassWordTransformation()
-                        }
+                        },
+                        errorMessage = passwordError,
+                        isError = passwordState is ValidationState.Invalid
                     )
 
                     CustomButton(
@@ -207,7 +227,7 @@ fun EmployeesSignIn(navController: NavHostController) {
                             signInViewModel.signIn()
                         },
                         modifier = Modifier.padding(16.dp),
-                        enabled = true
+                        enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
                     )
                 }
             }

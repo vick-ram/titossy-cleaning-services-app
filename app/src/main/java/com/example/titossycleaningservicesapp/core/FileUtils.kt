@@ -28,7 +28,7 @@ object FileUtils {
         return null
     }
 
-    private fun getFileName(context: Context, uri: Uri): String? {
+    fun getFileName(context: Context, uri: Uri): String? {
         val cursor = context.contentResolver.query(uri, null, null, null, null)
         cursor?.use {
             if (cursor.moveToFirst()) {

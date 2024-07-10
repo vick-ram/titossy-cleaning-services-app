@@ -1,20 +1,26 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import android.icu.text.DecimalFormat
+import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
+import com.example.titossycleaningservicesapp.core.dateUiFormat
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class PurchaseOrder(
     val purchaseOrderId: String,
     val employee: String,
     val supplier: String,
-    val expectedDate: String,
+    val expectedDate: LocalDate,
     val purchaseOrderItems: List<PurchaseOrderItem>? = null,
     val totalAmount: BigDecimal,
     val orderStatus: OrderStatus,
 ) {
     val formattedAmount: String
         get() = "Kshs. ${DecimalFormat("#,###.00").format(totalAmount)}"
+    val formattedDate: String
+        get() = expectedDate.format(dateUiFormat)
 }
 
 
@@ -35,6 +41,12 @@ data class PurchaseOrderUiState(
     val isLoading: Boolean = false,
     val purchaseOrder: PurchaseOrder? = null,
     val purchaseOrders: List<PurchaseOrder>? = null,
+    val successMessage: String = "",
+    val errorMessage: String = ""
+)
+
+data class PurchaseOrderStatusUiState(
+    val isLoading: Boolean = false,
     val successMessage: String = "",
     val errorMessage: String = ""
 )

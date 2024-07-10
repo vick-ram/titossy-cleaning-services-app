@@ -1,8 +1,11 @@
 package com.example.titossycleaningservicesapp.presentation.users.inventory.screens
 
 import android.content.ContentValues.TAG
+import android.icu.text.DecimalFormat
+import android.net.Uri
 import android.util.Log
-import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,25 +20,32 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,15 +66,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.FileUtils
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
 import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.presentation.utils.CustomSearch
 import com.example.titossycleaningservicesapp.presentation.utils.SearchTextField
+import kotlinx.coroutines.delay
+import java.math.BigDecimal
 
 @Composable
 fun HomeScreen(
@@ -73,10 +87,20 @@ fun HomeScreen(
     paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
+    var requestFile by remember { mutableStateOf<Uri?>(null) }
+    var fileName by remember { mutableStateOf("") }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            requestFile = uri
+            uri?.let {
+                fileName = FileUtils.getFileName(context, uri) ?: ""
+            }
+        }
     val productViewModel: ProductViewModel = hiltViewModel()
     val productsState by productViewModel.productDataUiState.collectAsState()
     val pUiState by productViewModel.productUiState.collectAsState()
-    val search = rememberSaveable { mutableStateOf(TextFieldValue("")) }
+    val search = remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(productsState, productViewModel) {
         productViewModel.fetchProducts()
@@ -84,78 +108,304 @@ fun HomeScreen(
 
     LaunchedEffect(pUiState) {
         when {
-            pUiState.isLoading -> {}
-
-            pUiState.successMessage.isNotEmpty() -> {
-                Toast.makeText(
-                    context,
-                    pUiState.successMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
+            pUiState.isLoading -> {
+                delay(100L)
             }
 
-            pUiState.errorMessage.isNotEmpty() -> {}
+            pUiState.successMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = pUiState.successMessage
+                )
+                productViewModel.fetchProducts()
+                openDialog = false
+            }
+
+            pUiState.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = pUiState.errorMessage
+                )
+            }
         }
     }
-
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        SearchTextField(
-            value = search.value,
-            onValueChange = {
-                search.value = it
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+        ) {
+            productsState.products?.let { products ->
+                OverviewSection(
+                    modifier = modifier.padding(horizontal = 8.dp),
+                    totalItems = products.size,
+                    totalValue = products.sumOf { it.unitPrice.toBigDecimal() * it.stock.toBigDecimal() }
+                )
             }
-        )
+            Spacer(modifier = modifier.height(8.dp))
 
-        when {
+            SearchTextField(
+                value = search.value,
+                onValueChange = {
+                    search.value = it
+                }
+            )
 
-            productsState.products != null -> {
-                productsState.products?.let { products ->
-                    CustomSearch(
-                        items = products,
-                        searchQuery = search,
-                        searchPredicate = { product: Product, query ->
-                            product.name.contains(query, ignoreCase = true)
-                        },
-                        itemContent = { product, modifier ->
-                            ProductCard(
-                                modifier = modifier,
-                                product = product,
-                                onRestock = { quantity ->
-                                    productViewModel.addProductToPurchaseOrder(
-                                        productId = product.productId,
-                                        quantity = quantity.toInt()
+            when {
+
+                productsState.products != null -> {
+                    productsState.products?.let { products ->
+                        CustomSearch(
+                            items = products,
+                            searchQuery = search,
+                            searchPredicate = { product: Product, query ->
+                                product.name.contains(query, ignoreCase = true)
+                            },
+                            itemContent = { product, modifier ->
+                                ProductCard(
+                                    modifier = modifier,
+                                    product = product,
+                                    onRestock = { quantity ->
+                                        productViewModel.addProductToPurchaseOrder(
+                                            productId = product.productId,
+                                            quantity = quantity.toInt()
+                                        )
+                                        navController.navigate("purchaseOrder")
+                                    },
+                                    onDelete = { productViewModel.deleteProduct(it.productId) }
+                                )
+                            },
+                            key = { product -> product.productId }
+                        )
+                    }
+                }
+
+                productsState.isLoading -> {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CustomProgressIndicator(isLoading = true)
+                    }
+                }
+
+                productsState.errorMessage.isNotEmpty() -> {
+                    Log.d(TAG, "HomeScreen: ${productsState.errorMessage}")
+                }
+            }
+            if (openDialog) {
+                AlertDialog(
+                    onDismissRequest = { openDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                requestFile?.let {
+                                    productViewModel.createProduct(
+                                        context = context,
+                                        uri = it
                                     )
-                                    navController.navigate("purchaseOrder")
+                                }
+                            },
+                            enabled = productViewModel.name.isNotBlank()
+                                    && productViewModel.description.isNotBlank()
+                                    && productViewModel.price.isNotBlank()
+                        ) {
+                            Text(text = "Create")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { openDialog = false }) {
+                            Text(text = "Cancel")
+                        }
+                    },
+                    title = {
+                        Text(text = "Add new inventory")
+                    },
+                    text = {
+                        Column(
+                            modifier = modifier
+                                .fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = productViewModel.name,
+                                onValueChange = { productViewModel.name = it },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "Name",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                        )
+                                    )
                                 },
-                                onDelete = { productViewModel.deleteProduct(it.productId) }
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                             )
-                        },
-                        key = { product -> product.productId }
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = productViewModel.description,
+                                onValueChange = { productViewModel.description = it },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "Description",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                        )
+                                    )
+                                },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = productViewModel.price,
+                                onValueChange = { productViewModel.price = it },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "Price",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                        )
+                                    )
+                                },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = productViewModel.stock,
+                                onValueChange = { productViewModel.stock = it },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "Stock",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                        )
+                                    )
+                                },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = productViewModel.reorderLevel,
+                                onValueChange = { productViewModel.reorderLevel = it },
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "Reorder Level",
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                        )
+                                    )
+                                },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
+                            OutlinedTextField(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                value = fileName,
+                                onValueChange = { fileName = it },
+                                readOnly = true,
+                                shape = MaterialTheme.shapes.medium,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                trailingIcon = {
+                                    IconButton(onClick = {
+                                        launcher.launch("image/*")
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.AttachFile,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    },
+                    properties = DialogProperties(
+                        dismissOnBackPress = false,
+                        dismissOnClickOutside = false
                     )
-                }
-            }
-
-            productsState.isLoading -> {
-                Box(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CustomProgressIndicator(isLoading = true)
-                }
-            }
-
-            productsState.errorMessage.isNotEmpty() -> {
-                Log.d(TAG, "HomeScreen: ${productsState.errorMessage}")
+                )
             }
         }
+        FloatingActionButton(
+            modifier = modifier
+                .align(Alignment.BottomEnd)
+                .systemBarsPadding()
+                .padding(bottom = 16.dp, end = 16.dp),
+            onClick = { openDialog = true }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null
+            )
+        }
     }
-    CustomProgressIndicator(isLoading = productsState.isLoading)
 }
 
 @Composable
@@ -259,59 +509,108 @@ fun ProductCard(
 
     }
     if (showDialog) {
-        Dialog(
-            onDismissRequest = { showDialog = false }
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                    .padding(16.dp)
-            ) {
-
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onRestock(quantity)
+                        showDialog = false
+                    },
+                    enabled = quantity.isNotEmpty()
+                ) {
+                    Text(text = "Ok")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(text = "Close")
+                }
+            },
+            title = {
                 Text(
                     text = "Enter Restock Quantity",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-
-                BasicTextField(
+            },
+            text = {
+                TextField(
+                    modifier = modifier
+                        .focusRequester(focusRequester),
                     value = quantity,
                     onValueChange = { quantity = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {
                         onRestock(quantity)
                         showDialog = false
                     }),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(8.dp)
-                        .focusRequester(focusRequester),
                 )
+            }
+        )
+    }
+}
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(
-                        onClick = {
-                            onRestock(quantity)
-                            showDialog = false
-                        },
-                        enabled = quantity.isNotEmpty()
-                    ) {
-                        Text(text = "OK")
-                    }
+@Composable
+fun OverviewSection(
+    modifier: Modifier = Modifier,
+    totalItems: Int,
+    totalValue: BigDecimal
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFCC80),
+            contentColor = Color(0xFF424242)
+        )
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Inventory Overview",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Spacer(modifier = modifier.height(8.dp))
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = "Total Items",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = totalItems.toString(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Column {
+                    Text(
+                        text = "Total Value",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Kshs. ${DecimalFormat("#,###.00").format(totalValue)}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
     }
 }
+
+
+

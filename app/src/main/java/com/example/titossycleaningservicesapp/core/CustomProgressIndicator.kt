@@ -7,19 +7,30 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 @Composable
 fun CustomProgressIndicator(
@@ -96,5 +107,56 @@ private fun DrawScope.drawAutumnProgressCircle(
         color = color,
         radius = radius,
         style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+    )
+}
+
+@Composable
+fun LoadingButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
+    text: String = "Button",
+    loadingText: String = "Loading...",
+    contentColor: Color = MaterialTheme.colorScheme.primary,
+    shape: Shape = MaterialTheme.shapes.large
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,enabled = enabled,
+        colors = ButtonDefaults.buttonColors(contentColor = contentColor),
+        contentPadding = PaddingValues(16.dp),
+        shape = shape
+    ) {
+        if (isLoading) {
+            LoadingAnimation(
+                text = loadingText,
+                color = contentColor
+            )
+        } else {
+            Text(text = text)
+        }
+    }
+}
+
+@Composable
+fun LoadingAnimation(
+    text: String,
+    color: Color
+) {
+    var dots by rememberSaveable { mutableStateOf("") }
+    val dotCount = 3
+
+    LaunchedEffect(key1 = Unit) {while (true) {
+        dots = (1..dotCount).joinToString("") { ".".repeat(it) }
+        delay(500)
+        dots = ""
+        delay(500)
+    }
+    }
+
+    Text(
+        text = "$text $dots",
+        color = color
     )
 }

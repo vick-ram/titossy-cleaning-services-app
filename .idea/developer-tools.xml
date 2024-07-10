@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="color-picker">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="jwt-encoder-decoder">
     <developerToolsConfigurations>
       <developerToolConfiguration developerToolId="text-filter" id="1a368d84-a38c-4bbd-a376-2266f1eac525" name="Workbench">
         <properties>
@@ -35,9 +35,9 @@
       <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="d0667ec3-3440-462b-88e8-7380ea03755c" name="Workbench">
         <properties>
           <property key="headerText" type="INPUT" value="kotlin.String|{&#13;&#10;  &quot;alg&quot;:&quot;HS256&quot;,&#13;&#10;  &quot;typ&quot;:&quot;JWT&quot;&#13;&#10;}" />
-          <property key="payloadText" type="INPUT" value="kotlin.String|{&#13;&#10;  &quot;sub&quot;:&quot;91e60fa8-cd77-4a20-9d0a-45030999bb9f&quot;,&#13;&#10;  &quot;aud&quot;:&quot;http://0.0.0.0:8080/hello&quot;,&#13;&#10;  &quot;iss&quot;:&quot;http://0.0.0.0:8080/&quot;,&#13;&#10;  &quot;email&quot;:&quot;Josephine.Ward@gmail.com&quot;,&#13;&#10;  &quot;username&quot;:&quot;Jerel.Mante&quot;,&#13;&#10;  &quot;role&quot;:&quot;INVENTORY&quot;,&#13;&#10;  &quot;exp&quot;:1750330783&#13;&#10;}" />
+          <property key="payloadText" type="INPUT" value="kotlin.String|{&#13;&#10;  &quot;sub&quot;:&quot;01667cc8-2084-4513-be95-1e823fbcce77&quot;,&#13;&#10;  &quot;aud&quot;:&quot;http://0.0.0.0:8080/hello&quot;,&#13;&#10;  &quot;iss&quot;:&quot;http://0.0.0.0:8080/&quot;,&#13;&#10;  &quot;email&quot;:&quot;benson@gmail.com&quot;,&#13;&#10;  &quot;username&quot;:null,&#13;&#10;  &quot;exp&quot;:1751030143&#13;&#10;}" />
           <property key="secret" type="SECRET" value="kotlin.String|SAVED_IN_KEYSTORE" />
-          <property key="encodedText" type="INPUT" value="kotlin.String|ew0KICAiYWxnIjoiSFMyNTYiLA0KICAidHlwIjoiSldUIg0KfQ.ew0KICAic3ViIjoiOTFlNjBmYTgtY2Q3Ny00YTIwLTlkMGEtNDUwMzA5OTliYjlmIiwNCiAgImF1ZCI6Imh0dHA6Ly8wLjAuMC4wOjgwODAvaGVsbG8iLA0KICAiaXNzIjoiaHR0cDovLzAuMC4wLjA6ODA4MC8iLA0KICAiZW1haWwiOiJKb3NlcGhpbmUuV2FyZEBnbWFpbC5jb20iLA0KICAidXNlcm5hbWUiOiJKZXJlbC5NYW50ZSIsDQogICJyb2xlIjoiSU5WRU5UT1JZIiwNCiAgImV4cCI6MTc1MDMzMDc4Mw0KfQ.ZXcwS0lDQWlZV3huSWpvaVNGTXlOVFlpTEEwS0lDQWlkSGx3SWpvaVNsZFVJZzBLZlEuLkcwdFk2aG1ydGJNd2R6NkZ1cnBXSlhkZXNQNUZrYUo3WnBvNTk3ZktNYlU" />
+          <property key="encodedText" type="INPUT" value="kotlin.String|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTY2N2NjOC0yMDg0LTQ1MTMtYmU5NS0xZTgyM2ZiY2NlNzciLCJhdWQiOiJodHRwOi8vMC4wLjAuMDo4MDgwL2hlbGxvIiwiaXNzIjoiaHR0cDovLzAuMC4wLjA6ODA4MC8iLCJlbWFpbCI6ImJlbnNvbkBnbWFpbC5jb20iLCJ1c2VybmFtZSI6bnVsbCwiZXhwIjoxNzUxMDMwMTQzfQ.iRsZd3g-gAmncJk31FaEHr9xC5LIu9UtnOIZ1bJDtOE" />
           <property key="privateKey" type="SECRET" value="kotlin.String|SAVED_IN_KEYSTORE" />
         </properties>
       </developerToolConfiguration>

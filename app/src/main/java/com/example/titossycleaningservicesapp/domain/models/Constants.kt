@@ -21,5 +21,13 @@ enum class Frequency {
 }
 
 enum class OrderStatus {
-    PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+    PENDING, APPROVED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+}
+
+enum class BookingStatus {
+    PENDING, APPROVED, IN_PROGRESS, COMPLETED, CANCELLED,
+}
+
+enum class PaymentStatus {
+    PENDING, CONFIRMED, REFUNDED, CANCELLED
 }

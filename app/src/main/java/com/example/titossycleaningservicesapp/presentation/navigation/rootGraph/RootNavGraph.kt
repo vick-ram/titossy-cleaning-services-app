@@ -3,10 +3,8 @@ package com.example.titossycleaningservicesapp.presentation.navigation.rootGraph
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,12 +13,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.PaymentViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.authGraph.authNavGraph
 import com.example.titossycleaningservicesapp.presentation.ui.OnBoardingScreen
 import com.example.titossycleaningservicesapp.presentation.users.navigation.usersNavigation
@@ -35,6 +38,11 @@ fun RootNavGraph(
     startDestination: String,
     dataStoreKeys: DataStoreKeys
 ) {
+
+    val employeeViewModel: EmployeeViewModel = hiltViewModel()
+    val supplierViewModel: SupplierViewModel = hiltViewModel()
+    val customerViewModel: CustomerViewModel = hiltViewModel()
+    val paymentViewModel: PaymentViewModel = hiltViewModel()
 
     var userType by rememberSaveable { mutableStateOf<String?>(null) }
     var isLoading by rememberSaveable { mutableStateOf(true) }
@@ -78,7 +86,10 @@ fun RootNavGraph(
                     }
                 )
             }
-            authNavGraph(navController)
+            authNavGraph(
+                navController = navController,
+                customerViewModel = customerViewModel
+            )
             usersNavigation(
                 signOut = {
                     mainViewModel.signOut()
@@ -90,10 +101,11 @@ fun RootNavGraph(
                 },
                 startDestination = usersStartDestination,
                 mainViewModel = mainViewModel,
-                onHomeClick = {
-                    navController.popBackStack()
-                    navController.navigate(RootNavRoutes.HOME.route)
-                }
+                employeeViewModel = employeeViewModel,
+                supplierAuthViewModel = supplierViewModel,
+                paymentViewModel = paymentViewModel,
+                /*dialog = dialog,
+                openDialog = { dialog = it}*/
             )
         }
     }

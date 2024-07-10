@@ -78,7 +78,8 @@ class PurchaseOrderRepositoryImpl @Inject constructor(
             )
             when(response.status) {
                 "success" -> {
-                    response.data?.let { emit(Resource.Success(it)) }
+                    val message = response.message
+                    message?.let { emit(Resource.Success(it)) }
                 }
                 "error" -> {
                     if (response.error !=null) {

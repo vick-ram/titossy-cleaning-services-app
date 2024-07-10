@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -34,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
-import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingStatus
+import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.util.BookingRoutes
 
@@ -47,11 +49,12 @@ fun HomeScreen(
 
     val bookingViewModel: BookingViewModel = hiltViewModel()
     val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
-    val allBookings = bookingUiState.bookings?.size
-    val pendingBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.PENDING }?.size
-    val approvedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.APPROVED }?.size
-    val inProgressBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size
-    val completedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size
+    val allBookings = bookingUiState.bookings?.size ?: 0
+    val pendingBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.PENDING }?.size ?: 0
+    val approvedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.APPROVED }?.size ?: 0
+    val inProgressBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size ?: 0
+    val completedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size ?: 0
+    val cancelledBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.CANCELLED }?.size ?: 0
 
     LaunchedEffect(key1 = bookingViewModel) {
         bookingViewModel.fetchBookings()
@@ -163,7 +166,7 @@ fun HomeScreen(
                 modifier = modifier
                     .weight(1f),
                 onClick = {
-                    navController.navigate(BookingRoutes.InProgressBookings.route)
+                    navController.navigate(BookingRoutes.ApprovedBookings.route)
                           },
                 elevation = CardDefaults.elevatedCardElevation(
                     defaultElevation = 4.dp,
@@ -186,7 +189,7 @@ fun HomeScreen(
                     modifier = modifier
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
-                    text = "$inProgressBookings",
+                    text = approvedBookings.toString(),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
@@ -205,7 +208,7 @@ fun HomeScreen(
                 modifier = modifier
                     .weight(1f),
                 onClick = {
-                    navController.navigate(BookingRoutes.CompletedBookings.route)
+                    navController.navigate(BookingRoutes.InProgressBookings.route)
                 },
                 elevation = CardDefaults.elevatedCardElevation(
                     defaultElevation = 4.dp,
@@ -218,11 +221,62 @@ fun HomeScreen(
                         .padding(top = 4.dp)
                         .size(60.dp)
                         .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.Sync,
+                    contentDescription = "in progress bookings",
+                    tint = colorResource(id = R.color.in_progress)
+                )
+                Spacer(modifier = modifier.height(8.dp))
+                Text(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = "$inProgressBookings",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = modifier.height(8.dp))
+                Text(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = "IN PROGRESS",
+                    color = colorResource(id = R.color.in_progress),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        Spacer(modifier = modifier.height(16.dp))
+
+        Row(
+            modifier = modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            ElevatedCard(
+                modifier = modifier
+                    .weight(1f),
+                onClick = {
+                    navController.navigate(BookingRoutes.CompletedBookings.route)
+                },
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
+                ),
+                colors = CardDefaults.elevatedCardColors(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
                     imageVector = Icons.Filled.CheckBox,
                     contentDescription = "completed bookings",
                     tint = colorResource(id = R.color.completed)
                 )
-                Spacer(modifier = modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     modifier = modifier
                         .padding(8.dp)
@@ -242,47 +296,47 @@ fun HomeScreen(
                     textAlign = TextAlign.Center
                 )
             }
-        }
-        ElevatedCard(
-            modifier = modifier
-                .fillMaxWidth(.45f),
-            onClick = {
-                navController.navigate(BookingRoutes.CompletedBookings.route)
-            },
-            elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 4.dp,
-                pressedElevation = 6.dp
-            ),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Icon(
+            ElevatedCard(
                 modifier = modifier
-                    .padding(top = 4.dp)
-                    .size(60.dp)
-                    .align(Alignment.CenterHorizontally),
-                imageVector = Icons.Filled.CheckBox,
-                contentDescription = "approved bookings",
-                tint = colorResource(id = R.color.approved)
-            )
-            Spacer(modifier = modifier.height(8.dp))
-            Text(
-                modifier = modifier
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally),
-                text = "$approvedBookings",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = modifier.height(8.dp))
-            Text(
-                modifier = modifier
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally),
-                text = "APPROVED",
-                color = colorResource(id = R.color.approved),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
+                    .weight(1f),
+                onClick = {
+                    navController.navigate(BookingRoutes.CancelledBookings.route)
+                },
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 4.dp,
+                    pressedElevation = 6.dp
+                ),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Icon(
+                    modifier = modifier
+                        .padding(top = 4.dp)
+                        .size(60.dp)
+                        .align(Alignment.CenterHorizontally),
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "cancelled bookings",
+                    tint = Color.Red
+                )
+                Spacer(modifier = modifier.height(8.dp))
+                Text(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = "$cancelledBookings",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = modifier.height(8.dp))
+                Text(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = "CANCELLED",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

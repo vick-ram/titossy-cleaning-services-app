@@ -21,3 +21,10 @@ data class Employee(
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )
+
+data class EmployeeUiState(
+    val isLoading: Boolean = false,
+    val employee: Employee? = null,
+    val employees: List<Employee>? = null,
+    val errorMessage: String = ""
+)

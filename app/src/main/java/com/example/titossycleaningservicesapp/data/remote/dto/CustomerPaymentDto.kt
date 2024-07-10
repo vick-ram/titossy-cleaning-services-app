@@ -1,6 +1,8 @@
 package com.example.titossycleaningservicesapp.data.remote.dto
 
+import com.example.titossycleaningservicesapp.domain.models.PaymentStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CustomerPayment
+import java.time.LocalDateTime
 
 data class CustomerPaymentDto(
     val paymentId: String,
@@ -16,12 +18,12 @@ data class CustomerPaymentDto(
     fun toCustomerPayment() = CustomerPayment(
         paymentId,
         bookingId,
-        amount,
+        amount.toBigDecimal(),
         paymentMethod,
         phoneNumber,
         transactionCode,
-        paymentStatus,
-        createdAt,
-        updatedAt
+        PaymentStatus.valueOf(paymentStatus),
+        LocalDateTime.parse(createdAt),
+        LocalDateTime.parse(updatedAt)
     )
 }

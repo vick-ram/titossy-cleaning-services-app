@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.navigation
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -14,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.BookingsScreen
+import com.example.titossycleaningservicesapp.presentation.users.customer.screens.FAQsScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.ServiceDetailsScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.SettingsScreen
@@ -24,13 +26,13 @@ import com.example.titossycleaningservicesapp.presentation.users.customer.utils.
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoute
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.NavRoutes
+import kotlin.math.log
 
 @Composable
 fun NavigationGraph(
     onSignOut: () -> Unit,
     navController: NavHostController,
-    paddingValues: PaddingValues,
-    onHomClick: () -> Unit
+    paddingValues: PaddingValues
 ) {
     NavHost(
         modifier = Modifier.animateContentSize(),
@@ -42,14 +44,29 @@ fun NavigationGraph(
             HomeScreen(navController, paddingValues, onSignOut)
         }
         composable(CustomerBottomRoutes.Bookings.route) {
-            BookingsScreen(navController, paddingValues)
+            BookingsScreen( paddingValues = paddingValues)
         }
 
         composable(CustomerBottomRoutes.Settings.route) {
             SettingsScreen(paddingValues = paddingValues)
         }
 
-        detailsGraph(navController = navController, onHomClick = onHomClick)
+        detailsGraph(
+            navController = navController,
+            onHomClick = {
+                navController.navigate(NavRoutes.Home.route) {
+                    popUpTo(DetailsRoute.DETAILS.name){
+                        inclusive = true
+                    }
+                }
+            }
+        )
+        composable("FAQs") {
+            FAQsScreen(
+                navController = navController,
+                paddingValues = paddingValues
+            )
+        }
     }
 }
 
@@ -76,7 +93,7 @@ fun NavGraphBuilder.detailsGraph(
         composable(DetailsRoutes.BookingDetails.route) {
             BookingDataScreen(navController = navController)
         }
-        composable(DetailsRoutes.CheckOut.route  + "/{bookingId}") { backStack ->
+        composable(DetailsRoutes.CheckOut.route + "/{bookingId}") { backStack ->
             val bookingId = backStack.arguments?.getString("bookingId")
             bookingId?.let {
                 CheckOutScreen(bookingId = it, navController = navController)

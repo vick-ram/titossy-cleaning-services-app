@@ -34,7 +34,12 @@ object ApiConstants {
     const val CLEAR_CART = "$CART/clear"
 
     const val BOOKING = "api/booking"
+    const val BOOKING_CUSTOMER = "api/booking/customer"
     const val BOOKING_ID = "$BOOKING/{id}"
+    const val ASSIGN = "$BOOKING/assign"
+    const val ASSIGN_ID = "$ASSIGN/{bookingId}"
+    const val ASSIGN_CLEANER = "$ASSIGN/cleaner"
+    const val FEEDBACK = "api/feedback"
 
     const val PAYMENT = "api/payment"
     const val CUSTOMER_PAYMENT = "$PAYMENT/customer"

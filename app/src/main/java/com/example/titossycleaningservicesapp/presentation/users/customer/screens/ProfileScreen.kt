@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +34,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,7 +54,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -66,7 +63,7 @@ import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.splitFullName
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Customer
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 
 @Composable
@@ -77,7 +74,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val mainViewModel: MainViewModel = hiltViewModel()
     var customerId by rememberSaveable { mutableStateOf<String?>(null) }
-    val viewModel: CustomerAuthViewModel = hiltViewModel()
+    val viewModel: CustomerViewModel = hiltViewModel()
     val customerState by viewModel.customerUiState.collectAsStateWithLifecycle()
     val customer = customerState.customers?.find { it.id.toString() == customerId }
     val focusRequester = remember { FocusRequester() }
@@ -230,7 +227,6 @@ fun CustomerSettings(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileItem(
     title: String,
@@ -252,8 +248,8 @@ fun ProfileItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                 unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
             )
@@ -468,13 +464,5 @@ fun CustomProfileTextField(
             }
         )
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CustomDatePicker(modifier: Modifier = Modifier) {
-    val datePickerState = rememberDatePickerState()
-
 }
 

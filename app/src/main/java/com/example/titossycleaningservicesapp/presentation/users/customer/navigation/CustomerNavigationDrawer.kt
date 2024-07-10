@@ -17,8 +17,7 @@ import com.example.titossycleaningservicesapp.presentation.users.customer.utils.
 
 @Composable
 fun CustomerBottomNavigation(
-    onSignOut: () -> Unit,
-    onHomeClick: () -> Unit
+    onSignOut: () -> Unit
 ) {
     val navController = rememberNavController()
     val bottomItems = CustomerBottomRoutes.entries
@@ -71,8 +70,7 @@ fun CustomerBottomNavigation(
         NavigationGraph(
             onSignOut = onSignOut,
             navController = navController,
-            paddingValues = innerPadding,
-            onHomClick = onHomeClick
+            paddingValues = innerPadding
         )
     }
 }

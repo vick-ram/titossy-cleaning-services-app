@@ -38,6 +38,14 @@ interface SupplierDao {
     suspend fun updateSupplier(supplier: SupplierEntity)
 
     @Transaction
+    @Query("UPDATE suppliers SET status = :status WHERE supplier_id = :id")
+    suspend fun updateSupplierStatus(id: String, status: String)
+
+    @Transaction
     @Delete
     suspend fun deleteSupplier(supplier: SupplierEntity)
+
+    @Transaction
+    @Query("DELETE FROM suppliers")
+    suspend fun deleteAllSuppliers()
 }

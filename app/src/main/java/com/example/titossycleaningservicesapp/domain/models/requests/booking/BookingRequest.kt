@@ -1,6 +1,8 @@
 package com.example.titossycleaningservicesapp.domain.models.requests.booking
 
+import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.Frequency
+import java.util.UUID
 
 data class BookingRequest(
     val bookingDate: String,
@@ -11,9 +13,11 @@ data class BookingRequest(
 )
 
 data class UpdateBookingStatus(
-    val bookingStatus: BookingStatus
+    val status: BookingStatus
 )
 
-enum class BookingStatus {
-    PENDING, APPROVED, IN_PROGRESS, COMPLETED, CANCELLED,
-}
+data class AssignBooking(
+    val bookingId: String,
+    val cleanerId: UUID
+)
+

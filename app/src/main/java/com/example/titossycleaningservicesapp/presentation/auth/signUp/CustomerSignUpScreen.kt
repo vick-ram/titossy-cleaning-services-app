@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,14 +46,13 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.rememberImeState
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
-import kotlinx.coroutines.launch
 
 @Composable
 fun CustomerSignUpScreen(
@@ -63,9 +60,8 @@ fun CustomerSignUpScreen(
     navController: NavHostController
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
-    val signUpViewModel: CustomerAuthViewModel = hiltViewModel()
+    val signUpViewModel: CustomerViewModel = hiltViewModel()
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     val passwordState by signUpViewModel.passwordState.collectAsStateWithLifecycle()
     val passwordErrorMessage by signUpViewModel.passwordErrorMessage.collectAsStateWithLifecycle()
@@ -73,6 +69,14 @@ fun CustomerSignUpScreen(
     val emailErrorMessage by signUpViewModel.emailErrorMessage.collectAsStateWithLifecycle()
     val phoneState by signUpViewModel.phoneState.collectAsStateWithLifecycle()
     val phoneErrorMessage by signUpViewModel.phoneErrorMessage.collectAsStateWithLifecycle()
+
+    val usernameState by signUpViewModel.usernameState.collectAsStateWithLifecycle()
+    val firstNameState by signUpViewModel.firstnameState.collectAsStateWithLifecycle()
+    val lastNameState by signUpViewModel.lastnameState.collectAsStateWithLifecycle()
+
+    val usernameErrorMessage by signUpViewModel.usernameErrorMessage.collectAsStateWithLifecycle()
+    val firstNameErrorMessage by signUpViewModel.firstnameErrorMessage.collectAsStateWithLifecycle()
+    val lastNameErrorMessage by signUpViewModel.lastnameErrorMessage.collectAsStateWithLifecycle()
 
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
@@ -106,7 +110,9 @@ fun CustomerSignUpScreen(
         ) {
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -147,7 +153,9 @@ fun CustomerSignUpScreen(
                 CustomTextField(
                     value = signUpViewModel.username,
                     onValueChange = {
-                        signUpViewModel.username = it
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.USERNAME, it
+                        )
                     },
                     modifier = Modifier,
                     label = "Username",
@@ -155,24 +163,36 @@ fun CustomerSignUpScreen(
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    errorMessage = usernameErrorMessage,
+                    isError = usernameState is ValidationState.Invalid
                 )
 
                 CustomTextField(
                     value = signUpViewModel.firstName,
-                    onValueChange = { signUpViewModel.firstName = it },
+                    onValueChange = {
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.FIRST_NAME, it
+                        )
+                    },
                     modifier = Modifier,
                     label = "First Name",
                     leadingIcon = Icons.Filled.Person,
                     keyBoardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    errorMessage = firstNameErrorMessage,
+                    isError = firstNameState is ValidationState.Invalid
                 )
 
                 CustomTextField(
                     value = signUpViewModel.lastName,
-                    onValueChange = { signUpViewModel.lastName = it },
+                    onValueChange = {
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.LAST_NAME, it
+                        )
+                    },
                     modifier = Modifier,
                     label = "Last Name",
                     leadingIcon = Icons.Filled.Person,
@@ -180,13 +200,17 @@ fun CustomerSignUpScreen(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
                     ),
+                    errorMessage = lastNameErrorMessage,
+                    isError = lastNameState is ValidationState.Invalid
                 )
 
                 CustomTextField(
                     value = signUpViewModel.phone,
-                    onValueChange = {
-                        signUpViewModel.phone = it
-                        signUpViewModel.onPhoneChange(it)
+                    onValueChange = { newPhone ->
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.PHONE,
+                            newPhone
+                        )
                     },
                     modifier = Modifier,
                     label = "Phone",
@@ -196,15 +220,16 @@ fun CustomerSignUpScreen(
                         imeAction = ImeAction.Next
                     ),
                     errorMessage = phoneErrorMessage,
-                    isError = phoneState is ValidationState.Invalid,
-                    trailingIcon = if (phoneState is ValidationState.Valid) Icons.Outlined.Info else null
+                    isError = phoneState is ValidationState.Invalid
                 )
 
                 CustomTextField(
                     value = signUpViewModel.email,
-                    onValueChange = {
-                        signUpViewModel.email = it
-                        signUpViewModel.onEmailChange(it)
+                    onValueChange = { newEmail ->
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.EMAIL,
+                            newEmail
+                        )
                     },
                     modifier = Modifier,
                     label = "Email",
@@ -214,15 +239,16 @@ fun CustomerSignUpScreen(
                         imeAction = ImeAction.Next
                     ),
                     errorMessage = emailErrorMessage,
-                    isError = emailState is ValidationState.Invalid,
-                    trailingIcon = if (emailState is ValidationState.Valid) Icons.Outlined.Info else null
+                    isError = emailState is ValidationState.Invalid
                 )
 
                 CustomTextField(
                     value = signUpViewModel.password,
-                    onValueChange = {
-                        signUpViewModel.password = it
-                        signUpViewModel.onPasswordChange(it)
+                    onValueChange = { newPassword ->
+                        signUpViewModel.onFieldChange(
+                            CustomerViewModel.FieldType.PASSWORD,
+                            newPassword
+                        )
                     },
                     modifier = Modifier,
                     label = "Password",
@@ -248,13 +274,14 @@ fun CustomerSignUpScreen(
 
                 CustomButton(
                     text = "Register",
-                    onClick = {
-                        scope.launch {
-                            signUpViewModel.signUp()
-                        }
-                    },
+                    onClick = { signUpViewModel.signUp() },
                     modifier = Modifier,
-                    enabled = true
+                    enabled = usernameState is ValidationState.Valid &&
+                            firstNameState is ValidationState.Valid &&
+                            lastNameState is ValidationState.Valid &&
+                            phoneState is ValidationState.Valid &&
+                            emailState is ValidationState.Valid &&
+                            passwordState is ValidationState.Valid
                 )
             }
         }

@@ -1,5 +1,10 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
+import android.content.Context
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
@@ -29,6 +34,50 @@ class ProductViewModel @Inject constructor(
 
     private val _productCartUiState = MutableStateFlow(ProductCartUiState(isLoading = true))
     val productCartUiState = _productCartUiState.asStateFlow()
+
+    var name by mutableStateOf("")
+    var description by mutableStateOf("")
+    var price by mutableStateOf("")
+    var image by mutableStateOf("")
+    var stock by mutableStateOf("")
+    var reorderLevel by mutableStateOf("")
+
+    fun createProduct(
+        context: Context,
+        uri: Uri
+    ) = viewModelScope.launch {
+        productRepository.createProduct(
+            context, uri, name, description, price, stock, reorderLevel
+        ).collect { resource ->
+            when(resource) {
+                is Resource.Error -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = resource.message.toString()
+                        )
+                    }
+                }
+                is Resource.Loading -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+                is Resource.Success -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = resource.data.toString()
+                        )
+                    }
+                    fetchProducts()
+                }
+            }
+        }
+        _productUiState.update { it.copy(isLoading = false) }
+    }
 
 
     fun fetchProducts() = viewModelScope.launch {
@@ -133,7 +182,7 @@ class ProductViewModel @Inject constructor(
     }
 
     fun deleteProduct(productId: String) = viewModelScope.launch {
-        productRepository.deleteProductFromCart(productId)
+        productRepository.deleteProduct(productId)
             .collectLatest { resource ->
                 when (resource) {
                     is Resource.Error -> {
@@ -160,6 +209,7 @@ class ProductViewModel @Inject constructor(
                                 successMessage = resource.data.toString()
                             )
                         }
+                        fetchProducts()
                     }
                 }
             }

@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,13 +21,12 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,6 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.CustomServiceCard
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -98,15 +98,21 @@ fun HomeScreen(
                         .padding(16.dp)
                         .focusRequester(focusRequest)
                         .onFocusChanged { isFocused = it.isFocused },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF007BFF),
-                        unfocusedBorderColor = Color.LightGray,
-                        cursorColor = Color(0xFF007BFF),
-                        disabledBorderColor = Color.LightGray,
-                        disabledTextColor = Color.LightGray
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
                     ),
-                    shape = MaterialTheme.shapes.extraLarge,
-                    placeholder = { Text(text = "Search service..", color = Color.LightGray) },
+                    shape = RoundedCornerShape(50),
+                    placeholder = {
+                        Text(
+                            text = "Search service..",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                            )
+                        )
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Search
@@ -116,9 +122,12 @@ fun HomeScreen(
                             serviceViewModel.searchServices(searchText)
                         }
                     ),
-                    textStyle = MaterialTheme.typography.bodySmall,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                    ),
                     leadingIcon = {
                         Icon(
+                            modifier = Modifier.size(32.dp),
                             imageVector = Icons.Rounded.Search,
                             contentDescription = null
                         )
@@ -144,7 +153,7 @@ fun HomeScreen(
                                     )
                                 }
                             }
-                            IconButton(onClick = { expanded = true }) {
+                            IconButton(onClick = { expanded = !expanded }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
                                     contentDescription = null,
@@ -159,14 +168,16 @@ fun HomeScreen(
                         ) {
                             DropdownMenuItem(
                                 text = { Text(text = "FAQs") },
-                                onClick = { }
+                                onClick = {
+                                    navController.navigate("FAQs")
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text(text = "Help") },
                                 onClick = { }
                             )
                             DropdownMenuItem(
-                                text = { Text(text = "Logout") },
+                                text = { Text(text = "logout") },
                                 onClick = onSignOut
                             )
                         }

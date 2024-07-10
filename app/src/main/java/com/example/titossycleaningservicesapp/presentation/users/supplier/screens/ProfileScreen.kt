@@ -1,161 +1,320 @@
 package com.example.titossycleaningservicesapp.presentation.users.supplier.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.splitFullName
+import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
+import java.util.UUID
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProfileScreen(
-    navController: NavHostController,
+    modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    pagerState: PagerState
+    mainViewModel: MainViewModel,
+    supplierViewModel: SupplierViewModel
 ) {
+    val context = LocalContext.current
 
-    val tabs = listOf("Profile", "Settings")
-    val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier
-            .fillMaxSize(1f)
-            .padding(paddingValues)
-    ) {
+    var supplierId by rememberSaveable { mutableStateOf<String?>(null) }
+    val supplierState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    val supplier = supplierState.suppliers?.find { it.id.toString() == supplierId }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(100.dp)
-                .clip(CircleShape)
-                .shadow(elevation = 4.dp)
-                .border(BorderStroke(width = 1.dp, color = Color.Black), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                tint = MaterialTheme.colorScheme.onSecondary
-            )
+    val supplierNames = splitFullName(supplier?.fullName ?: "No fullName")
+
+    var firstName by rememberSaveable { mutableStateOf("") }
+    var lastName by rememberSaveable { mutableStateOf("") }
+    var phone by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(key1 = supplierId) {
+        supplierId = mainViewModel.readUserId()
+    }
+
+    LaunchedEffect(supplierViewModel, context) {
+        supplierViewModel.resultChannel.collect { result ->
+            when (result) {
+                is AuthEvent.Error -> {
+                    Toast.makeText(
+                        context,
+                        result.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                is AuthEvent.Loading -> supplierViewModel.isLoading
+
+                is AuthEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        result.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "Username",
-            fontWeight = FontWeight.W300,
-            fontSize = 18.sp
+    }
+
+    when {
+        supplierState.isLoading -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+            content = { CustomProgressIndicator(isLoading = true) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(8.dp))
+        supplierState.suppliers != null -> {
+            supplier?.let { sup ->
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    Row(
+                        modifier = modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(onClick = { showDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                    Spacer(modifier = modifier.height(16.dp))
+                    SupplierInfoField(
+                        label = "Name:",
+                        field = sup.fullName
+                    )
+                    HorizontalDivider()
+                    SupplierInfoField(
+                        label = "Phone:",
+                        field = sup.phone
+                    )
+                    HorizontalDivider()
+                    SupplierInfoField(
+                        label = "Email:",
+                        field = sup.email
+                    )
+                    HorizontalDivider()
+                    SupplierInfoField(
+                        label = "Address:",
+                        field = sup.address
+                    )
+                }
+            }
+        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            TabRow(
-                selectedTabIndex = pagerState.currentPage,
-                indicator = { TabPositions -> Box {} },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    val selected = pagerState.currentPage == index
-                    Tab(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = {
-                            Button(
-                                onClick = {
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(4.dp),
-                                shape = RoundedCornerShape(
-                                    topStart = if (index == 0) 16.dp else 0.dp,
-                                    bottomStart = if (index == 0) 16.dp else 0.dp,
-                                    topEnd = if (index == 1) 16.dp else 0.dp,
-                                    bottomEnd = if (index == 1) 16.dp else 0.dp
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
+        supplierState.errorMessage.isNotEmpty() -> {
+            Toast.makeText(
+                context,
+                supplierState.errorMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    supplierViewModel.update(
+                        id = UUID.fromString(supplierId),
+                        firstName = firstName,
+                        lastName = lastName,
+                        phone = phone,
+                        address = address,
+                        email = email,
+                        password = password
+                    )
+                    showDialog = false }
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(text = "Cancel")
+                }
+            },
+            title = {
+                Text(text = "Edit Profile")
+            },
+            text = {
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = firstName,
+                        onValueChange = { firstName = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = supplierNames.first,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                                 )
-                            ) {
-                                Text(text = title)
-                            }
-                        },
-                        selected = selected,
-                        onClick = {
-                            scope.launch { pagerState.animateScrollToPage(index) }
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = lastName,
+                        onValueChange = { lastName = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = supplierNames.second,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                )
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = phone,
+                        onValueChange = { phone = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = supplier?.phone ?: "",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                )
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = address,
+                        onValueChange = { address = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = supplier?.address ?: "",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                )
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = email,
+                        onValueChange = { email = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = supplier?.email ?: "",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                )
+                            )
+                        }
+                    )
+                    OutlinedTextField(
+                        modifier = modifier.fillMaxWidth(),
+                        value = password,
+                        onValueChange = { password = it },
+                        shape = MaterialTheme.shapes.medium,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                text = "Enter Password",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                                )
+                            )
                         }
                     )
                 }
             }
-
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                state = pagerState
-            ) {
-                when (pagerState.currentPage) {
-                    0 -> SupplierProfile()
-                    1 -> SupplierSettings()
-                }
-            }
-        }
+        )
     }
 }
+
 
 @Composable
-fun SupplierProfile() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Profile")
+fun SupplierInfoField(
+    modifier: Modifier = Modifier,
+    label: String, field: String,
+    style: TextStyle = MaterialTheme.typography.bodyLarge
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = label,
+            style = style.copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Spacer(modifier = modifier.height(8.dp))
+
+        Text(
+            modifier = modifier.padding(start = 16.dp),
+            text = field,
+            style = style.copy(
+                color = MaterialTheme.colorScheme.onSurface.copy(.7f)
+            )
+        )
     }
 }
-
-@Composable
-fun SupplierSettings() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Settings")
-    }
-}
-
-

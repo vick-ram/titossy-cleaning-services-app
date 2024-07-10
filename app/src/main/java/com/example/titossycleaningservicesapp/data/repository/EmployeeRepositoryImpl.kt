@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -60,6 +60,29 @@ class EmployeeRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             AuthEvent.Error(e.message.toString())
+        }
+    }
+
+    override fun getEmployeesByRole(role: String): Flow<Resource<List<Employee>>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.getEmployeesByRole(role)
+
+            when(response.status) {
+                "success" -> {
+                    val employeesEntity = response.data?.map { it.toEmployeeModel() }
+                    employeesEntity?.let { emit(Resource.Success(it)) }
+                }
+                "error" -> {
+                    if (response.error != null) {
+                        val errors = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errors)
+                    }
+                }
+            }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
         }
     }
 
@@ -128,15 +151,19 @@ class EmployeeRepositoryImpl @Inject constructor(
     override fun getAllEmployees(): Flow<Resource<List<Employee>>> {
         return flow {
             emit(Resource.Loading)
-            val employeeFromDb = employeeDao.getAllEmployees().firstOrNull()
-            if (employeeFromDb.isNullOrEmpty()) {
                 val response = apiService.getEmployees()
+
                 when (response.status) {
                     "success" -> {
-                        val employeeEntity = response.data?.map { it.toEmployee() }
-                        employeeEntity?.let {
-                            employeeDao.insertEmployees(it)
+                        withContext(Dispatchers.IO) {
+                            val employeeEntity = response.data?.map { it.toEmployee() }
+                            employeeEntity?.let {
+                                employeeDao.insertEmployees(it)
+                            }
                         }
+                        val employeeFromDb = employeeDao.getAllEmployees().firstOrNull()
+                        val employees = employeeFromDb?.map { it.toEmployee() }
+                        employees?.let { emit(Resource.Success(it)) }
                     }
 
                     "error" -> {
@@ -146,12 +173,7 @@ class EmployeeRepositoryImpl @Inject constructor(
                         }
                     }
                 }
-            } else {
-                val employees = employeeFromDb.map { it.toEmployee() }
-                emit(Resource.Success(employees))
-            }
-        }.flowOn(Dispatchers.IO)
-            .catch { exceptions ->
+        }.catch { exceptions ->
             emit(Resource.Error(exceptions.message.toString()))
         }
     }

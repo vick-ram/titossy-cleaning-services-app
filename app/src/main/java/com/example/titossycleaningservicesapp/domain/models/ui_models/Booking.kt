@@ -1,8 +1,9 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import android.icu.text.DecimalFormat
+import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
+import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.Frequency
-import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingStatus
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -22,6 +23,8 @@ data class Booking(
         get() = DecimalFormat("#,###.00").format(totalAmount)
     val paidString: String
         get() = if (paid) "Paid" else "Not Paid"
+    val formattedDate: String
+        get() = bookingDateTime.format(dateTimeUiFormat)
 }
 
 data class BookingServiceAddOns(
@@ -43,3 +46,42 @@ data class BookingUiState(
     val errorMessage: String = "",
     val isSuccess: String = ""
 )
+
+data class BookingUpdateUiState(
+    val isLoading: Boolean = false,
+    val successMessage: String = "",
+    val errorMessage: String = ""
+)
+
+data class BookingAssignmentUiState(
+    val isLoading: Boolean = false,
+    val assignedBookings: List<BookingCleanerAssignment>? = null,
+    val errorMessage: String = "",
+    val isSuccess: String = ""
+)
+
+data class BookingAssignmentUpdateUiState(
+    val isLoading: Boolean = false,
+    val successMessage: String = "",
+    val errorMessage: String = ""
+)
+
+data class BookingCleanerAssignment(
+    val bookingAssignment: BookingAssignment,
+    val cleaner: String,
+    val assignedBy: String,
+    val assignedDate: LocalDateTime
+) {
+    val formattedDate: String
+        get() = assignedDate.format(dateTimeUiFormat)
+}
+
+data class BookingAssignment(
+    val bookingId: String,
+    val customer: String,
+    val service: String,
+    val instructions: String,
+    val address: String?,
+    val bookingStatus: BookingStatus
+)
+

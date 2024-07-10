@@ -4,12 +4,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.signIn.EmployeesSignIn
 import com.example.titossycleaningservicesapp.presentation.auth.signIn.CustomerSignInScreen
 import com.example.titossycleaningservicesapp.presentation.auth.signIn.SupplierSignInScreen
 import com.example.titossycleaningservicesapp.presentation.auth.signUp.CustomerSignUpScreen
-import com.example.titossycleaningservicesapp.presentation.auth.signUp.SignUpSuccessful
 import com.example.titossycleaningservicesapp.presentation.auth.signUp.SupplierSignUpScreen
 import com.example.titossycleaningservicesapp.presentation.auth.utils.ApprovalScreen
 import com.example.titossycleaningservicesapp.presentation.auth.utils.SupplierApprovalScreen
@@ -17,7 +16,8 @@ import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 
 fun NavGraphBuilder.authNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    customerViewModel: CustomerViewModel
 ) {
     navigation(
         route = RootNavRoutes.AUTH.route,
@@ -26,7 +26,8 @@ fun NavGraphBuilder.authNavGraph(
         composable(Authentication.LOGIN.route) {
             CustomerSignInScreen(
                 navController = navController,
-                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) }
+                toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) },
+                customerViewModel = customerViewModel
             )
         }
         composable(Authentication.SIGNUP.route) {

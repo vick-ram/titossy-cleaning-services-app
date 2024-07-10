@@ -5,10 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,14 +30,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -96,9 +87,8 @@ fun SearchTextField(
             .fillMaxWidth()
             .padding(16.dp)
             .height(56.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.extraLarge)
-            .border(
-                BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)),
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant,
                 shape = MaterialTheme.shapes.extraLarge
             )
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -107,7 +97,7 @@ fun SearchTextField(
                 isFocused.value = it.isFocused
             },
         textStyle = MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Start
         ),
         singleLine = true,
@@ -162,125 +152,11 @@ fun NavigationIcon(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color.Transparent)
-            .border(BorderStroke(width = 1.dp, color = Color.LightGray), CircleShape)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
+    IconButton(onClick = onClick) {
         Icon(
+            modifier = modifier.size(32.dp),
             imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = modifier.size(32.dp)
+            contentDescription = null
         )
-    }
-}
-
-
-@Composable
-fun BookingTimeCard(
-    modifier: Modifier = Modifier,
-    selectedDate: String,
-    selectedTime: String,
-    onDateSelected: (String) -> Unit,
-    onTimeSelected: (String) -> Unit
-) {
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            modifier = modifier
-                .weight(1f)
-                .clip(MaterialTheme.shapes.small)
-                .border(
-                    BorderStroke(
-                        width = 1.dp,
-                        Color.Gray
-                    ), MaterialTheme.shapes.small
-                )
-                .clickable { onDateSelected(selectedDate) }
-        ) {
-            Column(
-                modifier = modifier
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = "Date",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray
-                    )
-                )
-                Row(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CalendarMonth,
-                        contentDescription = null,
-                        modifier = modifier.padding(end = 4.dp)
-                    )
-                    Text(
-                        text = selectedDate,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Box(
-            modifier = modifier
-                .weight(1f)
-                .clip(MaterialTheme.shapes.small)
-                .border(
-                    BorderStroke(
-                        width = 1.dp,
-                        Color.Gray
-                    ), MaterialTheme.shapes.small
-                )
-                .clickable { onTimeSelected(selectedTime) }
-        ) {
-            Column(
-                modifier = modifier
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = "Time",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray
-                    )
-                )
-                Row(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Schedule,
-                        contentDescription = null,
-                        modifier = modifier.padding(end = 4.dp)
-                    )
-                    Text(
-                        text = selectedTime,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    )
-                }
-
-            }
-        }
     }
 }

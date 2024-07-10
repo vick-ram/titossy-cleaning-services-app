@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -30,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,20 +38,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
-import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
+import com.example.titossycleaningservicesapp.presentation.auth.utils.ValidationState
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
@@ -64,12 +63,16 @@ fun SupplierSignInScreen(
     navController: NavHostController
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
-    val supplierViewModel: SupplierAuthViewModel = hiltViewModel()
+    val supplierViewModel: SupplierViewModel = hiltViewModel()
     val supplierUiState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackBarHostState = remember { SnackbarHostState() }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+
+    val emailState by supplierViewModel.emailState.collectAsStateWithLifecycle()
+    val passwordState by supplierViewModel.passwordState.collectAsStateWithLifecycle()
+
+    val emailErrorMessage by supplierViewModel.emailErrorMessage.collectAsStateWithLifecycle()
+    val passwordErrorMessage by supplierViewModel.passwordErrorMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(supplierUiState, supplierViewModel) {
         supplierViewModel.fetchSuppliers()
@@ -79,6 +82,10 @@ fun SupplierSignInScreen(
         supplierViewModel.resultChannel.collect { result ->
             when (result) {
                 is AuthEvent.Error -> {
+                    showToast(
+                        context = context,
+                        message = result.message
+                    )
                     supplierViewModel.clearToken()
                 }
 
@@ -156,20 +163,30 @@ fun SupplierSignInScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     CustomTextField(
-                        value = email,
-                        onValueChange = { email = it },
+                        value = supplierViewModel.email,
+                        onValueChange = {
+                            supplierViewModel.onFieldChange(
+                                SupplierViewModel.FieldType.EMAIL, it
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         label = "email",
                         leadingIcon = Icons.Filled.Email,
                         keyBoardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Next
-                        )
+                        ),
+                        errorMessage = emailErrorMessage,
+                        isError = emailState is ValidationState.Invalid
                     )
 
                     CustomTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                        value = supplierViewModel.password,
+                        onValueChange = {
+                            supplierViewModel.onFieldChange(
+                                SupplierViewModel.FieldType.PASSWORD, it
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         label = "Password",
                         leadingIcon = Icons.Filled.Lock,
@@ -187,16 +204,16 @@ fun SupplierSignInScreen(
                             VisualTransformation.None
                         } else {
                             PassWordTransformation()
-                        }
+                        },
+                        errorMessage = passwordErrorMessage,
+                        isError = passwordState is ValidationState.Invalid
                     )
 
                     CustomButton(
                         text = "Sign In",
-                        onClick = {
-                            supplierViewModel.signIn(email, password)
-                        },
+                        onClick = { supplierViewModel.signIn() },
                         modifier = Modifier.padding(16.dp),
-                        enabled = true
+                        enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
                     )
                 }
             }

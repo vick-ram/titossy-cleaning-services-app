@@ -26,7 +26,8 @@ data class AddProductToCart(
 data class ProductUiState(
     val isLoading: Boolean = false,
     val successMessage: String = "",
-    val errorMessage: String = ""
+    val errorMessage: String = "",
+    val isSuccess: String = ""
 )
 
 data class ProductDataUiState(

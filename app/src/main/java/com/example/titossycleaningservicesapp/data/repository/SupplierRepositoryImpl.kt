@@ -6,6 +6,8 @@ import com.example.titossycleaningservicesapp.data.local.database.dao.SupplierDa
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
+import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
+import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierApproval
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
@@ -69,6 +71,74 @@ class SupplierRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateSupplierStatus(id: UUID, approvalStatus: ApprovalStatus): AuthEvent {
+        return try {
+            AuthEvent.Loading
+            val response = apiService.approveSupplier(
+                id = id,
+                approvalStatus = SupplierApproval(
+                    status = approvalStatus
+                )
+            )
+            when (response.status) {
+                "success" -> {
+                    val supplierEntity = supplierDao.getSupplierById(id.toString()).singleOrNull()
+                    if (supplierEntity != null) {
+                        supplierEntity.status = approvalStatus
+                        supplierDao.updateSupplier(supplierEntity)
+                    }
+                    AuthEvent.Success(
+                        message = response.message
+                    )
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val errors = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errors)
+                    } else {
+                        throw Exception("Unknown error occurred")
+                    }
+                }
+
+                else -> {
+                    throw Exception("couldn't process the request")
+                }
+            }
+        } catch (e: Exception) {
+            AuthEvent.Error(e.message.toString())
+        }
+    }
+
+    override suspend fun deleteSupplier(id: UUID): AuthEvent {
+        return try {
+            AuthEvent.Loading
+            val response = apiService.deleteSupplier(id)
+            when (response.status) {
+                "success" -> {
+                    val message = response.message
+                    AuthEvent.Success(message)
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
+                    } else {
+                        throw Exception("something went wrong")
+                    }
+                }
+
+                else -> {
+                    throw Exception("Failed to process")
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AuthEvent.Error(e.message.toString())
+        }
+    }
+
     override fun getSupplierByEmail(email: String): Flow<Resource<Supplier>> {
         return flow {
             emit(Resource.Loading)
@@ -76,11 +146,12 @@ class SupplierRepositoryImpl @Inject constructor(
 
             if (supplierEntity != null) {
                 val response = apiService.getSupplierByEmail(email)
-                when(response.status) {
+                when (response.status) {
                     "success" -> {
                         val entitySupplier = response.data?.toSupplierEntity()
                         entitySupplier?.let { supplierDao.insertSupplier(it) }
                     }
+
                     "error" -> {
                         if (response.error != null) {
                             val errors = FileUtils.createErrorMessage(response.error)
@@ -111,7 +182,8 @@ class SupplierRepositoryImpl @Inject constructor(
             when (response.status) {
                 "success" -> {
                     response.data?.let { dataStoreKeys.saveTokenToDataStore(it) }
-                    val supplierEntity = apiService.getSupplierByEmail(email).data?.toSupplierEntity()
+                    val supplierEntity =
+                        apiService.getSupplierByEmail(email).data?.toSupplierEntity()
 
                     supplierEntity?.let {
                         supplierDao.insertSupplier(it)
@@ -128,6 +200,7 @@ class SupplierRepositoryImpl @Inject constructor(
                         throw Exception("something went wrong")
                     }
                 }
+
                 else -> throw Exception("Internal error")
             }
         } catch (e: Exception) {
@@ -184,12 +257,13 @@ class SupplierRepositoryImpl @Inject constructor(
                 password = password
             )
             val response = apiService.supplierUpdate(id.toString(), supplier)
-            when(response.status) {
+            when (response.status) {
                 "success" -> {
                     AuthEvent.Success(
                         message = response.message
                     )
                 }
+
                 "error" -> {
                     if (response.error != null) {
                         val errors = FileUtils.createErrorMessage(response.error)
@@ -198,6 +272,7 @@ class SupplierRepositoryImpl @Inject constructor(
                         throw Exception("Something went wrong")
                     }
                 }
+
                 else -> {
                     throw Exception("Error")
                 }
@@ -210,27 +285,28 @@ class SupplierRepositoryImpl @Inject constructor(
     override fun getAllSuppliers(): Flow<Resource<List<Supplier>>> {
         return flow {
             emit(Resource.Loading)
-            val dbSuppliers = supplierDao.getAllSuppliers().firstOrNull()
 
-            if (dbSuppliers.isNullOrEmpty()) {
-                val response = apiService.getSuppliers()
-                when(response.status) {
-                    "success" -> {
-                        withContext(Dispatchers.IO) {
-                            val entitySuppliers = response.data?.map { it.toSupplierEntity() }
-                            entitySuppliers?.let { supplierDao.insertAllSuppliers(it) }
+            val response = apiService.getSuppliers()
+            when (response.status) {
+                "success" -> {
+                    withContext(Dispatchers.IO) {
+                        val entitySuppliers = response.data?.map { it.toSupplierEntity() }
+                        entitySuppliers?.let {
+                            supplierDao.deleteAllSuppliers()
+                            supplierDao.insertAllSuppliers(it)
                         }
                     }
-                    "error" -> {
-                        if (response.error != null) {
-                            val error = FileUtils.createErrorMessage(response.error)
-                            throw Exception(error)
-                        }
+                    val dbSuppliers = supplierDao.getAllSuppliers().firstOrNull()
+                    val suppliers = dbSuppliers?.map { it.toSupplier() }
+                    suppliers?.let { emit(Resource.Success(it)) }
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
                     }
                 }
-            } else {
-                val suppliers = dbSuppliers.map { it.toSupplier() }
-                emit(Resource.Success(suppliers))
             }
         }.catch { exception ->
             exception.printStackTrace()
@@ -241,25 +317,26 @@ class SupplierRepositoryImpl @Inject constructor(
     override suspend fun getSupplierById(id: UUID): Flow<Resource<Supplier>> {
         return flow {
             emit(Resource.Loading)
-            val dbSupplier = supplierDao.getSupplierById(id.toString()).singleOrNull()
-
-            if (dbSupplier == null) {
-                val response = apiService.getSupplierById(id.toString())
-                when(response.status) {
-                    "success" -> {
+            val response = apiService.getSupplierById(id.toString())
+            when (response.status) {
+                "success" -> {
+                    withContext(Dispatchers.IO) {
                         val entitySupplier = response.data?.toSupplierEntity()
-                        entitySupplier?.let { supplierDao.insertSupplier(it) }
-                    }
-                    "error" -> {
-                        if (response.error != null) {
-                            val error = FileUtils.createErrorMessage(response.error)
-                            throw Exception(error)
+                        entitySupplier?.let {
+                            supplierDao.insertSupplier(it)
                         }
                     }
+                    val dbSupplier = supplierDao.getSupplierById(id.toString()).singleOrNull()
+                    val supplier = dbSupplier?.toSupplier()
+                    supplier?.let { emit(Resource.Success(it)) }
                 }
-            } else {
-                val supplier = dbSupplier.toSupplier()
-                emit(Resource.Success(supplier))
+
+                "error" -> {
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    }
+                }
             }
         }.catch { e ->
             e.printStackTrace()

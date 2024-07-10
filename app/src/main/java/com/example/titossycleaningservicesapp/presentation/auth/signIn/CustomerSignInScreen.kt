@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.auth.signIn
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,12 +41,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
-import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerAuthViewModel
+import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
 import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
@@ -59,9 +59,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun CustomerSignInScreen(
     toSignUpScreen: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    customerViewModel: CustomerViewModel
 ) {
-    val customerViewModel: CustomerAuthViewModel = hiltViewModel()
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -96,7 +96,13 @@ fun CustomerSignInScreen(
                     }
                 }
 
-                is AuthEvent.Error -> {}
+                is AuthEvent.Error -> {
+                    Toast.makeText(
+                        context,
+                        result.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
                 AuthEvent.Loading -> customerViewModel.isLoading
             }
@@ -129,7 +135,8 @@ fun CustomerSignInScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     AuthCurve(
-                        title = "Login")
+                        title = "Login"
+                    )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -149,9 +156,11 @@ fun CustomerSignInScreen(
 
                     CustomTextField(
                         value = customerViewModel.password,
-                        onValueChange = {
-                            customerViewModel.password = it
-                            customerViewModel.onPasswordChange(it)
+                        onValueChange = { newPassword ->
+                            customerViewModel.onFieldChange(
+                                CustomerViewModel.FieldType.PASSWORD,
+                                newPassword
+                            )
                         },
                         modifier = Modifier,
                         label = "Password",

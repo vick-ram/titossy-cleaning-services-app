@@ -4,6 +4,8 @@ import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderItem
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class PurchaseOrderDto(
     val purchaseOrderId: String,
@@ -20,7 +22,7 @@ data class PurchaseOrderDto(
         purchaseOrderId = purchaseOrderId,
         employee = employee,
         supplier = supplier,
-        expectedDate = expectedDate,
+        expectedDate = LocalDate.parse(expectedDate),
         purchaseOrderItems = purchaseOrderItems?.map { it.toPurchaseOrderItem() },
         totalAmount = totalAmount,
         orderStatus = OrderStatus.valueOf(orderStatus)

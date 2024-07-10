@@ -19,6 +19,7 @@ data class Supplier(
 data class SupplierUiState(
     val isLoading: Boolean = false,
     val errorMessage: String = "",
-    val suppliers: List<Supplier>? = null
+    val suppliers: List<Supplier>? = null,
+    val supplier: Supplier? = null
 )
 

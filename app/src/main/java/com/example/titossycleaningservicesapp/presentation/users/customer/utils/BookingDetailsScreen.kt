@@ -15,20 +15,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChevronLeft
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,11 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.core.LoadingButton
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.Frequency
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingRequest
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
-import com.example.titossycleaningservicesapp.presentation.utils.BookingTimeCard
-import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
+import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -65,6 +69,7 @@ fun BookingDataScreen(
 ) {
     val bookingViewModel: BookingViewModel = hiltViewModel()
     val bookingUiState by bookingViewModel.bookingUiState.collectAsState()
+    val serviceViewModel: ServiceViewModel = hiltViewModel()
 
     val context = LocalContext.current
     var selectedDate by remember { mutableStateOf("") }
@@ -74,11 +79,32 @@ fun BookingDataScreen(
     var instructions by rememberSaveable { mutableStateOf("") }
     var address by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(bookingUiState.booking) {
-        bookingUiState.booking?.let { booking ->
-            navController.navigate(
-                DetailsRoutes.CheckOut.route + "/${booking.bookingId}"
-            )
+    LaunchedEffect(bookingViewModel) {
+        bookingViewModel.fetchBookings()
+    }
+
+    LaunchedEffect(bookingUiState) {
+        when {
+            bookingUiState.isLoading -> delay(100L)
+            bookingUiState.isSuccess.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    length = Toast.LENGTH_LONG,
+                    message = bookingUiState.isSuccess
+                )
+                bookingUiState.booking?.let { booking ->
+                    navController.navigate(
+                        DetailsRoutes.CheckOut.route + "/${booking.bookingId}"
+                    )
+                }
+            }
+            bookingUiState.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = bookingUiState.errorMessage
+                )
+                serviceViewModel.clearCart()
+            }
         }
     }
 
@@ -91,16 +117,13 @@ fun BookingDataScreen(
                     )
                 },
                 navigationIcon = {
-                    NavigationIcon(
-                        icon = Icons.Outlined.ChevronLeft,
-                        onClick = {navController.navigateUp()}
-                    )
-                },
-                actions = {
-                    NavigationIcon(
-                        icon = Icons.Outlined.MoreVert,
-                        onClick = {}
-                    )
+                    IconButton(onClick = { navController.navigateUp(); serviceViewModel.clearCart() }) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            imageVector = Icons.Default.ChevronLeft,
+                            contentDescription = null
+                        )
+                    }
                 }
             )
         }
@@ -122,44 +145,80 @@ fun BookingDataScreen(
                 .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            BookingItemSection(title = "Choose date & time:") {
-                BookingTimeCard(
-                    selectedDate = selectedDate,
-                    selectedTime = selectedTime,
-                    onDateSelected = {
-                        showDatePicker(
-                            onDateSelected = { selectedDate = it },
-                            context = context
+            BookingItemSection(title = "Choose Date:") {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = selectedDate,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            showDatePicker(
+                                onDateSelected = {selectedDate = it},
+                                context = context
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.CalendarMonth,
+                                contentDescription = "date"
+                            )
+                        }
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Select date",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                            )
                         )
                     },
-                    onTimeSelected = {
-                        showTimePicker(
-                            onTimeSelected = { selectedTime = it },
-                            context = context
-                        )
-                    }
+                    shape = MaterialTheme.shapes.small
                 )
             }
-            BookingItemSection(title = "Choose Frequency") {
+            BookingItemSection(title = "Choose Time:") {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = selectedTime,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            showTimePicker(
+                                onTimeSelected = {selectedTime = it},
+                                context = context
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Schedule,
+                                contentDescription = "time"
+                            )
+                        }
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Select time",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+                            )
+                        )
+                    },
+                    shape = MaterialTheme.shapes.small
+                )
+            }
+            BookingItemSection(title = "Choose Frequency:") {
                 CustomRadioButton(
                     values = frequency,
                     selected = selectedFrequency,
                     onSelected = { selectedFrequency = it }
                 )
             }
-            BookingItemSection(title = "Additional Instructions") {
+            BookingItemSection(title = "Additional Instructions:") {
                 AdditionalInstructions(
                     value = instructions,
                     onValueChange = { instructions = it }
                 )
             }
-            /*BookingItemSection(title = "Booking Location") {
-                BookingAddressField(
-                    value = address,
-                    onValueChange = { address = it }
-                )
-            }*/
-            BookingItemSection(title = "Booking Location") {
+            BookingItemSection(title = "Booking Location:") {
                 BookingInput(
                     value = address,
                     onValueChange = { address = it },
@@ -168,7 +227,7 @@ fun BookingDataScreen(
             }
             Button(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth()
                     .padding(vertical = 16.dp)
                     .align(Alignment.CenterHorizontally),
                 shape = RectangleShape,
@@ -183,7 +242,6 @@ fun BookingDataScreen(
         }
     }
 }
-
 
 
 @Composable
@@ -295,24 +353,28 @@ fun AdditionalInstructions(
     value: String,
     onValueChange: (String) -> Unit
 ) {
-    BasicTextField(
+    OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp),
-        textStyle = MaterialTheme.typography.bodyLarge,
-        decorationBox = { innerTextField ->
-            if (value.isEmpty()) {
-                Text(
-                    text = "Any additional instructions..",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                    )
+            .height(100.dp),
+        placeholder = {
+            Text(
+                text = "Enter instructions(Optional)",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                 )
-            }
-            innerTextField()
-        }
+            )
+        },
+        textStyle = MaterialTheme.typography.bodyLarge,
+        shape = MaterialTheme.shapes.medium,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(.2f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(.3f)
+        )
     )
 }
 
@@ -321,78 +383,32 @@ fun BookingInput(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String? = null,
+    label: String,
     maxLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        BasicTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            value = value,
-            onValueChange = onValueChange,
-            textStyle = MaterialTheme.typography.bodyLarge,
-            maxLines = maxLines,
-            keyboardOptions = keyboardOptions,
-            decorationBox = { innerTextField ->
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    if (label != null) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                        )
-                    }
-                    innerTextField()
-                }
-            }
-        )
-    }
-}
 
-@Composable
-fun BookingAddressField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    BasicTextField(
+    OutlinedTextField(
         modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
+            .fillMaxWidth(),
         value = value,
         onValueChange = onValueChange,
         textStyle = MaterialTheme.typography.bodyLarge,
-        decorationBox = {innerTextField ->
-            if (value.isEmpty()) {
-                Text(
-                    text = "Enter booking address",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                    )
-                )
-            }
-            innerTextField()
-        }
-    )
-}
-
-@Composable
-fun BookingItemTitle(modifier: Modifier = Modifier, value: String) {
-    Text(
-        modifier = modifier,
-        text = value,
-        style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+        maxLines = maxLines,
+        keyboardOptions = keyboardOptions,
+        placeholder = {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+            )
+        },
+        shape = MaterialTheme.shapes.medium,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(.2f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(.3f)
         )
     )
 }

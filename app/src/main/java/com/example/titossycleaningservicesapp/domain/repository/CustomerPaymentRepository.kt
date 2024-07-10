@@ -9,7 +9,7 @@ interface CustomerPaymentRepository {
         bookingId: String,
         phoneNumber: String,
         transactionCode: String
-    ) : Flow<Resource<CustomerPayment>>
+    ) : Flow<Resource<String>>
     fun updatePayment(
         paymentId: String,
         bookingId: String,

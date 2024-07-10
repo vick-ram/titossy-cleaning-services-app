@@ -1,8 +1,10 @@
 package com.example.titossycleaningservicesapp.data.remote.dto
 
+import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.Frequency
-import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Booking
+import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingAssignment
+import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingCleanerAssignment
 import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingServiceAddOns
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,5 +54,36 @@ data class BookingServiceAddOnsDto(
         serviceAddOn = serviceAddOn,
         quantity = quantity,
         subtotal = subtotal
+    )
+}
+
+data class BookingCleanerAssignmentDto(
+    val bookingAssignment: BookingAssignmentDto,
+    val cleaner: String,
+    val assignedBy: String,
+    val assignedDate: String
+) {
+    fun toBookingCleanerAssignment() = BookingCleanerAssignment(
+        bookingAssignment = bookingAssignment.toBookingAssignment(),
+        cleaner = cleaner,
+        assignedBy = assignedBy,
+        assignedDate = LocalDateTime.parse(assignedDate)
+    )
+}
+data class BookingAssignmentDto(
+    val bookingId: String,
+    val customer: String,
+    val service: String,
+    val instructions: String,
+    val address: String?,
+    val bookingStatus: String
+) {
+    fun toBookingAssignment() = BookingAssignment(
+        bookingId = bookingId,
+        customer = customer,
+        service = service,
+        instructions = instructions,
+        address = address,
+        bookingStatus = BookingStatus.valueOf(bookingStatus)
     )
 }
