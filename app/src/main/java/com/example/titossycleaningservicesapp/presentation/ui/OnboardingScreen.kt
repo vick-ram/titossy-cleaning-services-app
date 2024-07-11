@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
@@ -66,6 +67,7 @@ fun OnBoardingScreen(
     )
     Column(
         modifier = Modifier.fillMaxSize()
+            .safeDrawingPadding()
     ) {
         TopSection(
             onBackClick = {
@@ -146,7 +148,7 @@ fun BottomSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, bottom = 16.dp)
+            .padding(12.dp)
 
     ) {
         Indicators(size, index)
@@ -156,7 +158,6 @@ fun BottomSection(
             contentColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .sizeIn(56.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.KeyboardDoubleArrowRight,
@@ -213,8 +214,7 @@ fun OnBoardingItem(items: OnboardingItems) {
 
         Text(
             text = items.title,
-            style = MaterialTheme.typography.headlineMedium,
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -225,7 +225,7 @@ fun OnBoardingItem(items: OnboardingItems) {
 
         Text(
             text = items.description,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Light,
             textAlign = TextAlign.Center,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -133,8 +134,8 @@ fun ServiceDetailsScreen(
 
     }
 
-    LaunchedEffect(serviceId) {
-        viewModel.clearServiceAddons()
+    LaunchedEffect(serviceId, viewModel) {
+       // viewModel.clearServiceAddons()
         viewModel.fetchServiceAddons(serviceId)
     }
 
@@ -166,6 +167,7 @@ fun ServiceDetailsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .systemBarsPadding()
                         .padding(16.dp)
                         .clickable { showBottomSheet = true },
                     verticalAlignment = Alignment.CenterVertically,
@@ -175,9 +177,8 @@ fun ServiceDetailsScreen(
                         modifier = Modifier.padding(4.dp),
                         text = "Total",
                         style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 18.sp
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Text(
@@ -283,23 +284,11 @@ fun ServiceDetailsScreen(
 
             item {
                 Text(
-                    text = service?.name ?: "",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            item {
-                Text(
                     text = service?.description ?: "",
                     modifier = Modifier
                         .padding(16.dp),
                     color = Color.Gray,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 )
             }
 
@@ -313,8 +302,8 @@ fun ServiceDetailsScreen(
                 ) {
                     Text(
                         text = service?.formattedPrice ?: "",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -342,7 +331,6 @@ fun ServiceDetailsScreen(
                 ) {
                     Text(
                         text = "Book Now",
-                        fontSize = 18.sp,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -351,7 +339,7 @@ fun ServiceDetailsScreen(
             item {
                 Text(
                     text = "Addons",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,
                     modifier = Modifier.padding(16.dp)
                 )

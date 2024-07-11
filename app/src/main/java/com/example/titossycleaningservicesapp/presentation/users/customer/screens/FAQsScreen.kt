@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.FAQItem
 
@@ -121,7 +120,7 @@ fun FAQsScreen(
             Spacer(modifier = modifier.width(32.dp))
             Text(
                 text = "FAQs",
-                style = MaterialTheme.typography.headlineMedium.copy(
+                style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             )
@@ -175,8 +174,7 @@ fun FAQItemCard(
                 Text(
                     text = faqItem.question,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontWeight = FontWeight.SemiBold
                     )
                 )
             }
@@ -184,9 +182,7 @@ fun FAQItemCard(
                 Spacer(modifier = modifier.height(8.dp))
                 Text(
                     text = faqItem.answer,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 16.sp
-                    )
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

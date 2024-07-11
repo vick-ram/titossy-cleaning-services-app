@@ -182,12 +182,12 @@ fun DetailRow(label: String, value: String) {
     ) {
         Text(
             text = "$label:",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -209,14 +209,14 @@ fun BookingServiceAddOnCard(addOn: BookingServiceAddOns) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = addOn.service ?: "Unknown Service",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
+                    text = addOn.service ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
                 addOn.serviceAddOn?.let {
                     Text(
                         text = "Add-on: $it",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 Text(

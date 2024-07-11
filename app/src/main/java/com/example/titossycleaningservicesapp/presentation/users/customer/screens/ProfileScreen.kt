@@ -239,7 +239,7 @@ fun ProfileItem(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
         TextField(
             value = value,
@@ -327,7 +327,7 @@ fun ProfileFields(
         ) {
             Text(
                 text = "Update your Account",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.W600,
                     fontSize = 20.sp
                 )
@@ -429,7 +429,7 @@ fun CustomProfileTextField(
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                             )
                         )
@@ -454,7 +454,7 @@ fun CustomProfileTextField(
 
             }
         },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done
         ),

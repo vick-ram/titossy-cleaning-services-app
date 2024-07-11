@@ -3,6 +3,7 @@ package com.example.titossycleaningservicesapp.presentation.auth.signIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,8 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -48,7 +45,6 @@ import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
-import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
@@ -60,7 +56,8 @@ import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
 
 @Composable
 fun SupplierSignInScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    paddingValues: PaddingValues
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val supplierViewModel: SupplierViewModel = hiltViewModel()
@@ -115,13 +112,15 @@ fun SupplierSignInScreen(
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth(),
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -130,96 +129,80 @@ fun SupplierSignInScreen(
                 NavigationIcon(
                     icon = Icons.Rounded.ChevronLeft,
                     onClick = { navController.navigateUp() })
-
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "supplier",
+                    text = "back",
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 )
             }
-
-            Surface(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(18.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 4.dp,
-                shape = RoundedCornerShape(15.dp),
-                shadowElevation = 1.dp
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    AuthCurve(title = "Login")
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    CustomTextField(
-                        value = supplierViewModel.email,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.EMAIL, it
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = "email",
-                        leadingIcon = Icons.Filled.Email,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = emailErrorMessage,
-                        isError = emailState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.password,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.PASSWORD, it
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = "Password",
-                        leadingIcon = Icons.Filled.Lock,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        trailingIcon = if (passwordVisible) {
-                            Icons.Filled.Visibility
-                        } else {
-                            Icons.Filled.VisibilityOff
-                        },
-                        onTrailingIconClicked = { passwordVisible = !passwordVisible },
-                        visualTransformation = if (passwordVisible) {
-                            VisualTransformation.None
-                        } else {
-                            PassWordTransformation()
-                        },
-                        errorMessage = passwordErrorMessage,
-                        isError = passwordState is ValidationState.Invalid
-                    )
-
-                    CustomButton(
-                        text = "Sign In",
-                        onClick = { supplierViewModel.signIn() },
-                        modifier = Modifier.padding(16.dp),
-                        enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
-                    )
-                }
+                Text(
+                    text = "Supplier SignIn",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.email,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.EMAIL, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "email",
+                    leadingIcon = Icons.Filled.Email,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = emailErrorMessage,
+                    isError = emailState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.password,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.PASSWORD, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Password",
+                    leadingIcon = Icons.Filled.Lock,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    trailingIcon = if (passwordVisible) {
+                        Icons.Filled.Visibility
+                    } else {
+                        Icons.Filled.VisibilityOff
+                    },
+                    onTrailingIconClicked = { passwordVisible = !passwordVisible },
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PassWordTransformation()
+                    },
+                    errorMessage = passwordErrorMessage,
+                    isError = passwordState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomButton(
+                    text = "Sign In",
+                    onClick = { supplierViewModel.signIn() },
+                    modifier = Modifier.padding(16.dp),
+                    enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
+                )
             }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier
                     .weight(0.4f)
@@ -238,11 +221,7 @@ fun SupplierSignInScreen(
                     }
                 ) {
                     Text(
-                        text = "Sign Up",
-                        fontSize = 18.sp,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        text = "Sign Up"
                     )
                 }
             }

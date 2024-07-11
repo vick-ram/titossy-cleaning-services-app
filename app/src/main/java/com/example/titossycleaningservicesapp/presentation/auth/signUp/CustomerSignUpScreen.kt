@@ -5,13 +5,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +46,6 @@ import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.rememberImeState
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.viewmodel.CustomerViewModel
-import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
@@ -57,7 +55,8 @@ import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 @Composable
 fun CustomerSignUpScreen(
     backToLogin: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    paddingValues: PaddingValues
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
     val signUpViewModel: CustomerViewModel = hiltViewModel()
@@ -104,52 +103,39 @@ fun CustomerSignUpScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        Column {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Start,
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(modifier = Modifier.width(4.dp))
                 NavigationIcon(
                     icon = Icons.Rounded.ChevronLeft,
                     onClick = { navController.navigateUp() }
                 )
+                Text(
+                    text = "back",
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-
-            Text(
-                text = "back",
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(18.dp),
-            tonalElevation = 4.dp,
-            shadowElevation = 1.dp,
-            color = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(state = scrollState),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AuthCurve(title = "Register")
-
+                Text(
+                    text = "Create Account",
+                    style = MaterialTheme.typography.headlineMedium
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-
                 CustomTextField(
                     value = signUpViewModel.username,
                     onValueChange = {
@@ -167,7 +153,7 @@ fun CustomerSignUpScreen(
                     errorMessage = usernameErrorMessage,
                     isError = usernameState is ValidationState.Invalid
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
                     value = signUpViewModel.firstName,
                     onValueChange = {
@@ -185,7 +171,7 @@ fun CustomerSignUpScreen(
                     errorMessage = firstNameErrorMessage,
                     isError = firstNameState is ValidationState.Invalid
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
                     value = signUpViewModel.lastName,
                     onValueChange = {
@@ -203,7 +189,7 @@ fun CustomerSignUpScreen(
                     errorMessage = lastNameErrorMessage,
                     isError = lastNameState is ValidationState.Invalid
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
                     value = signUpViewModel.phone,
                     onValueChange = { newPhone ->
@@ -222,7 +208,7 @@ fun CustomerSignUpScreen(
                     errorMessage = phoneErrorMessage,
                     isError = phoneState is ValidationState.Invalid
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
                     value = signUpViewModel.email,
                     onValueChange = { newEmail ->
@@ -241,7 +227,7 @@ fun CustomerSignUpScreen(
                     errorMessage = emailErrorMessage,
                     isError = emailState is ValidationState.Invalid
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
                     value = signUpViewModel.password,
                     onValueChange = { newPassword ->
@@ -271,11 +257,12 @@ fun CustomerSignUpScreen(
                     isError = passwordState is ValidationState.Invalid,
                     errorMessage = passwordErrorMessage,
                 )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 CustomButton(
                     text = "Register",
                     onClick = { signUpViewModel.signUp() },
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxWidth(.8f),
+                    shape = MaterialTheme.shapes.medium,
                     enabled = usernameState is ValidationState.Valid &&
                             firstNameState is ValidationState.Valid &&
                             lastNameState is ValidationState.Valid &&

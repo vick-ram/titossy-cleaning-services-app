@@ -7,9 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,16 +40,15 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 val startDestination by mainViewModel.startDestination
                 if (mainViewModel.isReady.collectAsState().value) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding()
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         RootNavGraph(
                             navController = navController,
                             mainViewModel = mainViewModel,
                             startDestination = startDestination,
-                            dataStoreKeys = dataStoreKeys
+                            dataStoreKeys = dataStoreKeys,
+                            paddingValues = it
                         )
                     }
                 } else {

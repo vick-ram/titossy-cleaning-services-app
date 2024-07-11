@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.auth.authGraph
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -17,7 +18,8 @@ import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
-    customerViewModel: CustomerViewModel
+    customerViewModel: CustomerViewModel,
+    paddingValues: PaddingValues
 ) {
     navigation(
         route = RootNavRoutes.AUTH.route,
@@ -27,27 +29,30 @@ fun NavGraphBuilder.authNavGraph(
             CustomerSignInScreen(
                 navController = navController,
                 toSignUpScreen = { navController.navigate(Authentication.SIGNUP.route) },
-                customerViewModel = customerViewModel
+                customerViewModel = customerViewModel,
+                paddingValues = paddingValues
             )
         }
         composable(Authentication.SIGNUP.route) {
             CustomerSignUpScreen(
                 navController = navController,
                 backToLogin = { navController.navigate(Authentication.LOGIN.route) },
+                paddingValues = paddingValues
             )
         }
         composable(Authentication.SUPPLIER_SIGNUP.route) {
-            SupplierSignUpScreen(navController = navController)
+            SupplierSignUpScreen(navController = navController, paddingValues)
         }
 
         composable(Authentication.SUPPLIER.route) {
             SupplierSignInScreen(
                 navController = navController,
+                paddingValues = paddingValues
             )
         }
 
         composable(Authentication.EMPLOYEE.route) {
-            EmployeesSignIn(navController)
+            EmployeesSignIn(navController, paddingValues)
         }
         composable(Authentication.APPROVAL.route) {
             ApprovalScreen(navController)

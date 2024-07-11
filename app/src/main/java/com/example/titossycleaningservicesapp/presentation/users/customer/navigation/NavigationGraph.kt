@@ -1,6 +1,5 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.navigation
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -26,7 +25,6 @@ import com.example.titossycleaningservicesapp.presentation.users.customer.utils.
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoute
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.NavRoutes
-import kotlin.math.log
 
 @Composable
 fun NavigationGraph(

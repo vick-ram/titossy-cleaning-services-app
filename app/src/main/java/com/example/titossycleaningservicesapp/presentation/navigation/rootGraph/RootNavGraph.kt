@@ -1,9 +1,7 @@
 package com.example.titossycleaningservicesapp.presentation.navigation.rootGraph
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +34,8 @@ fun RootNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
     startDestination: String,
-    dataStoreKeys: DataStoreKeys
+    dataStoreKeys: DataStoreKeys,
+    paddingValues: PaddingValues
 ) {
 
     val employeeViewModel: EmployeeViewModel = hiltViewModel()
@@ -73,9 +72,7 @@ fun RootNavGraph(
         NavHost(
             route = RootNavRoutes.ROOT.route,
             navController = navController,
-            startDestination = startDestination,
-            enterTransition = { fadeIn(animationSpec = tween(2000)) },
-            exitTransition = { fadeOut(animationSpec = tween(200)) }
+            startDestination = startDestination
         ) {
             composable(RootNavRoutes.ONBOARDING.route) {
                 OnBoardingScreen(
@@ -88,7 +85,8 @@ fun RootNavGraph(
             }
             authNavGraph(
                 navController = navController,
-                customerViewModel = customerViewModel
+                customerViewModel = customerViewModel,
+                paddingValues = paddingValues
             )
             usersNavigation(
                 signOut = {
@@ -104,8 +102,6 @@ fun RootNavGraph(
                 employeeViewModel = employeeViewModel,
                 supplierAuthViewModel = supplierViewModel,
                 paymentViewModel = paymentViewModel,
-                /*dialog = dialog,
-                openDialog = { dialog = it}*/
             )
         }
     }

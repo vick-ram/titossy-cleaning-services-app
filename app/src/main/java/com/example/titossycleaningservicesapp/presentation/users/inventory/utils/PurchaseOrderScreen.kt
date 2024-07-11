@@ -72,7 +72,7 @@ fun PurchaseOrderScreen(
 
     var expanded by rememberSaveable { mutableStateOf(false) }
     var showDateDialog by rememberSaveable { mutableStateOf(false) }
-    var selectedSupplier by rememberSaveable { mutableStateOf<Supplier?>(null) }
+    var selectedSupplier by remember { mutableStateOf<Supplier?>(null) }
     val productViewModel: ProductViewModel = hiltViewModel()
     val productCartUiState by productViewModel.productCartUiState.collectAsStateWithLifecycle()
     val supplierViewModel: SupplierViewModel = hiltViewModel()
@@ -80,7 +80,7 @@ fun PurchaseOrderScreen(
     val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
     val datePickerState = rememberDatePickerState()
     val confirmEnabled = remember { derivedStateOf { datePickerState.selectedDateMillis != null } }
-    var selectedDate by rememberSaveable { mutableStateOf(LocalDate.now()) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val purchaseUiState by purchaseOrderViewModel.purchaseOrderDataUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -229,15 +229,8 @@ fun PurchaseOrderScreen(
                         }
                     }
                 }
-
             }
         }
-        Spacer(
-            modifier = Modifier
-                .weight(1f)
-                .height(16.dp)
-        )
-
         LoadingButton(
             modifier = modifier
                 .fillMaxWidth(.6f)
@@ -251,22 +244,6 @@ fun PurchaseOrderScreen(
             },
             text = "Create Purchase Order"
         )
-
-        /*Button(
-            modifier = modifier
-                .fillMaxWidth(.6f)
-                .align(Alignment.CenterHorizontally),
-            onClick = {
-                purchaseOrderViewModel.createPurchaseOrder(
-                    supplierId = selectedSupplier?.id.toString(),
-                    expectedDate = selectedDate
-                )
-            },
-            shape = MaterialTheme.shapes.extraSmall,
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            Text(text = "Create Purchase Order")
-        }*/
     }
 
     if (showDateDialog) {

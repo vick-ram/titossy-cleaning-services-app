@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +46,6 @@ import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.rememberImeState
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
-import com.example.titossycleaningservicesapp.presentation.auth.utils.AuthCurve
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomButton
 import com.example.titossycleaningservicesapp.presentation.auth.utils.CustomTextField
 import com.example.titossycleaningservicesapp.presentation.auth.utils.PassWordTransformation
@@ -55,7 +55,8 @@ import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 
 @Composable
 fun SupplierSignUpScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    paddingValues: PaddingValues
 ) {
     val supplierViewModel: SupplierViewModel = hiltViewModel()
     val context = LocalContext.current
@@ -108,176 +109,169 @@ fun SupplierSignUpScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(paddingValues)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
                     navController.navigateUp()
                 }
+                Text(
+                    text = "back",
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-
-            Surface(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(scrollSate)
-                    .padding(18.dp),
-                tonalElevation = 0.dp,
-                shadowElevation = 1.dp,
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                    .padding(16.dp)
+                    .verticalScroll(state = scrollSate),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AuthCurve(title = "Register")
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    CustomTextField(
-                        value = supplierViewModel.firstName,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.FIRST_NAME, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "First Name",
-                        leadingIcon = Icons.Filled.Person,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = firstnameErrorMessage,
-                        isError = firstnameState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.lastName,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.LAST_NAME, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "Last Name",
-                        leadingIcon = Icons.Filled.Person,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = lastnameErrorMessage,
-                        isError = lastnameState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.phone,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.PHONE, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "Phone",
-                        leadingIcon = Icons.Filled.Phone,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = phoneErrorMessage,
-                        isError = phoneState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.address,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.ADDRESS, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "Address",
-                        leadingIcon = Icons.Filled.LocationOn,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = addressErrorMessage,
-                        isError = addressState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.email,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.EMAIL, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "Email",
-                        leadingIcon = Icons.Filled.Email,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        errorMessage = emailErrorMessage,
-                        isError = emailState is ValidationState.Invalid
-                    )
-
-                    CustomTextField(
-                        value = supplierViewModel.password,
-                        onValueChange = {
-                            supplierViewModel.onFieldChange(
-                                SupplierViewModel.FieldType.PASSWORD, it
-                            )
-                        },
-                        modifier = Modifier,
-                        label = "Password",
-                        leadingIcon = Icons.Filled.Lock,
-                        keyBoardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        trailingIcon = if (passwordVisibility) {
-                            Icons.Filled.Visibility
-                        } else {
-                            Icons.Filled.VisibilityOff
-                        },
-                        onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
-                        visualTransformation = if (passwordVisibility) {
-                            VisualTransformation.None
-                        } else {
-                            PassWordTransformation()
-                        },
-                        errorMessage = passwordErrorMessage,
-                        isError = passwordState is ValidationState.Invalid
-                    )
-
-                    CustomButton(
-                        text = "Sign Up",
-                        onClick = { supplierViewModel.signUp() },
-                        modifier = Modifier,
-                        enabled = firstnameState is ValidationState.Valid &&
-                                lastnameState is ValidationState.Valid &&
-                                phoneState is ValidationState.Valid &&
-                                emailState is ValidationState.Valid &&
-                                passwordState is ValidationState.Valid &&
-                                addressState is ValidationState.Valid
-                    )
-                }
+                Text(
+                    text = "Create Account",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.firstName,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.FIRST_NAME, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "First Name",
+                    leadingIcon = Icons.Filled.Person,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = firstnameErrorMessage,
+                    isError = firstnameState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.lastName,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.LAST_NAME, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Last Name",
+                    leadingIcon = Icons.Filled.Person,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = lastnameErrorMessage,
+                    isError = lastnameState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.phone,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.PHONE, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Phone",
+                    leadingIcon = Icons.Filled.Phone,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = phoneErrorMessage,
+                    isError = phoneState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.address,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.ADDRESS, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Address",
+                    leadingIcon = Icons.Filled.LocationOn,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = addressErrorMessage,
+                    isError = addressState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.email,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.EMAIL, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Email",
+                    leadingIcon = Icons.Filled.Email,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    errorMessage = emailErrorMessage,
+                    isError = emailState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomTextField(
+                    value = supplierViewModel.password,
+                    onValueChange = {
+                        supplierViewModel.onFieldChange(
+                            SupplierViewModel.FieldType.PASSWORD, it
+                        )
+                    },
+                    modifier = Modifier,
+                    label = "Password",
+                    leadingIcon = Icons.Filled.Lock,
+                    keyBoardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    trailingIcon = if (passwordVisibility) {
+                        Icons.Filled.Visibility
+                    } else {
+                        Icons.Filled.VisibilityOff
+                    },
+                    onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
+                    visualTransformation = if (passwordVisibility) {
+                        VisualTransformation.None
+                    } else {
+                        PassWordTransformation()
+                    },
+                    errorMessage = passwordErrorMessage,
+                    isError = passwordState is ValidationState.Invalid
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                CustomButton(
+                    text = "Sign Up",
+                    onClick = { supplierViewModel.signUp() },
+                    modifier = Modifier.fillMaxWidth(.8f),
+                    shape = MaterialTheme.shapes.medium,
+                    enabled = firstnameState is ValidationState.Valid &&
+                            lastnameState is ValidationState.Valid &&
+                            phoneState is ValidationState.Valid &&
+                            emailState is ValidationState.Valid &&
+                            passwordState is ValidationState.Valid &&
+                            addressState is ValidationState.Valid
+                )
             }
         }
         CustomProgressIndicator(

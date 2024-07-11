@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.UpdateBookingStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.BookingAssignment
@@ -65,11 +66,12 @@ fun HomeScreen(
 
     val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
     val bookingAssignmentUiState by bookingViewModel.bookingAssignmentUiState.collectAsStateWithLifecycle()
+    val bookingUpdateUiState by bookingViewModel.bookingUpdate.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = bookingViewModel) {
         bookingViewModel.fetchCleanerAssignments()
     }
-    LaunchedEffect(key1 = bookingAssignmentUiState) {
+    /*LaunchedEffect(key1 = bookingAssignmentUiState) {
         if (bookingAssignmentUiState.errorMessage.isNotEmpty()) {
             Toast.makeText(
                 context,
@@ -82,6 +84,23 @@ fun HomeScreen(
                 bookingAssignmentUiState.isSuccess,
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }*/
+
+    LaunchedEffect(key1 = bookingUpdateUiState) {
+        when {
+            bookingUpdateUiState.isLoading -> return@LaunchedEffect
+            bookingUpdateUiState.successMessage.isNotEmpty() ->
+                showToast(
+                    context = context,
+                    message = bookingUpdateUiState.successMessage
+                )
+            bookingUpdateUiState.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = bookingUpdateUiState.errorMessage
+                )
+            }
         }
     }
 
@@ -172,7 +191,6 @@ fun HomeScreen(
                                         assign.bookingId,
                                         UpdateBookingStatus(status)
                                     )
-                                    bookingViewModel.fetchBookingAssignments(assign.bookingId)
                                 },
                                 onCompleted = { assign, status ->
                                     bookingViewModel.updateBookingStatus(

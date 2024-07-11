@@ -47,7 +47,7 @@ fun ManagerNavigationDrawer(
     signOutManager: () -> Unit,
     mainViewModel: MainViewModel,
     employeeViewModel: EmployeeViewModel,
-    supplierViewModel: SupplierViewModel
+    supplierViewModel: SupplierViewModel,
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

@@ -1,6 +1,7 @@
 package com.example.titossycleaningservicesapp.presentation.auth.utils
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -10,6 +11,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,13 +36,20 @@ fun CustomTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(.8f),
         readOnly = readOnly,
-        label = { Text(text = label, overflow = TextOverflow.Ellipsis) },
+        label = {
+            Text(
+                text = label,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
         leadingIcon = {
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
+                tint = Color.Gray
             )
         },
         trailingIcon = {

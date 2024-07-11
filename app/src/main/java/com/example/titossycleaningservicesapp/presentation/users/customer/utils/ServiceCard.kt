@@ -128,7 +128,6 @@ fun ServiceAddOnCard(
     serviceAddOn: ServiceAddOn,
     addToCart: (ServiceAddOn) -> Unit
 ) {
-    var showRow by remember { mutableStateOf(false) }
     ElevatedCard(
         modifier = Modifier
             .padding(8.dp)
@@ -154,8 +153,9 @@ fun ServiceAddOnCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = serviceAddOn.name,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -164,7 +164,7 @@ fun ServiceAddOnCard(
 
             Text(
                 text = serviceAddOn.description,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 maxLines = 2,
                 textAlign = TextAlign.Center,
@@ -230,16 +230,15 @@ fun CustomServiceCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = service.name,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = service.description,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 ),
@@ -250,8 +249,8 @@ fun CustomServiceCard(
 
             Text(
                 text = service.formattedPrice,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )

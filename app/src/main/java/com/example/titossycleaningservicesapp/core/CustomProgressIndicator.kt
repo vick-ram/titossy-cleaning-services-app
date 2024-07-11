@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,8 +34,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun CustomProgressIndicator(
     modifier: Modifier = Modifier,
-    size: Dp = 60.dp,
-    strokeWidth: Dp = 15.dp,
+    size: Dp = 30.dp,
+    strokeWidth: Dp = 8.dp,
     isLoading: Boolean = false
 ) {
     val color = MaterialTheme.colorScheme.surface

@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachFile
@@ -138,14 +140,14 @@ fun HomeScreen(
             modifier = modifier
                 .fillMaxWidth()
         ) {
-            productsState.products?.let { products ->
+            /*productsState.products?.let { products ->
                 OverviewSection(
                     modifier = modifier.padding(horizontal = 8.dp),
                     totalItems = products.size,
                     totalValue = products.sumOf { it.unitPrice.toBigDecimal() * it.stock.toBigDecimal() }
                 )
             }
-            Spacer(modifier = modifier.height(8.dp))
+            Spacer(modifier = modifier.height(8.dp))*/
 
             SearchTextField(
                 value = search.value,
@@ -153,7 +155,6 @@ fun HomeScreen(
                     search.value = it
                 }
             )
-
             when {
 
                 productsState.products != null -> {
@@ -230,6 +231,7 @@ fun HomeScreen(
                         Column(
                             modifier = modifier
                                 .fillMaxWidth()
+                                .verticalScroll(state = rememberScrollState())
                         ) {
                             OutlinedTextField(
                                 modifier = modifier
@@ -417,7 +419,7 @@ fun ProductCard(
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var quantity by rememberSaveable { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(showDialog) {
@@ -506,7 +508,6 @@ fun ProductCard(
                 }
             }
         }
-
     }
     if (showDialog) {
         AlertDialog(
@@ -539,7 +540,13 @@ fun ProductCard(
                     modifier = modifier
                         .focusRequester(focusRequester),
                     value = quantity,
-                    onValueChange = { quantity = it },
+                    onValueChange = {
+                        quantity = if ((it.toIntOrNull() ?: 0) <= 30) {
+                            it
+                        } else {
+                            "30"
+                        }
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,

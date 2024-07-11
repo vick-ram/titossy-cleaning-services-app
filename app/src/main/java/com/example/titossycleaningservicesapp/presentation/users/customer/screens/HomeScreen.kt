@@ -1,9 +1,13 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,17 +49,24 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
+import com.example.titossycleaningservicesapp.presentation.ui.theme.AppTheme
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.CustomServiceCard
 import com.example.titossycleaningservicesapp.presentation.users.customer.utils.DetailsRoutes
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -73,7 +85,10 @@ fun HomeScreen(
     val focusManager = LocalFocusManager.current
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+    ) {
         Column {
             Box(
                 modifier = Modifier
@@ -108,7 +123,7 @@ fun HomeScreen(
                     placeholder = {
                         Text(
                             text = "Search service..",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                             )
                         )
@@ -122,7 +137,7 @@ fun HomeScreen(
                             serviceViewModel.searchServices(searchText)
                         }
                     ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                     ),
                     leadingIcon = {
@@ -195,8 +210,7 @@ fun HomeScreen(
 
                 serviceState.services.isNotEmpty() -> {
                     LazyColumn(
-                        modifier = Modifier,
-                        contentPadding = paddingValues,
+                        modifier = Modifier.padding(horizontal = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(serviceState.services) { service ->
@@ -222,3 +236,102 @@ fun HomeScreen(
         }
     }
 }
+
+
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BookingTimeSelector() {
+    val timeSlots = generateTimeSlots()
+    var selectedTimeSlot by remember { mutableStateOf<String?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Select Booking Time",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+        }
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(timeSlots.size) { index ->
+                val timeSlot = timeSlots[index]
+                TimeSlotItem(
+                    timeSlot = timeSlot,
+                    isSelected = timeSlot == selectedTimeSlot,
+                    onSelect = { selectedTimeSlot = timeSlot }
+                )
+            }
+        }
+        if (selectedTimeSlot != null) {
+            Text(
+                text = "Selected Time: $selectedTimeSlot",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun TimeSlotItem(
+    timeSlot: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(100.dp, 40.dp)
+            .background(
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(onClick = onSelect),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = timeSlot,
+            color = if (isSelected) Color.White else Color.Black,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = 16.sp
+        )
+    }
+}
+
+fun generateTimeSlots(): List<String> {
+    val startHour = 9
+    val endHour = 17
+    val slots = mutableListOf<String>()
+    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
+    for (hour in startHour..endHour) {
+        for (minute in listOf(0, 30)) {
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+            }
+            slots.add(sdf.format(calendar.time))
+        }
+    }
+    return slots
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BookingTimeSelectorPreview() {
+    AppTheme {
+        BookingTimeSelector()
+    }
+}
+
