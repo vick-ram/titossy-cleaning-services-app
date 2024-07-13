@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,10 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,45 +31,47 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.titossycleaningservicesapp.presentation.ui.theme.AppTheme
 
 @Composable
-fun CustomSearchField(modifier: Modifier = Modifier) {
-
-    var searchText by remember { mutableStateOf("") }
+fun CustomSearchField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 100.dp)
+            .fillMaxWidth(.8f)
             .focusRequester(focusRequester),
-        value = searchText,
-        onValueChange = { searchText = it },
+        value = value,
+        onValueChange = onValueChange,
         shape = RoundedCornerShape(50),
         placeholder = {
             Text(
-                text = "search something...",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                text = "Search",
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                 )
             )
         },
         leadingIcon = {
             Icon(
-                modifier = modifier.size(32.dp),
+                modifier = modifier,
                 imageVector = Icons.Filled.Search,
                 contentDescription = null
             )
         },
         trailingIcon = {
-            if (searchText.isNotBlank()) {
+            if (value.isNotBlank()) {
                 IconButton(onClick = {
-                    if (searchText.isNotEmpty()) {
-                        searchText = ""
+                    if (value.isNotEmpty()) {
+                        onValueChange("")
                     }
                     focusManager.clearFocus()
                 }) {
@@ -82,7 +82,7 @@ fun CustomSearchField(modifier: Modifier = Modifier) {
                 }
             }
         },
-        textStyle = MaterialTheme.typography.bodyLarge,
+        textStyle = MaterialTheme.typography.bodyMedium,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
@@ -96,7 +96,7 @@ fun CustomSearchField(modifier: Modifier = Modifier) {
 @Composable
 fun PreviewField() {
     AppTheme {
-        CustomSearchField()
+        SmallSearchField(value = "", onValueChange = {})
     }
 }
 
@@ -119,8 +119,9 @@ fun SmallSearchField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Start
         ),
         decorationBox = { innerTextField ->
             Row(
@@ -136,7 +137,12 @@ fun SmallSearchField(
                     contentDescription = null
                 )
                 Spacer(modifier = modifier.width(3.dp))
-                Box(modifier = modifier.weight(1f)) {
+                Box(
+                    modifier = modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
                     if (value.isEmpty()) {
                         Text(
                             text = "Search",

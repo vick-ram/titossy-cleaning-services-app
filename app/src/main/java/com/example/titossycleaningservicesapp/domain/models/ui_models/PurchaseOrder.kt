@@ -1,12 +1,10 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import android.icu.text.DecimalFormat
-import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
 import com.example.titossycleaningservicesapp.core.dateUiFormat
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class PurchaseOrder(
     val purchaseOrderId: String,
@@ -15,6 +13,7 @@ data class PurchaseOrder(
     val expectedDate: LocalDate,
     val purchaseOrderItems: List<PurchaseOrderItem>? = null,
     val totalAmount: BigDecimal,
+    val paid: Boolean,
     val orderStatus: OrderStatus,
 ) {
     val formattedAmount: String

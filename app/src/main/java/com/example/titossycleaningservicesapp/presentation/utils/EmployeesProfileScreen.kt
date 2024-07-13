@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,11 +28,13 @@ fun EmployeesProfile(
     paddingValues: PaddingValues,
     employee: Employee?
 ) {
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .verticalScroll(state = scrollState)
             .padding(8.dp)
     ) {
         Row(
@@ -42,7 +46,7 @@ fun EmployeesProfile(
             Text(
                 modifier = modifier.padding(16.dp),
                 text = "My Profile",
-                style = MaterialTheme.typography.headlineMedium.copy(
+                style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 )
             )
@@ -79,7 +83,7 @@ fun EmployeesProfile(
 fun EmployeeInfoField(
     modifier: Modifier = Modifier,
     label: String, field: String,
-    style: TextStyle = MaterialTheme.typography.bodyLarge
+    style: TextStyle = MaterialTheme.typography.bodyMedium
 ) {
     Column(
         modifier = modifier

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,6 +37,7 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.showToast
+import com.example.titossycleaningservicesapp.core.statusToColor
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
@@ -135,13 +137,13 @@ fun PurchaseOrderItemCard(
         ) {
             Text(
                 text = "Order ID:",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(.6f)
                 )
             )
             Text(
                 text = purchaseOrder.purchaseOrderId,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
@@ -151,19 +153,19 @@ fun PurchaseOrderItemCard(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 4.dp, start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "Employee:",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(.6f)
                 )
             )
             Text(
                 text = purchaseOrder.employee,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
@@ -174,19 +176,19 @@ fun PurchaseOrderItemCard(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 4.dp, start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "Supplier:",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(.6f)
                 )
             )
             Text(
                 text = purchaseOrder.supplier,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
@@ -197,49 +199,39 @@ fun PurchaseOrderItemCard(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 4.dp, start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "Order Status:",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(.6f)
                 )
             )
             Text(
                 text = purchaseOrder.orderStatus.name,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = orderStatusColor(purchaseOrder.orderStatus),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = statusToColor(purchaseOrder.orderStatus),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
                 )
             )
         }
-
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp, end = 16.dp),
+                .padding(top = 4.dp, bottom = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = { onViewDetails(purchaseOrder.purchaseOrderId) }) {
+            Button(
+                modifier = modifier.wrapContentSize(),
+                onClick = { onViewDetails(purchaseOrder.purchaseOrderId) }
+            ) {
                 Text(text = "View Details")
             }
         }
     }
 }
 
-
-@Composable
-fun orderStatusColor(status: OrderStatus): Color {
-    return when (status) {
-        OrderStatus.PENDING -> Color(0xFFFFEB3B)
-        OrderStatus.APPROVED -> colorResource(id = R.color.approved)
-        OrderStatus.PROCESSING -> Color(0xFF4CAF50)
-        OrderStatus.SHIPPED -> Color(0xFF2196F3)
-        OrderStatus.DELIVERED -> Color(0xFF4CAF50)
-        OrderStatus.CANCELLED -> Color(0xFFF44336)
-    }
-}

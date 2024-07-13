@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderItem
-import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
 
 @Composable
@@ -48,7 +48,6 @@ fun InventoryPurchaseOrderDetailsScreen(
     val purchaseOrder =
         purchaseOrderUiState.purchaseOrders?.find { it.purchaseOrderId == purchaseOrderId }
     val purchaseOrderStatus by purchaseOrderViewModel.purchaseOrderStatus.collectAsStateWithLifecycle()
-    val productViewModel: ProductViewModel = hiltViewModel()
 
     LaunchedEffect(purchaseOrderStatus, purchaseOrderViewModel) {
         when {
@@ -58,7 +57,6 @@ fun InventoryPurchaseOrderDetailsScreen(
                     context = context,
                     message = purchaseOrderStatus.successMessage
                 )
-                productViewModel
                 purchaseOrderViewModel.fetchPurchaseOrders()
             }
 
@@ -78,7 +76,8 @@ fun InventoryPurchaseOrderDetailsScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
                 Icon(
@@ -87,10 +86,10 @@ fun InventoryPurchaseOrderDetailsScreen(
                     contentDescription = null
                 )
             }
-            Spacer(modifier = modifier.width(32.dp))
+            Spacer(modifier = modifier.width(8.dp))
             Text(
                 "Purchase Order Details",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -107,7 +106,7 @@ fun InventoryPurchaseOrderDetailsScreen(
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         Text(
             "Items",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         LazyColumn {
@@ -118,7 +117,7 @@ fun InventoryPurchaseOrderDetailsScreen(
             }
         }
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        if (purchaseOrder?.orderStatus == OrderStatus.SHIPPED) {
+        if (purchaseOrder?.orderStatus == OrderStatus.ACKNOWLEDGED) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,10 +128,10 @@ fun InventoryPurchaseOrderDetailsScreen(
                 Button(onClick = {
                     purchaseOrderViewModel.updateOrderStatus(
                         id = purchaseOrderId,
-                        status = OrderStatus.DELIVERED.name
+                        status = OrderStatus.RECEIVED.name
                     )
                 }) {
-                    Text("Receive")
+                    Text("Receive Order")
                 }
             }
         }
@@ -147,30 +146,34 @@ fun PurchaseOrderItemRow(
     Column(modifier = modifier.padding(8.dp)) {
         Text(
             "Product:  ${purchaseOrderItem.product}",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
         Text(
             "Quantity:  ${purchaseOrderItem.quantity}",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
         Text(
             "Unit Price:  Kshs. ${purchaseOrderItem.unitPrice.toPlainString()}",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
         Text(
             "Subtotal:  Kshs. ${purchaseOrderItem.subtotal.toPlainString()}",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
 
 @Composable
-fun DetailRow(label: String, value: String, modifier: Modifier = Modifier) {
+fun DetailRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = modifier.padding(vertical = 4.dp),
+        modifier = modifier.padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
-        Text(value, style = MaterialTheme.typography.bodyLarge)
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }

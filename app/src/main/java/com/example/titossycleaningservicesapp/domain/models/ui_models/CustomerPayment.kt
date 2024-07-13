@@ -1,6 +1,7 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
+import com.example.titossycleaningservicesapp.domain.models.PaymentMethod
 import com.example.titossycleaningservicesapp.domain.models.PaymentStatus
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -10,7 +11,7 @@ data class CustomerPayment(
     val paymentId: String,
     val bookingId: String,
     val amount: BigDecimal,
-    val paymentMethod: String?,
+    val paymentMethod: PaymentMethod?,
     val phoneNumber: String,
     val transactionCode: String,
     val paymentStatus: PaymentStatus,

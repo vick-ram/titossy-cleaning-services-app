@@ -21,7 +21,13 @@ enum class Frequency {
 }
 
 enum class OrderStatus {
-    PENDING, APPROVED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+    PENDING,
+    REVIEWED,
+    APPROVED,
+    ACKNOWLEDGED,
+    RECEIVED,
+    COMPLETED,
+    CANCELLED
 }
 
 enum class BookingStatus {
@@ -30,4 +36,8 @@ enum class BookingStatus {
 
 enum class PaymentStatus {
     PENDING, CONFIRMED, REFUNDED, CANCELLED
+}
+
+enum class PaymentMethod {
+    CASH, MOBILE, CARD
 }

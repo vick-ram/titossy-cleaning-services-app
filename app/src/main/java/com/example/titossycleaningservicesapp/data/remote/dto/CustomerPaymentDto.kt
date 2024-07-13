@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.data.remote.dto
 
+import com.example.titossycleaningservicesapp.domain.models.PaymentMethod
 import com.example.titossycleaningservicesapp.domain.models.PaymentStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CustomerPayment
 import java.time.LocalDateTime
@@ -19,7 +20,7 @@ data class CustomerPaymentDto(
         paymentId,
         bookingId,
         amount.toBigDecimal(),
-        paymentMethod,
+        paymentMethod?.let { PaymentMethod.valueOf(it) },
         phoneNumber,
         transactionCode,
         PaymentStatus.valueOf(paymentStatus),

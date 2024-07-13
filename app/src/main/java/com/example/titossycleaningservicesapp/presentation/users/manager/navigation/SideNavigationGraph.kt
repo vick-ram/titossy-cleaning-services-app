@@ -11,6 +11,7 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ContactScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ProfileScreen
+import com.example.titossycleaningservicesapp.presentation.users.manager.utils.ManagerOrdersScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.RouteData
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.SuppliersScreen
 
@@ -45,6 +46,12 @@ fun SideNavigationGraph(
                 navController = navController,
                 supplierViewModel = supplierViewModel,
                 paddingValues = paddingValues
+            )
+        }
+        composable("managerOrders") {
+            ManagerOrdersScreen(
+                paddingValues = paddingValues,
+                navController = navController
             )
         }
     }

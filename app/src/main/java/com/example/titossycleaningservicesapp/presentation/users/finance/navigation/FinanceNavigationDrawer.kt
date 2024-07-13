@@ -51,7 +51,7 @@ fun FinanceNavigationDrawer(
     val navController = rememberNavController()
     val drawerItems = listOf(
         NavRoutes.Home,
-        NavRoutes.Contact,
+        NavRoutes.Orders,
         NavRoutes.Profile,
     )
     var financeInfo by rememberSaveable { mutableStateOf<Pair<String, String>?>(null) }
@@ -102,7 +102,7 @@ fun FinanceNavigationDrawer(
                         title = {
                             when(currentDestination?.destination?.route) {
                                 NavRoutes.Home.route -> Text(text = "Home")
-                                NavRoutes.Contact.route -> Text(text = "Contact")
+                                NavRoutes.Orders.route -> Text(text = "Orders")
                                 NavRoutes.Profile.route -> Text(text = "")
                             }
                         },

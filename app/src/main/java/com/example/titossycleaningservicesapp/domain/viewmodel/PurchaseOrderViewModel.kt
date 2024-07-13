@@ -39,20 +39,24 @@ class PurchaseOrderViewModel @Inject constructor(
         purchaseOrderRepository.createPurchaseOrder(supplierId, expectedDate)
             .map { resource ->
                 when (resource) {
-                    is Resource.Error -> PurchaseOrderUiState(
+                    is Resource.Error -> PurchaseOrderStatusUiState(
                         isLoading = false,
                         errorMessage = resource.message.toString()
                     )
 
-                    is Resource.Loading -> PurchaseOrderUiState(isLoading = true)
-                    is Resource.Success -> PurchaseOrderUiState(
+                    is Resource.Loading -> PurchaseOrderStatusUiState(isLoading = true)
+                    is Resource.Success -> PurchaseOrderStatusUiState(
                         isLoading = false,
-                        purchaseOrder = resource.data
+                        successMessage = resource.data.toString()
                     )
                 }
             }
-            .collect { pOrderState ->
-                _purchaseOrderDataUiState.value = pOrderState
+            .collectLatest { pOrderState ->
+                _purchaseOrderStatus.update { it.copy(
+                    isLoading = pOrderState.isLoading,
+                    successMessage = pOrderState.successMessage,
+                    errorMessage = pOrderState.errorMessage
+                ) }
             }
     }
 

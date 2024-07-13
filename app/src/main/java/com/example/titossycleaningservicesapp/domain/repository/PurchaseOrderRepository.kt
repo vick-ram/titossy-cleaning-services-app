@@ -9,7 +9,7 @@ interface PurchaseOrderRepository {
     fun createPurchaseOrder(
         supplierId: String,
         expectedDate: LocalDate
-    ) : Flow<Resource<PurchaseOrder>>
+    ) : Flow<Resource<String>>
 
     fun getPurchaseOrders() : Flow<Resource<List<PurchaseOrder>>>
     fun getCompletedPurchaseOrders(status: String) : Flow<Resource<List<PurchaseOrder>>>

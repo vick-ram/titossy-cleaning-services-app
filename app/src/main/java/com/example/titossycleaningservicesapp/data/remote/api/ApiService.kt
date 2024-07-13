@@ -34,6 +34,7 @@ import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SERVI
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SERVICE_CART
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER_ID
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER_PAYMENT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER_SIGN_IN
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER_SIGN_OUT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.SUPPLIER_SIGN_UP
@@ -50,6 +51,7 @@ import com.example.titossycleaningservicesapp.data.remote.dto.ServiceAddOnDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ServiceCartDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ServiceDto
 import com.example.titossycleaningservicesapp.data.remote.dto.SupplierDto
+import com.example.titossycleaningservicesapp.data.remote.dto.SupplierPaymentDto
 import com.example.titossycleaningservicesapp.data.remote.dto.UpdateOrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.AssignBooking
@@ -64,6 +66,7 @@ import com.example.titossycleaningservicesapp.domain.models.requests.employee.Em
 import com.example.titossycleaningservicesapp.domain.models.requests.employee.EmployeeSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.payment.CustomerPaymentRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.payment.CustomerPaymentStatusUpdate
+import com.example.titossycleaningservicesapp.domain.models.requests.payment.SupplierPaymentRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.po.AddProductToCart
 import com.example.titossycleaningservicesapp.domain.models.requests.po.PurchaseOrderRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierApproval
@@ -335,6 +338,14 @@ interface ApiService {
 
     @DELETE(CUSTOMER_PAYMENT_ID)
     suspend fun deletePayment(@Path("id") id: String): ApiResponse<String>
+
+    @POST(SUPPLIER_PAYMENT)
+    suspend fun createSupplierPayment(
+        @Body paymentRequest: SupplierPaymentRequest
+    ) : ApiResponse<SupplierPaymentDto>
+
+    @GET(SUPPLIER_PAYMENT)
+    suspend fun getSupplierPayments() : ApiResponse<List<SupplierPaymentDto>>
 
     @Multipart
     @POST(PRODUCT)

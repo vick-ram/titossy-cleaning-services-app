@@ -1,7 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.users.inventory.screens
 
 import android.content.ContentValues.TAG
-import android.icu.text.DecimalFormat
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -14,13 +13,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,6 +59,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -72,6 +69,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.FileUtils
 import com.example.titossycleaningservicesapp.core.showToast
@@ -80,7 +78,6 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.presentation.utils.CustomSearch
 import com.example.titossycleaningservicesapp.presentation.utils.SearchTextField
 import kotlinx.coroutines.delay
-import java.math.BigDecimal
 
 @Composable
 fun HomeScreen(
@@ -140,15 +137,6 @@ fun HomeScreen(
             modifier = modifier
                 .fillMaxWidth()
         ) {
-            /*productsState.products?.let { products ->
-                OverviewSection(
-                    modifier = modifier.padding(horizontal = 8.dp),
-                    totalItems = products.size,
-                    totalValue = products.sumOf { it.unitPrice.toBigDecimal() * it.stock.toBigDecimal() }
-                )
-            }
-            Spacer(modifier = modifier.height(8.dp))*/
-
             SearchTextField(
                 value = search.value,
                 onValueChange = {
@@ -156,7 +144,6 @@ fun HomeScreen(
                 }
             )
             when {
-
                 productsState.products != null -> {
                     productsState.products?.let { products ->
                         CustomSearch(
@@ -398,8 +385,7 @@ fun HomeScreen(
         FloatingActionButton(
             modifier = modifier
                 .align(Alignment.BottomEnd)
-                .systemBarsPadding()
-                .padding(bottom = 16.dp, end = 16.dp),
+                .padding(8.dp),
             onClick = { openDialog = true }
         ) {
             Icon(
@@ -468,7 +454,14 @@ fun ProductCard(
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = Color.Green
+                        color = colorResource(id = R.color.teal_700)
+                    )
+                )
+                Text(
+                    text = product.sku,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
                 )
             }
@@ -561,63 +554,3 @@ fun ProductCard(
         )
     }
 }
-
-@Composable
-fun OverviewSection(
-    modifier: Modifier = Modifier,
-    totalItems: Int,
-    totalValue: BigDecimal
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFCC80),
-            contentColor = Color(0xFF424242)
-        )
-    ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Inventory Overview",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = modifier.height(8.dp))
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = "Total Items",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = totalItems.toString(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Column {
-                    Text(
-                        text = "Total Value",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Kshs. ${DecimalFormat("#,###.00").format(totalValue)}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-

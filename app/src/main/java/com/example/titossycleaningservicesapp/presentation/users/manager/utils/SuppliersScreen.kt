@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
@@ -85,21 +86,15 @@ fun SuppliersScreen(
     LaunchedEffect(supplierViewModel, context) {
         supplierViewModel.resultChannel.collectLatest { result ->
             when(result) {
-                is AuthEvent.Error -> {
-                    Toast.makeText(
-                        context,
-                        result.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                is AuthEvent.Error -> showToast(
+                    context = context,
+                    message = result.message
+                )
                 is AuthEvent.Loading -> supplierViewModel.isLoading
-                is AuthEvent.Success -> {
-                    Toast.makeText(
-                        context,
-                        result.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                is AuthEvent.Success -> showToast(
+                    context = context,
+                    message = result.message.toString()
+                )
             }
         }
     }
@@ -120,11 +115,12 @@ fun SuppliersScreen(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(vertical = 16.dp, horizontal = 8.dp)
                     ) {
                         Row(
                             modifier = modifier
                                 .fillMaxWidth()
+                                .padding(bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(onClick = { navController.navigateUp() }) {
                                 Icon(
@@ -133,13 +129,11 @@ fun SuppliersScreen(
                                     contentDescription = null
                                 )
                             }
+                            Text(
+                                text = "Suppliers",
+                                style = MaterialTheme.typography.titleLarge
+                            )
                         }
-                        Text(
-                            modifier = modifier.padding(top = 16.dp, bottom = 8.dp),
-                            text = "Suppliers",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        Spacer(modifier = modifier.height(16.dp))
                         Column(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -407,7 +401,7 @@ fun TableHeader(
         ) {
             Text(
                 text = "Name",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                 )
@@ -441,7 +435,7 @@ fun TableHeader(
         ) {
             Text(
                 text = "Status",
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface.copy(.5f)
                 )
@@ -470,7 +464,7 @@ fun TableHeader(
         Text(
             modifier = modifier.weight(2f),
             text = "Action",
-            style = MaterialTheme.typography.bodyLarge.copy(
+            style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface.copy(.5f)
             )

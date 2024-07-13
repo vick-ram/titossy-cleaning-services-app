@@ -8,9 +8,9 @@ import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.PaymentViewModel
-import com.example.titossycleaningservicesapp.presentation.users.finance.screens.ContactScreen
 import com.example.titossycleaningservicesapp.presentation.users.finance.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.finance.screens.ProfileScreen
+import com.example.titossycleaningservicesapp.presentation.users.finance.screens.PurchaseOrdersScreen
 import com.example.titossycleaningservicesapp.presentation.users.finance.util.CustomerIncomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.finance.util.NavRoutes
 
@@ -33,8 +33,10 @@ fun NavigationGraph(
                 paddingValues = paddingValues
                 )
         }
-        composable(NavRoutes.Contact.route) {
-            ContactScreen(navController = navController)
+        composable(NavRoutes.Orders.route) {
+            PurchaseOrdersScreen(
+                paddingValues = paddingValues
+            )
         }
         composable(NavRoutes.Profile.route) {
             ProfileScreen(

@@ -8,8 +8,7 @@ import java.util.UUID
 
 data class PurchaseOrderRequest(
     val supplierId: String,
-    val expectedDate: LocalDate,
-    val products: MutableList<PurchaseOrderItemRequest>? = null
+    val expectedDate: String
 )
 
 data class PurchaseOrderItemRequest(

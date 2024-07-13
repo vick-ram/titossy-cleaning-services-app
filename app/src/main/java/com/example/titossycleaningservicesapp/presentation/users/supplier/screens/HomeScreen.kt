@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -18,7 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,19 +27,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.SmallSearchField
 import com.example.titossycleaningservicesapp.core.showToast
-import com.example.titossycleaningservicesapp.domain.models.OrderStatus
+import com.example.titossycleaningservicesapp.core.statusToColor
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
 import kotlinx.coroutines.delay
@@ -122,14 +119,6 @@ fun HomeScreen(
                             PurchaseOrderCard(
                                 purchaseOrder = purchaseOrder,
                                 onDetailsClick = { navController.navigate("purchaseOrderDetails" + "/" + it.purchaseOrderId) },
-                                onStatusClick = {
-                                    if (it.orderStatus == OrderStatus.APPROVED) {
-                                        purchaseOrderViewModel.updateOrderStatus(
-                                            id = it.purchaseOrderId,
-                                            status = OrderStatus.PROCESSING.name
-                                        )
-                                    }
-                                }
                             )
                         }
                     }
@@ -160,7 +149,6 @@ fun HomeScreen(
 fun PurchaseOrderCard(
     purchaseOrder: PurchaseOrder,
     onDetailsClick: (PurchaseOrder) -> Unit,
-    onStatusClick: (PurchaseOrder) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -177,7 +165,7 @@ fun PurchaseOrderCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Purchase Order #${purchaseOrder.purchaseOrderId}",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
                     fontWeight = FontWeight.Bold
@@ -185,38 +173,28 @@ fun PurchaseOrderCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Supplier: ${purchaseOrder.supplier}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Status: ",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    TextButton(
-                        onClick = { onStatusClick(purchaseOrder) }
-                    ) {
-                        Text(
-                            text = purchaseOrder.orderStatus.name,
-                            color = when (purchaseOrder.orderStatus) {
-                                OrderStatus.PENDING -> Color(0xFFFFEB3B)
-                                OrderStatus.APPROVED -> colorResource(id = R.color.approved)
-                                OrderStatus.PROCESSING -> Color(0xFF4CAF50)
-                                OrderStatus.SHIPPED -> Color(0xFF2196F3)
-                                OrderStatus.DELIVERED -> Color(0xFF4CAF50)
-                                OrderStatus.CANCELLED -> Color(0xFFF44336)
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            )
+                    Text(
+                        text = purchaseOrder.orderStatus.name,
+                        color = statusToColor(purchaseOrder.orderStatus),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
                         )
-                    }
+                    )
 
                 }
             }
             OutlinedButton(
-                onClick = { onDetailsClick(purchaseOrder)  }
+                onClick = { onDetailsClick(purchaseOrder) },
+                modifier = Modifier.wrapContentSize()
             ) {
                 Text(text = "View Details")
             }

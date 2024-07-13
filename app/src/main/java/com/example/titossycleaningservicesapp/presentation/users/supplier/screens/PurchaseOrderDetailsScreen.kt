@@ -26,16 +26,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.showToast
+import com.example.titossycleaningservicesapp.core.statusToColor
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderItem
@@ -97,7 +95,7 @@ fun PurchaseOrderDetailsScreen(
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Purchase Order Details",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.titleLarge
             )
         }
 
@@ -116,7 +114,7 @@ fun PurchaseOrderDetailsScreen(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    if (purchaseOrder?.orderStatus == OrderStatus.PROCESSING) {
+                    if (purchaseOrder?.orderStatus == OrderStatus.APPROVED) {
                         Button(
                             modifier = Modifier
                                 .fillMaxWidth(.7f)
@@ -124,13 +122,13 @@ fun PurchaseOrderDetailsScreen(
                             onClick = {
                                 purchaseOrderViewModel.updateOrderStatus(
                                     id = purchaseOrderId,
-                                    status = OrderStatus.SHIPPED.name
+                                    status = OrderStatus.ACKNOWLEDGED.name
                                 )
                             },
                             contentPadding = PaddingValues(16.dp),
                             shape = MaterialTheme.shapes.extraSmall
                         ) {
-                            Text(text = "Dispatch")
+                            Text(text = "Acknowledge Order")
                         }
                     }
                 }
@@ -167,21 +165,13 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = purchaseOrder.orderStatus.name,
-                        color = when (purchaseOrder.orderStatus) {
-                            OrderStatus.PENDING -> Color(0xFFFFEB3B)
-                            OrderStatus.APPROVED -> colorResource(id = R.color.approved)
-                            OrderStatus.PROCESSING -> Color(0xFF4CAF50)
-                            OrderStatus.SHIPPED -> Color(0xFF2196F3)
-                            OrderStatus.DELIVERED -> Color(0xFF4CAF50)
-                            OrderStatus.CANCELLED -> Color(0xFFF44336)
-                        },
+                        color = statusToColor(purchaseOrder.orderStatus),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
         }
 
-        // Order Details
         Text(
             text = "Order Details",
             style = MaterialTheme.typography.headlineSmall

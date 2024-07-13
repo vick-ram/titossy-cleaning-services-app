@@ -82,10 +82,14 @@ class SupplierRepositoryImpl @Inject constructor(
             )
             when (response.status) {
                 "success" -> {
-                    val supplierEntity = supplierDao.getSupplierById(id.toString()).singleOrNull()
-                    if (supplierEntity != null) {
-                        supplierEntity.status = approvalStatus
-                        supplierDao.updateSupplier(supplierEntity)
+                    val entitySupplier = supplierDao.getSupplierById(id.toString()).firstOrNull()
+                    entitySupplier?.let { supplierDao.updateSupplier(it) }
+
+                    val newSuppliers = apiService.getSuppliers()
+                    val entitySuppliers = newSuppliers.data?.map { it.toSupplierEntity() }
+                    entitySuppliers?.let {
+                        supplierDao.deleteAllSuppliers()
+                        supplierDao.insertAllSuppliers(it)
                     }
                     AuthEvent.Success(
                         message = response.message
@@ -116,6 +120,19 @@ class SupplierRepositoryImpl @Inject constructor(
             val response = apiService.deleteSupplier(id)
             when (response.status) {
                 "success" -> {
+                    //fetch supplier from room and delete him
+                    val entitySupplier = supplierDao.getSupplierById(id.toString()).firstOrNull()
+                    entitySupplier?.let {supplierDao.deleteSupplier(it)}
+
+                    // fetch all suppliers from api and update the room
+                    // by deleting the current data and inserting new
+                    val newSuppliers = apiService.getSuppliers()
+                    val entitySuppliers = newSuppliers.data?.map { it.toSupplierEntity() }
+                    entitySuppliers?.let {
+                        supplierDao.deleteAllSuppliers()
+                        supplierDao.insertAllSuppliers(it)
+                    }
+                    //respond with a message
                     val message = response.message
                     AuthEvent.Success(message)
                 }

@@ -9,6 +9,7 @@ import com.example.titossycleaningservicesapp.data.repository.FeedbackRepository
 import com.example.titossycleaningservicesapp.data.repository.ProductRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.PurchaseOrderRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ServiceRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.SupplierPaymentRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.SupplierRepositoryImpl
 import com.example.titossycleaningservicesapp.domain.repository.BookingRepository
 import com.example.titossycleaningservicesapp.domain.repository.CartRepository
@@ -19,6 +20,7 @@ import com.example.titossycleaningservicesapp.domain.repository.FeedbackReposito
 import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
 import com.example.titossycleaningservicesapp.domain.repository.PurchaseOrderRepository
 import com.example.titossycleaningservicesapp.domain.repository.ServiceRepository
+import com.example.titossycleaningservicesapp.domain.repository.SupplierPaymentRepository
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
 import dagger.Binds
 import dagger.Module
@@ -75,5 +77,12 @@ abstract class RepositoryModule {
     ): PurchaseOrderRepository
 
     @Binds
-    abstract fun bindFeedbackRepository(feedbackRepositoryImpl: FeedbackRepositoryImpl) : FeedbackRepository
+    abstract fun bindFeedbackRepository(
+        feedbackRepositoryImpl: FeedbackRepositoryImpl
+    ) : FeedbackRepository
+
+    @Binds
+    abstract fun bindSupplierPayment(
+        supplierPaymentRepositoryImpl: SupplierPaymentRepositoryImpl
+    ) : SupplierPaymentRepository
 }

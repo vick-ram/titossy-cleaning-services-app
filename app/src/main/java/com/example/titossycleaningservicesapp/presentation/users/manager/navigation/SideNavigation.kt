@@ -105,7 +105,11 @@ fun ManagerNavigationDrawer(
             topBar = {
                 if (showSheet) {
                     TopAppBar(
-                        title = { Text(text = "manager") },
+                        title = {
+                            if (currentDestination?.destination?.route == RouteData.Home.route) {
+                                Text(text = "DashBoard")
+                            }
+                        },
                         navigationIcon = {
                             IconButton(
                                 onClick = {
@@ -125,7 +129,7 @@ fun ManagerNavigationDrawer(
                         },
                         actions = {
                             Box(modifier = Modifier) {
-                                IconButton(onClick = { expanded = !expanded  }) {
+                                IconButton(onClick = { expanded = !expanded }) {
                                     Icon(
                                         modifier = Modifier.size(32.dp),
                                         imageVector = Icons.Rounded.MoreVert,
@@ -134,7 +138,7 @@ fun ManagerNavigationDrawer(
                                 }
                                 DropdownMenu(
                                     expanded = expanded,
-                                    onDismissRequest = { expanded = false}
+                                    onDismissRequest = { expanded = false }
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text(text = "notifications") },

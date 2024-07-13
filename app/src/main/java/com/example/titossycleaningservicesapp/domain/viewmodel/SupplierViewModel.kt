@@ -151,7 +151,6 @@ class SupplierViewModel @Inject constructor(
         }
     }
 
-
     private fun sendEvent(event: AuthEvent) = viewModelScope.launch {
         _resultChannel.send(event)
     }
@@ -203,6 +202,7 @@ class SupplierViewModel @Inject constructor(
                     suppliers = updatedSuppliers
                 )
             }
+            fetchSuppliers()
         }
         isLoading = false
     }
@@ -241,6 +241,7 @@ class SupplierViewModel @Inject constructor(
                     suppliers = updatedSuppliers
                 )
             }
+            fetchSuppliers()
         }
         isLoading = false
     }

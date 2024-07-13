@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CustomerPaymentUIState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.SupplierPaymentStatusUiState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.SupplierPaymentUiState
 import com.example.titossycleaningservicesapp.domain.repository.CustomerPaymentRepository
+import com.example.titossycleaningservicesapp.domain.repository.SupplierPaymentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,10 +19,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentViewModel @Inject constructor(
-    private val customerPaymentRepository: CustomerPaymentRepository
+    private val customerPaymentRepository: CustomerPaymentRepository,
+    private val supplierPaymentRepository: SupplierPaymentRepository
 ) : ViewModel() {
     private val _customerPaymentUiState = MutableStateFlow(CustomerPaymentUIState(isLoading = true))
     val customerPaymentUIState = _customerPaymentUiState.asStateFlow()
+
+    private val _supplierPaymentUiState = MutableStateFlow(SupplierPaymentUiState(isLoading = true))
+    val supplierPaymentUiState = _supplierPaymentUiState.asStateFlow()
+
+    private val _supplierPaymentStatusUiState = MutableStateFlow(SupplierPaymentStatusUiState(isLoading = true))
+    val supplierPaymentStatusUiState = _supplierPaymentStatusUiState.asStateFlow()
+
+    init {
+        fetchCustomerPayments()
+        fetchSupplierPayments()
+    }
 
     fun makePayment(
         bookingId: String,
@@ -194,6 +209,75 @@ class PaymentViewModel @Inject constructor(
                             )
                         }
                         fetchCustomerPayments()
+                    }
+                }
+            }
+    }
+
+    fun paySupplier(
+        orderId: String,
+        method: String
+    ) = viewModelScope.launch {
+        supplierPaymentRepository.createSupplierPayment(
+            orderId, method
+        )
+            .collectLatest {resource ->
+                when(resource) {
+                    is Resource.Error -> {
+                        _supplierPaymentStatusUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.message.toString()
+                            )
+                        }
+                    }
+                    is Resource.Loading -> {
+                        _supplierPaymentStatusUiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                    is Resource.Success -> {
+                        _supplierPaymentStatusUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                successMessage = resource.data.toString()
+                            )
+                        }
+                    }
+                }
+            }
+    }
+
+    fun fetchSupplierPayments() = viewModelScope.launch {
+        supplierPaymentRepository.getSupplierPayments()
+            .collect { resource ->
+                when(resource) {
+                    is Resource.Error -> {
+                        _supplierPaymentUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.message.toString()
+                            )
+                        }
+                    }
+                    is Resource.Loading -> {
+                        _supplierPaymentUiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                    is Resource.Success -> {
+                        resource.data?.let {
+                            _supplierPaymentUiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    supplierPayments = resource.data
+                                )
+                            }
+                        }
                     }
                 }
             }

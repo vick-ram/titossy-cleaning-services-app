@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PurchaseOrderRepositoryImpl @Inject constructor(
@@ -20,19 +21,19 @@ class PurchaseOrderRepositoryImpl @Inject constructor(
     override fun createPurchaseOrder(
         supplierId: String,
         expectedDate: LocalDate
-    ): Flow<Resource<PurchaseOrder>> {
+    ): Flow<Resource<String>> {
         return flow {
             val purchaseOrder = PurchaseOrderRequest(
                 supplierId = supplierId,
-                expectedDate = expectedDate
+                expectedDate = expectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
             )
             emit(Resource.Loading)
             val response = apiService.createPurchaseOrder(purchaseOrder)
 
             when(response.status) {
                 "success" -> {
-                    val pOrder = response.data?.toPurchaseOrder()
-                    pOrder?.let { emit(Resource.Success(it)) }
+                    val message = response.message
+                    message?.let { emit(Resource.Success(it)) }
                 }
                 "error" -> {
                     if (response.error != null) {
