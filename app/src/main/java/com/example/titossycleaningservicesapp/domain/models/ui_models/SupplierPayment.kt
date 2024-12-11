@@ -1,5 +1,7 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
+import android.icu.text.DecimalFormat
+import com.example.titossycleaningservicesapp.core.dateTimeUiFormat
 import com.example.titossycleaningservicesapp.domain.models.PaymentMethod
 import com.example.titossycleaningservicesapp.domain.models.PaymentStatus
 import java.math.BigDecimal
@@ -15,7 +17,12 @@ data class SupplierPayment(
     val method: PaymentMethod,
     val paymentReference: String,
     val status: PaymentStatus,
-)
+) {
+    val formattedDate: String
+        get() = paymentDate.format(dateTimeUiFormat)
+    val formattedAmount: String
+        get() = "Kshs. ${DecimalFormat("#,###.00").format(amount)}"
+}
 
 data class SupplierPaymentUiState(
     val isLoading: Boolean = false,

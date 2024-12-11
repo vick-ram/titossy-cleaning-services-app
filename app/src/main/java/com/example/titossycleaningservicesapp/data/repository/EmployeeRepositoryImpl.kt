@@ -117,7 +117,7 @@ class EmployeeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateAvailability(
-        id: UUID,
+        id: String,
         availability: String
     ): AuthEvent {
         return try {
@@ -178,7 +178,7 @@ class EmployeeRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getEmployeeById(id: UUID): Flow<Resource<Employee>> {
+    override fun getEmployeeById(id: String): Flow<Resource<Employee>> {
         return flow {
             emit(Resource.Loading)
             val dbEmployee = employeeDao.getEmployeeById(id).firstOrNull()

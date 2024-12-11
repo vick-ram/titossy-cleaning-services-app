@@ -22,7 +22,7 @@ import com.example.titossycleaningservicesapp.data.local.database.entities.Suppl
         ServiceEntity::class,
         ServiceAddonEntity::class
     ],
-    version = 11,
+    version = 14,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

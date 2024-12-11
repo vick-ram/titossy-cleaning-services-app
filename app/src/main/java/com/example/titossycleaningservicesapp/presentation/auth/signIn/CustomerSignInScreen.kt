@@ -32,17 +32,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
@@ -56,7 +55,6 @@ import com.example.titossycleaningservicesapp.presentation.auth.utils.Validation
 import com.example.titossycleaningservicesapp.presentation.utils.Authentication
 import com.example.titossycleaningservicesapp.presentation.utils.RootNavRoutes
 import com.example.titossycleaningservicesapp.presentation.utils.UserRoutes
-import kotlinx.coroutines.launch
 
 @Composable
 fun CustomerSignInScreen(
@@ -66,10 +64,9 @@ fun CustomerSignInScreen(
     paddingValues: PaddingValues
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val passwordState by customerViewModel.passwordState.collectAsState()
-    val passwordErrorMessage by customerViewModel.passwordErrorMessage.collectAsState()
+    val passwordErrorMessage by customerViewModel.passwordErrorMessage.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(customerViewModel, context) {
@@ -127,23 +124,21 @@ fun CustomerSignInScreen(
         ) {
             Image(
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(200.dp)
                     .padding(bottom = 16.dp),
-                painter = painterResource(id = R.drawable.titossy_img),
+                painter = painterResource(id = R.drawable.titossy_logo),
                 contentDescription = null
             )
-            Text(
-                text = "Login",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             CustomTextField(
-                modifier = Modifier.fillMaxWidth(.8f),
+                modifier = Modifier.fillMaxWidth(),
                 value = customerViewModel.email,
-                onValueChange = {
-                    customerViewModel.email = it
+                onValueChange = { newEmail ->
+                    customerViewModel.onFieldChange(
+                        CustomerViewModel.FieldType.EMAIL,
+                        newEmail
+                    )
                 },
-                label = "username or email",
+                label = "email",
                 leadingIcon = Icons.Filled.Person,
                 keyBoardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -159,7 +154,7 @@ fun CustomerSignInScreen(
                         newPassword
                     )
                 },
-                modifier = Modifier.fillMaxWidth(.8f),
+                modifier = Modifier.fillMaxWidth(),
                 label = "Password",
                 leadingIcon = Icons.Filled.Lock,
                 keyBoardOptions = KeyboardOptions(
@@ -182,24 +177,32 @@ fun CustomerSignInScreen(
             )
 
             CustomButton(
-                modifier = Modifier.fillMaxWidth(.8f),
+                modifier = Modifier.fillMaxWidth(),
                 text = "Sign In",
-                onClick = {
-                    scope.launch {customerViewModel.signIn()}
-                },
-                shape = MaterialTheme.shapes.medium,
+                onClick = { customerViewModel.signIn() },
+                shape = MaterialTheme.shapes.extraLarge,
                 enabled = passwordState is ValidationState.Valid
             )
             Spacer(modifier = Modifier.height(8.dp))
-            CustomButton(
-                text = "Sign Up",
-                onClick = toSignUpScreen,
-                modifier = Modifier.fillMaxWidth(.8f),
-                shape = MaterialTheme.shapes.medium,
-                enabled = true
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Don't have an account?",
+                    modifier = Modifier.padding(end = 2.dp)
+                )
+                TextButton(
+                    onClick = toSignUpScreen
+                ) {
+                    Text(text = "Sign Up")
+                }
+            }
 
             BottomSection(
+                modifier = Modifier.padding(start = 16.dp),
                 navigateToSupplier = {
                     navController.navigate(Authentication.SUPPLIER.route)
                 },
@@ -232,42 +235,20 @@ fun BottomSection(
         modifier = modifier
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Supplier?",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.W700
-            )
-        )
-        TextButton(
-            onClick = navigateToSupplier
-        ) {
-            Text(
-                text = "Sign In"
-            )
+        Text(text = "Supplier?")
+        TextButton(onClick = navigateToSupplier) {
+            Text(text = "Sign In")
         }
     }
     Row(
         modifier = modifier
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Employee/Staff?",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.W700
-            )
-        )
-        TextButton(
-            onClick = navigateToEmployee
-        ) {
-            Text(
-                text = "Sign In"
-            )
+        Text(text = "Employee/Staff?")
+        TextButton(onClick = navigateToEmployee) {
+            Text(text = "Sign In")
         }
     }
 }
-
-

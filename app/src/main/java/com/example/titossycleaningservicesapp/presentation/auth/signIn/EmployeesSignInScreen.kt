@@ -29,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -129,89 +131,92 @@ fun EmployeesSignIn(navController: NavHostController, paddingValues: PaddingValu
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
-                    navController.navigateUp()
-                }
-                Text(
-                    modifier = Modifier,
-                    text = "back",
-                )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .padding(bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NavigationIcon(icon = Icons.Outlined.ChevronLeft) {
+                navController.navigateUp()
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Employee login",
-                    style = MaterialTheme.typography.headlineMedium
+            Text(
+                modifier = Modifier,
+                text = "back",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                CustomTextField(
-                    value = signInViewModel.email,
-                    onValueChange = {
-                        signInViewModel.onFieldChange(
-                            EmployeeViewModel.FieldType.EMAIL, it
-                        )
-                    },
-                    modifier = Modifier,
-                    label = "email",
-                    leadingIcon = Icons.Filled.Person,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
-                    errorMessage = emailError,
-                    isError = emailState is ValidationState.Invalid
-                )
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Employee Login",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            CustomTextField(
+                value = signInViewModel.email,
+                onValueChange = {
+                    signInViewModel.onFieldChange(
+                        EmployeeViewModel.FieldType.EMAIL, it
+                    )
+                },
+                modifier = Modifier,
+                label = "email",
+                leadingIcon = Icons.Filled.Person,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                errorMessage = emailError,
+                isError = emailState is ValidationState.Invalid
+            )
 
-                CustomTextField(
-                    value = signInViewModel.password,
-                    onValueChange = {
-                        signInViewModel.onFieldChange(
-                            EmployeeViewModel.FieldType.PASSWORD, it
-                        )
-                    },
-                    modifier = Modifier,
-                    label = "Password",
-                    leadingIcon = Icons.Filled.Lock,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    trailingIcon = if (togglePasswordVisibility) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    },
-                    onTrailingIconClicked = {
-                        togglePasswordVisibility = !togglePasswordVisibility
-                    },
-                    visualTransformation = if (togglePasswordVisibility) {
-                        VisualTransformation.None
-                    } else {
-                        PassWordTransformation()
-                    },
-                    errorMessage = passwordError,
-                    isError = passwordState is ValidationState.Invalid
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                CustomButton(
-                    text = "Sign In",
-                    onClick = { signInViewModel.signIn() },
-                    modifier = Modifier.fillMaxWidth(.8f),
-                    enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
-                )
-            }
+            CustomTextField(
+                value = signInViewModel.password,
+                onValueChange = {
+                    signInViewModel.onFieldChange(
+                        EmployeeViewModel.FieldType.PASSWORD, it
+                    )
+                },
+                modifier = Modifier,
+                label = "Password",
+                leadingIcon = Icons.Filled.Lock,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                trailingIcon = if (togglePasswordVisibility) {
+                    Icons.Filled.Visibility
+                } else {
+                    Icons.Filled.VisibilityOff
+                },
+                onTrailingIconClicked = {
+                    togglePasswordVisibility = !togglePasswordVisibility
+                },
+                visualTransformation = if (togglePasswordVisibility) {
+                    VisualTransformation.None
+                } else {
+                    PassWordTransformation()
+                },
+                errorMessage = passwordError,
+                isError = passwordState is ValidationState.Invalid
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CustomButton(
+                text = "Sign In",
+                onClick = { signInViewModel.signIn() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
+            )
         }
         CustomProgressIndicator(
             modifier = Modifier

@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.showToast
-import com.example.titossycleaningservicesapp.core.statusToColor
 import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrderItem
@@ -66,6 +62,7 @@ fun PurchaseOrderDetailsScreen(
                 )
                 navController.navigateUp()
             }
+
             purchaseOrderStatus.errorMessage.isNotEmpty() -> {
                 showToast(
                     context = context,
@@ -91,11 +88,9 @@ fun PurchaseOrderDetailsScreen(
                     navController.navigateUp()
                 }
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Purchase Order Details",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium
             )
         }
 
@@ -143,51 +138,59 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
         modifier = Modifier
             .padding(16.dp)
     ) {
-        // Purchase Order Header
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
+        OrderRow(
+            "Order ID",
+            purchaseOrder.purchaseOrderId
+        )
+        OrderRow(
+            "To",
+            "Titossy Cleaning Services"
+        )
+        OrderRow(
+            "From",
+            purchaseOrder.supplier
+        )
+        OrderRow(
+            "Expected Date",
+            purchaseOrder.formattedDate
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Items:",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Purchase Order #${purchaseOrder.purchaseOrderId}",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+            Text(
+                text = "Product",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Status: ", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = purchaseOrder.orderStatus.name,
-                        color = statusToColor(purchaseOrder.orderStatus),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
+            )
+            Text(
+                text = "Qty",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Text(
+                text = "Unit Price",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Text(
+                text = "Subtotal",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
         }
-
-        Text(
-            text = "Order Details",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OrderRow("Employee", purchaseOrder.employee)
-        OrderRow("Supplier", purchaseOrder.supplier)
-        OrderRow("Expected Date", purchaseOrder.formattedDate)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Items
-        Text(
-            text = "Items",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider()
         if (purchaseOrder.purchaseOrderItems != null) {
             purchaseOrder.purchaseOrderItems.forEach { item ->
                 PurchaseOrderItemRow(item)
@@ -195,67 +198,54 @@ fun PurchaseOrderScreen(purchaseOrder: PurchaseOrder) {
         } else {
             Text(
                 text = "No items found",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Total Amount: ",
-                style = MaterialTheme.typography.bodyLarge
+                text = "Total Amount:",
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = purchaseOrder.formattedAmount,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
 @Composable
 fun PurchaseOrderItemRow(purchaseOrderItem: PurchaseOrderItem) {
-    Card(
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 8.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = purchaseOrderItem.product,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Quantity: ${purchaseOrderItem.quantity}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "Unit Price: ${purchaseOrderItem.formattedUnitPrice}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "Subtotal: ${purchaseOrderItem.formattedSubtotal}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Details",
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        Text(
+            text = purchaseOrderItem.product,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = "X ${purchaseOrderItem.quantity}",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = purchaseOrderItem.unitPrice.toPlainString(),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = purchaseOrderItem.subtotal.toPlainString(),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
@@ -265,9 +255,19 @@ fun OrderRow(label: String, value: String) {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "$label: ", style = MaterialTheme.typography.bodyLarge)
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "$label: ",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
+            )
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
+
 

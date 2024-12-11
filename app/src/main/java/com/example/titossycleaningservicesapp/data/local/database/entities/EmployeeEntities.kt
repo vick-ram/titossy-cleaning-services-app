@@ -28,7 +28,7 @@ data class EmployeeEntity(
     @ColumnInfo("updated_at") val updatedAt: String
 ) {
     fun toEmployee() = Employee(
-        id = UUID.fromString(id),
+        id = id,
         username = username,
         fullName = fullName,
         phone = phone,

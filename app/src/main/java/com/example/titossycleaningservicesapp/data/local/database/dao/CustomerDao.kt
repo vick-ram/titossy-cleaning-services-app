@@ -24,7 +24,6 @@ interface CustomerDao {
     @Query(
         """
     UPDATE customers SET
-        username = :username,
         full_name = :fullName,
         phone = :phone,
         email = :email,
@@ -33,8 +32,7 @@ interface CustomerDao {
 """
     )
     suspend fun updateCustomer(
-        id: UUID,
-        username: String,
+        id: String,
         fullName: String,
         phone: String,
         email: String,
@@ -43,10 +41,6 @@ interface CustomerDao {
 
     @Delete
     suspend fun deleteCustomer(customer: CustomerEntity)
-
-    @Transaction
-    @Query("SELECT * FROM customers WHERE username = :username")
-    suspend fun getCustomerByUsername(username: String): CustomerEntity?
 
     @Transaction
     @Query("SELECT * FROM customers")
@@ -59,10 +53,6 @@ interface CustomerDao {
     @Transaction
     @Query("SELECT * FROM customers WHERE customer_id = :id")
     suspend fun getCustomerById(id: UUID): CustomerEntity?
-
-    @Transaction
-    @Query("SELECT * FROM customers WHERE email = :input OR username = :input")
-    suspend fun getCustomerByUsernameOrEmail(input: String) : CustomerEntity?
 
     @Transaction
     @Query("DELETE FROM customers")

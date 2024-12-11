@@ -13,6 +13,7 @@ interface PurchaseOrderRepository {
 
     fun getPurchaseOrders() : Flow<Resource<List<PurchaseOrder>>>
     fun getCompletedPurchaseOrders(status: String) : Flow<Resource<List<PurchaseOrder>>>
+    fun getPurchaseOrderById(id: String) : Flow<Resource<PurchaseOrder>>
     fun updateOrderStatus(
         id: String,
         status: String

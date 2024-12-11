@@ -41,6 +41,7 @@ class BookingViewModel @Inject constructor(
 
     init {
         fetchBookings()
+        fetchCustomerBookings()
     }
 
     fun fetchBookings() = viewModelScope.launch {
@@ -218,6 +219,7 @@ class BookingViewModel @Inject constructor(
                         }
                         fetchBookings()
                         fetchBookingAssignments(bookingId)
+                        fetchCleanerAssignments()
                     }
                 }
             }

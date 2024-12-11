@@ -39,7 +39,7 @@ data class EmployeeDto(
     )
 
     fun toEmployeeModel() = Employee(
-        id = UUID.fromString(id),
+        id = id,
         username = username,
         fullName = fullName,
         phone = phone,

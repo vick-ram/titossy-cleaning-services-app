@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.titossycleaningservicesapp.core.CaptureAndPrintComposable
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.splitFullName
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
@@ -53,7 +54,7 @@ fun ProfileScreen(
     var supplierId by rememberSaveable { mutableStateOf<String?>(null) }
     val supplierState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     var showDialog by rememberSaveable { mutableStateOf(false) }
-    val supplier = supplierState.suppliers?.find { it.id.toString() == supplierId }
+    val supplier = supplierState.suppliers?.find { it.id == supplierId }
 
     val supplierNames = splitFullName(supplier?.fullName ?: "No fullName")
 
@@ -101,44 +102,49 @@ fun ProfileScreen(
 
         supplierState.suppliers != null -> {
             supplier?.let { sup ->
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        IconButton(onClick = { showDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = null
+                CaptureAndPrintComposable(
+                    context,
+                    composable = {
+                        Column(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                        ) {
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                IconButton(onClick = { showDialog = true }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                            Spacer(modifier = modifier.height(16.dp))
+                            SupplierInfoField(
+                                label = "Name:",
+                                field = sup.fullName
+                            )
+                            HorizontalDivider()
+                            SupplierInfoField(
+                                label = "Phone:",
+                                field = sup.phone
+                            )
+                            HorizontalDivider()
+                            SupplierInfoField(
+                                label = "Email:",
+                                field = sup.email
+                            )
+                            HorizontalDivider()
+                            SupplierInfoField(
+                                label = "Address:",
+                                field = sup.address
                             )
                         }
-                    }
-                    Spacer(modifier = modifier.height(16.dp))
-                    SupplierInfoField(
-                        label = "Name:",
-                        field = sup.fullName
-                    )
-                    HorizontalDivider()
-                    SupplierInfoField(
-                        label = "Phone:",
-                        field = sup.phone
-                    )
-                    HorizontalDivider()
-                    SupplierInfoField(
-                        label = "Email:",
-                        field = sup.email
-                    )
-                    HorizontalDivider()
-                    SupplierInfoField(
-                        label = "Address:",
-                        field = sup.address
-                    )
-                }
+                    })
+
             }
         }
 
@@ -157,7 +163,7 @@ fun ProfileScreen(
             confirmButton = {
                 TextButton(onClick = {
                     supplierViewModel.update(
-                        id = UUID.fromString(supplierId),
+                        id = supplierId ?: "",
                         firstName = firstName,
                         lastName = lastName,
                         phone = phone,
@@ -165,7 +171,8 @@ fun ProfileScreen(
                         email = email,
                         password = password
                     )
-                    showDialog = false }
+                    showDialog = false
+                }
                 ) {
                     Text(text = "Confirm")
                 }

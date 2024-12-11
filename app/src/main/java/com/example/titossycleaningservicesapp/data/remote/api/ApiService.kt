@@ -22,6 +22,7 @@ import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLO
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_SIGN_IN
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_SIGN_OUT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.FEEDBACK
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.MESSAGES
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER_ID
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.PRODUCT
@@ -44,6 +45,7 @@ import com.example.titossycleaningservicesapp.data.remote.dto.BookingDto
 import com.example.titossycleaningservicesapp.data.remote.dto.CustomerDto
 import com.example.titossycleaningservicesapp.data.remote.dto.CustomerPaymentDto
 import com.example.titossycleaningservicesapp.data.remote.dto.EmployeeDto
+import com.example.titossycleaningservicesapp.data.remote.dto.MessageDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductCartDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductDto
 import com.example.titossycleaningservicesapp.data.remote.dto.PurchaseOrderDto
@@ -157,12 +159,12 @@ interface ApiService {
 
     @PATCH(SUPPLIER_ID)
     suspend fun approveSupplier(
-        @Path("id") id: UUID,
+        @Path("id") id: String,
         @Body approvalStatus: SupplierApproval
     ): ApiResponse<Unit>
 
     @DELETE(SUPPLIER_ID)
-    suspend fun deleteSupplier(@Path("id") id: UUID): ApiResponse<Unit>
+    suspend fun deleteSupplier(@Path("id") id: String): ApiResponse<Unit>
 
     @GET(SUPPLIER_ID)
     suspend fun getSupplierById(
@@ -396,5 +398,14 @@ interface ApiService {
         @Path("id") id: String,
         @Body orderStatus: UpdateOrderStatus
     ): ApiResponse<String>
+    @GET(ORDER_ID)
+    suspend fun getPurchaseOrderById(
+        @Path("id") id: String
+    ): ApiResponse<PurchaseOrderDto>
+
+    @GET(MESSAGES)
+    suspend fun getSupplierMessages(
+        @Path("receiver") receiver: String
+    ): ApiResponse<List<MessageDto>>
 
 }

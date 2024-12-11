@@ -12,10 +12,10 @@ import java.util.UUID
 interface EmployeeRepository {
     suspend fun signInEmployee(email: String, password: String): AuthEvent
     suspend fun signOutEmployee(): AuthEvent
-    suspend fun updateAvailability(id: UUID, availability: String): AuthEvent
+    suspend fun updateAvailability(id: String, availability: String): AuthEvent
     fun getAllEmployees() : Flow<Resource<List<Employee>>>
     fun getEmployeesByRole(role: String) : Flow<Resource<List<Employee>>>
-    fun getEmployeeById(id: UUID): Flow<Resource<Employee>>
+    fun getEmployeeById(id: String): Flow<Resource<Employee>>
     fun getEmployeesByStatus(status: String): Flow<Resource<List<Employee>>>
     fun getEmployeeByEmail(email: String): Flow<Resource<Employee>>
 }

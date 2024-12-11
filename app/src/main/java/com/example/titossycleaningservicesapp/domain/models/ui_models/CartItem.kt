@@ -1,10 +1,11 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
+import android.icu.text.DecimalFormat
 import java.math.BigDecimal
 import java.util.UUID
 
 
-public sealed class CartItem(
+sealed class CartItem(
     open val id: UUID,
     open val name: String,
     open val price: BigDecimal,
@@ -28,4 +29,6 @@ public sealed class CartItem(
         override val quantity: Int,
         override val total: BigDecimal
     ) : CartItem(id, name, price, thumbnail, quantity, total)
+    val formattedPrice: String
+        get() = DecimalFormat("#,###.00").format(total)
 }

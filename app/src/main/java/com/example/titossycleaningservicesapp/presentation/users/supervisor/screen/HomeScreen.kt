@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckCircle
@@ -55,6 +57,7 @@ fun HomeScreen(
     val inProgressBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size ?: 0
     val completedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size ?: 0
     val cancelledBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.CANCELLED }?.size ?: 0
+    val scrollState  = rememberScrollState()
 
     LaunchedEffect(key1 = bookingViewModel) {
         bookingViewModel.fetchBookings()
@@ -65,6 +68,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(paddingValues)
             .padding(16.dp)
+            .verticalScroll(state = scrollState)
     ) {
         Spacer(modifier = modifier.height(16.dp))
         Row(

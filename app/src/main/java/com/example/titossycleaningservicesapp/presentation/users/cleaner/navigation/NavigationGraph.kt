@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
-import com.example.titossycleaningservicesapp.presentation.users.cleaner.screens.AboutScreen
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.screens.ProfileScreen
 import com.example.titossycleaningservicesapp.presentation.users.cleaner.util.CleanerNavRoutes
@@ -25,12 +24,6 @@ fun NavigationGraph(
     ) {
         composable(CleanerNavRoutes.Home.routes) {
             HomeScreen(
-                navController = navController,
-                paddingValues = paddingValues
-            )
-        }
-        composable(CleanerNavRoutes.About.routes) {
-            AboutScreen(
                 navController = navController,
                 paddingValues = paddingValues
             )

@@ -116,4 +116,26 @@ class PurchaseOrderRepositoryImpl @Inject constructor(
             emit(Resource.Error(e.message.toString()))
         }
     }
+
+    override fun getPurchaseOrderById(id: String): Flow<Resource<PurchaseOrder>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.getPurchaseOrderById(id)
+            when(response.status) {
+                "success" -> {
+                    val order = response.data?.toPurchaseOrder()
+                    order?.let { emit(Resource.Success(it)) }
+                }
+                "error" -> {
+                    if (response.error !=null) {
+                        val errors = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errors)
+                    }
+                }
+            }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
 }

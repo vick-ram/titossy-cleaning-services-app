@@ -70,6 +70,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceDetailsScreen(
+    modifier: Modifier = Modifier,
     serviceId: String,
     navController: NavHostController,
 ) {
@@ -135,7 +136,6 @@ fun ServiceDetailsScreen(
     }
 
     LaunchedEffect(serviceId, viewModel) {
-       // viewModel.clearServiceAddons()
         viewModel.fetchServiceAddons(serviceId)
     }
 
@@ -199,18 +199,19 @@ fun ServiceDetailsScreen(
                 sheetMaxWidth = BottomSheetDefaults.SheetMaxWidth
             ) {
                 when {
-                    cartDataState.loading -> CustomProgressIndicator(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        isLoading = true
+                    cartDataState.loading -> Box(
+                        modifier = modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                        content = { CustomProgressIndicator(isLoading = true) }
                     )
 
                     cartDataState.cartItems.isNotEmpty() -> {
                         LazyColumn(
                             state = rememberLazyListState(),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentPadding = innerPadding
+                                .fillMaxWidth(),
+                            contentPadding = innerPadding,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(cartDataState.cartItems) { cartItem ->
                                 ServiceCardInCart(cartItem = cartItem) {
@@ -242,7 +243,6 @@ fun ServiceDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    contentPadding = PaddingValues(18.dp),
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
@@ -251,12 +251,10 @@ fun ServiceDetailsScreen(
                             }
                         }
                     },
-                    enabled = cartDataState.cartItems.isNotEmpty()
+                    enabled = cartDataState.cartItems.isNotEmpty(),
+                    shape = RectangleShape
                 ) {
-                    Text(
-                        text = "Proceed",
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize
-                    )
+                    Text(text = "Proceed")
                 }
             }
         }
@@ -374,7 +372,7 @@ fun ServiceDetailsScreen(
                                 .padding(16.dp)
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center,
-                            content = { CustomProgressIndicator(isLoading = true)}
+                            content = { CustomProgressIndicator(isLoading = true) }
                         )
                     }
 

@@ -18,7 +18,7 @@ data class SupplierDto(
     val updatedAt: String
 ) {
     fun toSupplierEntity() = SupplierEntity(
-            id = UUID.fromString(id),
+            id = id,
             fullName = fullName,
             phone = phone,
             address = address,

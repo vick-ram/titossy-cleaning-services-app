@@ -183,7 +183,7 @@ fun BoxScope.Indicators(size: Int, index: Int) {
 @Composable
 fun Indicator(isSelected: Boolean) {
     val width = animateDpAsState(
-        targetValue = if (isSelected) 25.dp else 10.dp,
+        targetValue = if (isSelected) 18.dp else 10.dp,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy), label = ""
     )
 

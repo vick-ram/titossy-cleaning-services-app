@@ -25,7 +25,6 @@ class CustomerRepositoryImpl @Inject constructor(
     private val dataStore: DataStoreKeys,
 ) : CustomerRepository {
     override suspend fun createCustomer(
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -35,7 +34,6 @@ class CustomerRepositoryImpl @Inject constructor(
         return try {
             AuthEvent.Loading
             val customer = CustomerSignUpRequest(
-                username = username,
                 firstName = firstName,
                 lastName = lastName,
                 phone = phone,
@@ -71,23 +69,18 @@ class CustomerRepositoryImpl @Inject constructor(
 
 
     override suspend fun signInCustomer(
-        username: String?,
-        email: String?,
+        email: String,
         password: String
     ): AuthEvent {
         return try {
             val customer = CustomerSignInRequest(
-                username, email, password
+                 email, password
             )
             val response = apiService.customerSignIn(customer)
             when (response.status) {
                 "success" -> {
                     response.data?.let { dataStore.saveTokenToDataStore(it) }
-                    val customerEntity = when {
-                        email != null -> apiService.getCustomerByEmail(email).data?.toCustomerEntity()
-                        username != null -> apiService.getCustomerByUsername(username).data?.toCustomerEntity()
-                        else -> null
-                    }
+                    val customerEntity = apiService.getCustomerByEmail(email).data?.toCustomerEntity()
 
                     customerEntity?.let {
                         customerDao.insertCustomer(it)
@@ -136,8 +129,7 @@ class CustomerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateCustomer(
-        customerId: UUID,
-        username: String,
+        customerId: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -145,7 +137,6 @@ class CustomerRepositoryImpl @Inject constructor(
         password: String
     ): AuthEvent {
         val customer = CustomerSignUpRequest(
-            username = username,
             firstName = firstName,
             lastName = lastName,
             phone = phone,
@@ -159,7 +150,6 @@ class CustomerRepositoryImpl @Inject constructor(
                     response.data?.toCustomerEntity()?.let {
                         customerDao.updateCustomer(
                             customerId,
-                            username,
                             "$firstName $lastName",
                             phone,
                             email,
@@ -218,34 +208,6 @@ class CustomerRepositoryImpl @Inject constructor(
 
             if (customerFromDb == null) {
                 val response = apiService.getCustomerById(id.toString())
-                when (response.status) {
-                    "success" -> {
-                        response.data?.toCustomerEntity()?.let {
-                            customerDao.insertCustomer(it)
-                        }
-                    }
-
-                    "error" -> {
-                        if (response.error != null) {
-                            val errorMessage = FileUtils.createErrorMessage(response.error)
-                            throw Exception(errorMessage)
-                        }
-                    }
-                }
-            }
-            customerFromDb?.toCustomer()?.let { emit(Resource.Success(it)) }
-        }.catch { e ->
-            emit(Resource.Error(e.message.toString()))
-        }
-    }
-
-    override fun getCustomerByUsername(username: String): Flow<Resource<Customer>> {
-        return flow {
-            emit(Resource.Loading)
-            val customerFromDb = customerDao.getCustomerByUsername(username)
-
-            if (customerFromDb == null) {
-                val response = apiService.getCustomerByUsername(username)
                 when (response.status) {
                     "success" -> {
                         response.data?.toCustomerEntity()?.let {

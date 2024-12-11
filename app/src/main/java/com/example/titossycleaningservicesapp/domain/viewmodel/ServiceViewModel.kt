@@ -143,7 +143,7 @@ class ServiceViewModel @Inject constructor(
                     }
                 }
             }
-            .collectLatest { state ->
+            .collect { state ->
                 state?.let {
                     _serviceAddonState.value = it
                 }

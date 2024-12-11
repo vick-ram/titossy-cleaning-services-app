@@ -36,7 +36,7 @@ fun CustomTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(.8f),
+        modifier = modifier.fillMaxWidth(),
         readOnly = readOnly,
         label = {
             Text(

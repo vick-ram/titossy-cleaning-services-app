@@ -10,8 +10,7 @@ import java.util.UUID
 
 @Entity("customers")
 data class CustomerEntity(
-    @ColumnInfo("customer_id") @PrimaryKey val id: UUID,
-    @ColumnInfo("username") var username: String,
+    @ColumnInfo("customer_id") @PrimaryKey val id: String,
     @ColumnInfo("full_name") var fullName: String,
     @ColumnInfo("phone") var phone: String,
     @ColumnInfo("address") var address: String?,
@@ -23,7 +22,6 @@ data class CustomerEntity(
 ) {
     fun toCustomer() = Customer(
         id = id,
-        username = username,
         fullName = fullName,
         phone = phone,
         address = address,

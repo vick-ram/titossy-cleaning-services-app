@@ -33,7 +33,6 @@ class CustomerViewModel @Inject constructor(
     private val dataStoreKeys: DataStoreKeys
 ) : ViewModel() {
 
-    var username by mutableStateOf("")
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var phone by mutableStateOf("")
@@ -59,12 +58,6 @@ class CustomerViewModel @Inject constructor(
 
     private val _emailErrorMessage = MutableStateFlow("")
     val emailErrorMessage: StateFlow<String> = _emailErrorMessage.asStateFlow()
-
-    private val _usernameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
-    val usernameState: StateFlow<ValidationState> = _usernameState.asStateFlow()
-
-    private val _usernameErrorMessage = MutableStateFlow("")
-    val usernameErrorMessage: StateFlow<String> = _usernameErrorMessage.asStateFlow()
 
     private val _firstnameState = MutableStateFlow<ValidationState>(ValidationState.Idle)
     val firstnameState: StateFlow<ValidationState> = _firstnameState.asStateFlow()
@@ -121,16 +114,6 @@ class CustomerViewModel @Inject constructor(
                     _phoneErrorMessage.emit((_phoneState.value as ValidationState.Invalid).message)
                 }
             }
-
-            FieldType.USERNAME -> {
-                username = newValue
-                _usernameState.value = Validations.isValidName(newValue)
-                if (_usernameState.value is ValidationState.Valid) {
-                    _usernameErrorMessage.emit("")
-                } else if (_usernameState.value is ValidationState.Invalid) {
-                    _usernameErrorMessage.emit((_usernameState.value as ValidationState.Invalid).message)
-                }
-            }
             FieldType.FIRST_NAME -> {
                 firstName = newValue
                 _firstnameState.value = Validations.isValidName(newValue)
@@ -153,7 +136,6 @@ class CustomerViewModel @Inject constructor(
     }
 
     private fun resetSignFields() {
-        username = ""
         firstName = ""
         lastName = ""
         phone = ""
@@ -164,10 +146,8 @@ class CustomerViewModel @Inject constructor(
 
     fun signIn() = viewModelScope.launch {
         isLoading = true
-        val usernameOrEmail = email.ifEmpty { username }
         val result = customerRepository.signInCustomer(
-            username = if (usernameOrEmail.contains("@")) null else usernameOrEmail,
-            email = if (usernameOrEmail.contains("@")) usernameOrEmail else null,
+            email = email,
             password = password
         )
         if (result is AuthEvent.Success) {
@@ -181,7 +161,7 @@ class CustomerViewModel @Inject constructor(
     fun signUp() = viewModelScope.launch {
         isLoading = true
         val result =
-            customerRepository.createCustomer(username, firstName, lastName, phone, email, password)
+            customerRepository.createCustomer(firstName, lastName, phone, email, password)
         if (result is AuthEvent.Success) {
             resetSignFields()
         }
@@ -189,10 +169,10 @@ class CustomerViewModel @Inject constructor(
         isLoading = false
     }
 
-    fun update(customerId: UUID) = viewModelScope.launch {
+    fun update(customerId: String) = viewModelScope.launch {
         isLoading = true
         val result = customerRepository.updateCustomer(
-            customerId, username, firstName, lastName, phone, email, password
+            customerId, firstName, lastName, phone, email, password
         )
         sendEvent(result)
         isLoading = false
@@ -255,40 +235,6 @@ class CustomerViewModel @Inject constructor(
         }
     }
 
-    fun getCustomerByUsername() = viewModelScope.launch {
-        customerRepository.getCustomerByUsername(username)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue = Resource.Loading
-            )
-            .collect { resource ->
-                when (resource) {
-                    is Resource.Error -> {
-                        _customerUiState.update {
-                            it.copy(
-                                error = resource.message,
-                                isLoading = false
-                            )
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                        _customerUiState.update { it.copy(isLoading = true) }
-                    }
-
-                    is Resource.Success -> {
-                        _customerUiState.update {
-                            it.copy(
-                                customer = resource.data,
-                                isLoading = false
-                            )
-                        }
-                    }
-                }
-            }
-    }
-
     fun getCustomers() = viewModelScope.launch {
         customerRepository.getCustomers()
             .map { resource ->
@@ -315,7 +261,6 @@ class CustomerViewModel @Inject constructor(
         EMAIL,
         PASSWORD,
         PHONE,
-        USERNAME,
         FIRST_NAME,
         LAST_NAME
     }

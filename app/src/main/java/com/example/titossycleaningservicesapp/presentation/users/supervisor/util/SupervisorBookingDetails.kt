@@ -2,6 +2,7 @@ package com.example.titossycleaningservicesapp.presentation.users.supervisor.uti
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,10 +24,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -100,6 +103,7 @@ fun SupervisorBookingDetails(
     val employeeState by employeeViewModel.employeeUiState.collectAsStateWithLifecycle()
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(bookingViewModel) {
         bookingViewModel.fetchBookings()
@@ -237,10 +241,11 @@ fun SupervisorBookingDetails(
                 assign = { employee ->
                     bookingViewModel.assignBooking(
                         bookingId = book.bookingId,
-                        cleanerId = employee.id.toString()
+                        cleanerId = employee.id
                     )
                 },
-                bookingCleanerAssignment = bookingAssignmentUiState.assignedBookings
+                bookingCleanerAssignment = bookingAssignmentUiState.assignedBookings,
+                scrollState = scrollState
             )
         }
     }
@@ -251,7 +256,7 @@ fun BookingDataRow(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
-    style: TextStyle = MaterialTheme.typography.bodyLarge,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
     color: Color = MaterialTheme.colorScheme.onSurface,
     labelColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
@@ -267,7 +272,7 @@ fun BookingDataRow(
             color = labelColor
         )
         Text(
-            text = "$value: ",
+            text = value,
             style = style,
             color = color
         )
@@ -288,51 +293,53 @@ fun BookingData(
     employees: List<Employee>?,
     assign: (Employee) -> Unit,
     bookingCleanerAssignment: List<BookingCleanerAssignment>?,
+    scrollState: ScrollState
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(state = scrollState),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         BookingDataRow(
-            label = "BookingID: ",
+            label = "BookingID",
             value = "#${booking.bookingId}"
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Customer: ",
+            label = "Customer",
             value = booking.customer
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Booking Date & Time: ",
+            label = "Booking Date & Time",
             value = booking.bookingDateTime.format(dateTimeUiFormat)
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Frequency: ",
+            label = "Frequency",
             value = "${booking.frequency}"
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Instructions: ",
+            label = "Instructions",
             value = booking.additionalInstructions
         )
         Spacer(modifier = modifier.width(8.dp))
         BookingDataRow(
-            label = "Address: ",
+            label = "Address",
             value = booking.address
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Paid: ",
+            label = "Paid",
             value = booking.paidString
         )
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(4.dp))
         BookingDataRow(
-            label = "Booking Status: ",
+            label = "Booking Status",
             value = "${booking.bookingStatus}",
             color = when (booking.bookingStatus) {
                 BookingStatus.PENDING -> colorResource(id = R.color.pending)
@@ -358,12 +365,11 @@ fun BookingData(
                 modifier = modifier
                     .fillMaxWidth(),
                 onClick = { onApprove(BookingStatus.APPROVED) },
-                colors = ButtonDefaults.buttonColors(),
-                contentPadding = PaddingValues(16.dp)
+                colors = ButtonDefaults.buttonColors()
             ) {
                 Text(
                     text = "Approve",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }
@@ -517,7 +523,7 @@ fun BookingDetailsAddon(
             Text(
                 modifier = modifier.padding(
                     horizontal = 8.dp,
-                    vertical = 4.dp
+                    vertical = 2.dp
                 ),
                 text = "Service:  ${addOn.service}",
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -527,21 +533,21 @@ fun BookingDetailsAddon(
             Text(
                 modifier = modifier.padding(
                     horizontal = 8.dp,
-                    vertical = 4.dp
+                    vertical = 2.dp
                 ),
                 text = "ServiceAddon:  ${addOn.addon}"
             )
             Text(
                 modifier = modifier.padding(
                     horizontal = 8.dp,
-                    vertical = 4.dp
+                    vertical = 2.dp
                 ),
                 text = "Qty:  ${addOn.quantity}"
             )
             Text(
                 modifier = modifier.padding(
                     horizontal = 8.dp,
-                    vertical = 4.dp
+                    vertical = 2.dp
                 ),
                 text = "Subtotal:  ${addOn.total}"
             )

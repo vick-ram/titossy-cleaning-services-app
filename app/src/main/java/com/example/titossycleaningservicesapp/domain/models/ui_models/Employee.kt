@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Employee(
-    val id: UUID,
+    val id: String,
     val username: String,
     val fullName: String,
     val gender: Gender,

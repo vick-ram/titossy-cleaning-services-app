@@ -125,11 +125,14 @@ fun BookingsScreen(
             )
 
             bookingState.bookings != null -> {
-                bookingState.bookings?.filter {
+                val filteredBookings = bookingState.bookings?.filter {
                     it.bookingStatus.name.contains(query, ignoreCase = true) ||
                             it.frequency.name.contains(query, ignoreCase = true) ||
                             it.formattedDate.contains(query, ignoreCase = true)
-                }?.let { bookings ->
+                }
+                if (filteredBookings.isNullOrEmpty()) {
+                    EmptyScreen()
+                } else {
                     LazyColumn(
                         modifier = modifier
                             .fillMaxWidth()
@@ -137,7 +140,7 @@ fun BookingsScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(
-                            items = bookings,
+                            items = filteredBookings,
                             key = { it.bookingId }
                         ) { booking ->
                             BookingCustomerCard(
@@ -441,5 +444,24 @@ fun Star(
             .size(32.dp)
             .clickable(onClick = onClick)
     )
+}
+
+@Composable
+fun EmptyScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Inbox,
+            contentDescription = null
+        )
+        Spacer(modifier = modifier.height(8.dp))
+        Text(
+            text = "No bookings found",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 

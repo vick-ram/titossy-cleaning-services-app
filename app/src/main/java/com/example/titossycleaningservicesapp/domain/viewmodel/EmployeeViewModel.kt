@@ -96,7 +96,7 @@ class EmployeeViewModel @Inject constructor(
         isLoading = false
     }
 
-    fun update(id: UUID) = viewModelScope.launch {
+    fun update(id: String) = viewModelScope.launch {
         isLoading = true
         val result = employeeRepository.updateAvailability(id, availability)
         _resultChannel.send(result)
@@ -180,7 +180,7 @@ class EmployeeViewModel @Inject constructor(
             }
     }
 
-    fun fetchEmployeeById(id: UUID) = viewModelScope.launch {
+    fun fetchEmployeeById(id: String) = viewModelScope.launch {
         employeeRepository.getEmployeeById(id)
             .stateIn(
                 scope = viewModelScope,

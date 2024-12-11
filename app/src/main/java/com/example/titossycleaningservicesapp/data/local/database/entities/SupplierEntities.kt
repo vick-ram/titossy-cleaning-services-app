@@ -10,7 +10,7 @@ import java.util.UUID
 
 @Entity("suppliers")
 data class SupplierEntity(
-    @ColumnInfo("supplier_id") @PrimaryKey val id: UUID,
+    @ColumnInfo("supplier_id") @PrimaryKey val id: String,
     @ColumnInfo("full_name") val fullName: String,
     @ColumnInfo("phone") val phone: String,
     @ColumnInfo("address") val address: String,

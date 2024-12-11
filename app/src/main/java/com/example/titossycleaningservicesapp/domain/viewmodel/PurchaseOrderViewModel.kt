@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,6 +83,37 @@ class PurchaseOrderViewModel @Inject constructor(
                             it.copy(
                                 isLoading = false,
                                 purchaseOrders = resource.data
+                            )
+                        }
+                    }
+                }
+            }
+    }
+
+    fun getPurchaseOrderById(id: String) = viewModelScope.launch {
+        purchaseOrderRepository.getPurchaseOrderById(id)
+            .collect { resource ->
+                when (resource) {
+                    is Resource.Error -> {
+                        _purchaseOrderDataUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.message.toString()
+                            )
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        _purchaseOrderDataUiState.update {
+                            it.copy(isLoading = true)
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        _purchaseOrderDataUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                purchaseOrder = resource.data
                             )
                         }
                     }

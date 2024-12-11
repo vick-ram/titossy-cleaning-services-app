@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,6 +45,7 @@ import com.example.titossycleaningservicesapp.domain.models.ui_models.Booking
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
 import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AllBookingsScreen(
@@ -60,7 +62,7 @@ fun AllBookingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .systemBarsPadding()
     ) {
         Row(
             modifier = modifier
@@ -78,7 +80,7 @@ fun AllBookingsScreen(
 
             Spacer(modifier = modifier.width(16.dp))
             Text(
-                text = "All Bookings",
+                text = "ALL",
                 style = MaterialTheme.typography.headlineSmall
             )
         }
@@ -141,33 +143,36 @@ fun BookingCard(
         ) {
             Text(
                 text = "Booking #${booking.bookingId}",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Customer: ${booking.customer}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
             Text(
                 text = "Date & Time: ${booking.bookingDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Total Amount: ${booking.amount}",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             Row {
                 Text(
                     text = "Status: ",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = booking.bookingStatus.name,
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = booking.bookingStatus.name.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(
+                            Locale.getDefault()
+                        ) else it.toString()
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
                     color = when (booking.bookingStatus) {
                         BookingStatus.PENDING -> colorResource(id = R.color.pending)
                         BookingStatus.APPROVED -> colorResource(id = R.color.approved)

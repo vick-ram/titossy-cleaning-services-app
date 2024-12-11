@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -117,95 +118,93 @@ fun SupplierSignInScreen(
             .fillMaxSize()
             .padding(paddingValues)
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NavigationIcon(
+                icon = Icons.Rounded.ChevronLeft,
+                onClick = { navController.navigateUp() })
+            Text(
+                text = "back",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
         Column(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Row(
+            Text(
+                text = "Sign In",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            CustomTextField(
+                value = supplierViewModel.email,
+                onValueChange = {
+                    supplierViewModel.onFieldChange(
+                        SupplierViewModel.FieldType.EMAIL, it
+                    )
+                },
+                modifier = Modifier,
+                label = "email",
+                leadingIcon = Icons.Filled.Email,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                errorMessage = emailErrorMessage,
+                isError = emailState is ValidationState.Invalid
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CustomTextField(
+                value = supplierViewModel.password,
+                onValueChange = {
+                    supplierViewModel.onFieldChange(
+                        SupplierViewModel.FieldType.PASSWORD, it
+                    )
+                },
+                modifier = Modifier,
+                label = "Password",
+                leadingIcon = Icons.Filled.Lock,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                trailingIcon = if (passwordVisible) {
+                    Icons.Filled.Visibility
+                } else {
+                    Icons.Filled.VisibilityOff
+                },
+                onTrailingIconClicked = { passwordVisible = !passwordVisible },
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PassWordTransformation()
+                },
+                errorMessage = passwordErrorMessage,
+                isError = passwordState is ValidationState.Invalid
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CustomButton(
+                text = "Sign In",
+                onClick = { supplierViewModel.signIn() },
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NavigationIcon(
-                    icon = Icons.Rounded.ChevronLeft,
-                    onClick = { navController.navigateUp() })
-                Text(
-                    text = "back",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Supplier SignIn",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                CustomTextField(
-                    value = supplierViewModel.email,
-                    onValueChange = {
-                        supplierViewModel.onFieldChange(
-                            SupplierViewModel.FieldType.EMAIL, it
-                        )
-                    },
-                    modifier = Modifier,
-                    label = "email",
-                    leadingIcon = Icons.Filled.Email,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
-                    errorMessage = emailErrorMessage,
-                    isError = emailState is ValidationState.Invalid
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                CustomTextField(
-                    value = supplierViewModel.password,
-                    onValueChange = {
-                        supplierViewModel.onFieldChange(
-                            SupplierViewModel.FieldType.PASSWORD, it
-                        )
-                    },
-                    modifier = Modifier,
-                    label = "Password",
-                    leadingIcon = Icons.Filled.Lock,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    trailingIcon = if (passwordVisible) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    },
-                    onTrailingIconClicked = { passwordVisible = !passwordVisible },
-                    visualTransformation = if (passwordVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PassWordTransformation()
-                    },
-                    errorMessage = passwordErrorMessage,
-                    isError = passwordState is ValidationState.Invalid
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                CustomButton(
-                    text = "Sign In",
-                    onClick = { supplierViewModel.signIn() },
-                    modifier = Modifier.padding(16.dp),
-                    enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+                enabled = emailState is ValidationState.Valid && passwordState is ValidationState.Valid
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
-                    .weight(0.4f)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -214,14 +213,15 @@ fun SupplierSignInScreen(
                     text = "Don't have an account?",
                     fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 TextButton(
                     onClick = {
                         navController.navigate(Authentication.SUPPLIER_SIGNUP.route)
                     }
                 ) {
                     Text(
-                        text = "Sign Up"
+                        text = "Sign Up",
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

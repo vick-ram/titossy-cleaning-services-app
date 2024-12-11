@@ -47,7 +47,6 @@ fun CleanerNavigationDrawer(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val drawerItems = listOf(
         CleanerNavRoutes.Home,
-        CleanerNavRoutes.About,
         CleanerNavRoutes.Profile
     )
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -102,9 +101,6 @@ fun CleanerNavigationDrawer(
                             when(currentDestination) {
                                 CleanerNavRoutes.Home.routes -> {
                                     Text(text = "Booking Schedules")
-                                }
-                                CleanerNavRoutes.About.routes -> {
-                                    Text(text = "Cleaner")
                                 }
                                 CleanerNavRoutes.Profile.routes -> {}
                             }

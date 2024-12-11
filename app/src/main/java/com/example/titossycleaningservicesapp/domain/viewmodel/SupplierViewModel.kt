@@ -6,7 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
+import com.example.titossycleaningservicesapp.core.WebsocketService
 import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants
+import com.example.titossycleaningservicesapp.data.remote.dto.MessageUiState
 import com.example.titossycleaningservicesapp.data.remote.util.AuthEvent
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.SupplierUiState
@@ -26,14 +29,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class SupplierViewModel @Inject constructor(
     private val supplierRepository: SupplierRepository,
-    private val dataStoreKeys: DataStoreKeys
+    private val dataStoreKeys: DataStoreKeys,
+    private val websocketService: WebsocketService
 ) : ViewModel() {
+
+
+    var message by mutableStateOf("")
+
+    private val _messageUiState = MutableStateFlow(MessageUiState(isLoading = true))
+    val messageUiState: StateFlow<MessageUiState> = _messageUiState.asStateFlow()
 
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
@@ -89,6 +98,8 @@ class SupplierViewModel @Inject constructor(
 
     init {
         fetchSuppliers()
+        websocketService.connect(ApiConstants.CHAT_ENDPOINT)
+        fetchSupplierMessages()
     }
 
     fun onFieldChange(type: FieldType, newValue: String) = viewModelScope.launch {
@@ -180,7 +191,7 @@ class SupplierViewModel @Inject constructor(
     }
 
     fun updateSupplierStatus(
-        id: UUID,
+        id: String,
         approvalStatus: ApprovalStatus
     ) = viewModelScope.launch {
         isLoading = true
@@ -208,7 +219,7 @@ class SupplierViewModel @Inject constructor(
     }
 
     fun update(
-        id: UUID,
+        id: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -230,7 +241,7 @@ class SupplierViewModel @Inject constructor(
         isLoading = false
     }
 
-    fun deleteSupplier(id: UUID) = viewModelScope.launch {
+    fun deleteSupplier(id: String) = viewModelScope.launch {
         isLoading = true
         val result = supplierRepository.deleteSupplier(id)
         sendEvent(result)
@@ -290,7 +301,7 @@ class SupplierViewModel @Inject constructor(
     }
 
     fun fetchSupplierById(id: String) = viewModelScope.launch {
-        supplierRepository.getSupplierById(UUID.fromString(id))
+        supplierRepository.getSupplierById(id)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000L),
@@ -332,6 +343,32 @@ class SupplierViewModel @Inject constructor(
         }
     }
 
+    fun sendMessage() = viewModelScope.launch {
+        websocketService.sendMessage(message)
+    }
+
+    fun fetchSupplierMessages() = viewModelScope.launch {
+        supplierRepository.getSupplierMessages("3bb79280-4")
+            .map {
+                when(it) {
+                    is Resource.Error -> MessageUiState(
+                        isLoading = false,
+                        error = it.message.toString()
+                    )
+                    is Resource.Loading -> MessageUiState(
+                        isLoading = true
+                    )
+                    is Resource.Success -> MessageUiState(
+                        isLoading = false,
+                        messages = it.data ?: emptyList()
+                    )
+                }
+            }
+            .collect {
+                _messageUiState.update { it }
+            }
+    }
+
     fun clearToken() = viewModelScope.launch {
         dataStoreKeys.clearToken()
     }
@@ -344,6 +381,7 @@ class SupplierViewModel @Inject constructor(
         LAST_NAME,
         ADDRESS
     }
+
 
     override fun onCleared() {
         super.onCleared()

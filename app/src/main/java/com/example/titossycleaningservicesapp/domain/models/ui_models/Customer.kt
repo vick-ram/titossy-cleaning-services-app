@@ -5,8 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Customer(
-    val id: UUID,
-    val username: String,
+    val id: String,
     val fullName: String,
     val phone: String,
     val address: String?,

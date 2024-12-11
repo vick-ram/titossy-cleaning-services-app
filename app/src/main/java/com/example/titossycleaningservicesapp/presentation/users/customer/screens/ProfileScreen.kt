@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
@@ -103,7 +102,6 @@ fun SettingsScreen(
                     paddingValues = paddingValues,
                     showDialog = showDialog,
                     onShowDialog = { showDialog = it },
-                    username = viewModel.username,
                     firstName = viewModel.firstName,
                     lastName = viewModel.lastName,
                     email = viewModel.email,
@@ -111,7 +109,6 @@ fun SettingsScreen(
                     splitFullName = splitFullName(cust.fullName),
                     onValueChange = { field, value ->
                         when (field) {
-                            "username" -> viewModel.username = value
                             "firstName" -> viewModel.firstName = value
                             "lastName" -> viewModel.lastName = value
                             "email" -> viewModel.email = value
@@ -146,7 +143,6 @@ fun CustomerSettings(
     paddingValues: PaddingValues,
     showDialog: Boolean = false,
     onShowDialog: (Boolean) -> Unit,
-    username: String,
     firstName: String,
     lastName: String,
     email: String,
@@ -175,11 +171,6 @@ fun CustomerSettings(
                     .align(Alignment.CenterHorizontally),
                 painter = painterResource(id = R.drawable.user),
                 contentDescription = null
-            )
-
-            ProfileItem(
-                title = "Username",
-                value = customer.username,
             )
 
             ProfileItem(
@@ -212,7 +203,6 @@ fun CustomerSettings(
         ProfileDialog(
             onShowDialog = onShowDialog,
             customer = customer,
-            username = username,
             firstName = firstName,
             lastName = lastName,
             email = email,
@@ -262,7 +252,6 @@ fun ProfileDialog(
     modifier: Modifier = Modifier,
     onShowDialog: (Boolean) -> Unit,
     customer: Customer,
-    username: String,
     firstName: String,
     lastName: String,
     email: String,
@@ -279,7 +268,6 @@ fun ProfileDialog(
         ProfileFields(
             modifier = modifier,
             customer = customer,
-            username = username,
             firstName = firstName,
             lastName = lastName,
             email = email,
@@ -297,7 +285,6 @@ fun ProfileDialog(
 fun ProfileFields(
     modifier: Modifier = Modifier,
     customer: Customer,
-    username: String,
     firstName: String,
     lastName: String,
     email: String,
@@ -331,15 +318,6 @@ fun ProfileFields(
                     fontWeight = FontWeight.W600,
                     fontSize = 20.sp
                 )
-            )
-            CustomProfileTextField(
-                modifier = modifier,
-                value = username,
-                placeholder = customer.username,
-                icon = Icons.Rounded.AccountCircle,
-                onValueChange = { onValueChange("username", it) },
-                focusRequester = focusRequester,
-                focusManager = focusManager
             )
             CustomProfileTextField(
                 modifier = modifier,

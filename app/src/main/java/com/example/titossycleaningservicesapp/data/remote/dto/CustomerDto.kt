@@ -9,7 +9,6 @@ import java.util.UUID
 
 data class CustomerDto(
     val id: String,
-    val username: String,
     val fullName: String,
     val phone: String,
     val address: String,
@@ -20,8 +19,7 @@ data class CustomerDto(
     val updatedAt: String
 ) {
     fun toCustomerEntity() = CustomerEntity(
-        id = UUID.fromString(id),
-        username = username,
+        id = id,
         fullName = fullName,
         phone = phone,
         address = address,

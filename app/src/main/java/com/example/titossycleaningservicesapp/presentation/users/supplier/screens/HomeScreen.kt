@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.presentation.users.supplier.screens
 
+import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -37,6 +42,7 @@ import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.SmallSearchField
 import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.core.statusToColor
+import com.example.titossycleaningservicesapp.domain.models.OrderStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.PurchaseOrder
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
 import kotlinx.coroutines.delay
@@ -105,7 +111,28 @@ fun HomeScreen(
             }
 
             purchaseOrderUiState.purchaseOrders != null -> {
-                purchaseOrderUiState.purchaseOrders?.filter {
+                val filteredOrders = purchaseOrderUiState.purchaseOrders?.filter {
+                    it.orderStatus.name.contains(
+                        search,
+                        ignoreCase = true
+                    )
+                }
+                if (filteredOrders.isNullOrEmpty()) {
+                    EmptyHomeScreen()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(filteredOrders) { purchaseOrder ->
+                            PurchaseOrderCard(
+                                purchaseOrder = purchaseOrder,
+                                navController = navController,
+                            )
+                        }
+                    }
+                }
+    /*            purchaseOrderUiState.purchaseOrders?.filter {
                     it.orderStatus.name.contains(
                         search,
                         ignoreCase = true
@@ -118,11 +145,11 @@ fun HomeScreen(
                         items(purchaseOrders) { purchaseOrder ->
                             PurchaseOrderCard(
                                 purchaseOrder = purchaseOrder,
-                                onDetailsClick = { navController.navigate("purchaseOrderDetails" + "/" + it.purchaseOrderId) },
+                                navController = navController,
                             )
                         }
                     }
-                }
+                }*/
             }
 
             purchaseOrderUiState.errorMessage.isNotEmpty() -> {
@@ -141,6 +168,10 @@ fun HomeScreen(
                     )
                 }
             }
+
+            else -> {
+                EmptyHomeScreen()
+            }
         }
     }
 }
@@ -148,8 +179,12 @@ fun HomeScreen(
 @Composable
 fun PurchaseOrderCard(
     purchaseOrder: PurchaseOrder,
-    onDetailsClick: (PurchaseOrder) -> Unit,
+    navController: NavHostController
 ) {
+    val buttonText =
+        if (purchaseOrder.orderStatus == OrderStatus.COMPLETED) "Print Receipt" else "View Details"
+    val navigateTo =
+        if (purchaseOrder.orderStatus == OrderStatus.COMPLETED) "receiptScreen/${purchaseOrder.purchaseOrderId}" else "purchaseOrderDetails/${purchaseOrder.purchaseOrderId}"
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,12 +228,35 @@ fun PurchaseOrderCard(
                 }
             }
             OutlinedButton(
-                onClick = { onDetailsClick(purchaseOrder) },
+                onClick = { navController.navigate(navigateTo) },
                 modifier = Modifier.wrapContentSize()
             ) {
-                Text(text = "View Details")
+                Text(text = buttonText)
             }
         }
     }
 }
+
+@Composable
+fun EmptyHomeScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = modifier.size(64.dp),
+            imageVector = Icons.Outlined.Recycling,
+            contentDescription = null
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "No purchase orders available",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
 

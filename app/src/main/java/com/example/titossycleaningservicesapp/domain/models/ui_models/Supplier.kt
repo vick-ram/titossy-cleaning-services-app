@@ -2,10 +2,9 @@ package com.example.titossycleaningservicesapp.domain.models.ui_models
 
 import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import java.time.LocalDateTime
-import java.util.UUID
 
 data class Supplier(
-    val id: UUID,
+    val id: String,
     val fullName: String,
     val phone: String,
     val address: String,

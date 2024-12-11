@@ -15,13 +15,13 @@ interface EmployeeDao {
     @Query("SELECT * FROM employee WHERE status = :status")
     fun getEmployeesByStatus(status: String): Flow<List<EmployeeEntity>>
     @Query("SELECT * FROM employee WHERE employee_id = :id")
-    fun getEmployeeById(id: UUID): Flow<EmployeeEntity>
+    fun getEmployeeById(id: String): Flow<EmployeeEntity>
     @Upsert
     suspend fun insertEmployees(employees: List<EmployeeEntity>)
     @Upsert
     suspend fun insertEmployee(employee: EmployeeEntity)
     @Query("UPDATE employee SET status = :status WHERE employee_id = :id")
-    suspend fun updateEmployeeStatus(status: String, id: UUID)
+    suspend fun updateEmployeeStatus(status: String, id: String)
     
     @Transaction
     @Query("DELETE FROM employee")

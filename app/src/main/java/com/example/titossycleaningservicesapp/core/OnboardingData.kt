@@ -12,7 +12,7 @@ class OnboardingItems(
         fun getData(): List<OnboardingItems> {
             return listOf(
                 OnboardingItems(
-                    "Welcome to TitosSy Cleaning Services",
+                    "Welcome to Titossy Cleaning Services",
                     "We provide the best cleaning services in the city. Our team of professionals will make your home shine.",
                     R.drawable.onboarding1
                 ),

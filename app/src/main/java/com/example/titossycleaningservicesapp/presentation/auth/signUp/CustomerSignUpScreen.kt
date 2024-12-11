@@ -16,7 +16,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -35,10 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -69,11 +70,9 @@ fun CustomerSignUpScreen(
     val phoneState by signUpViewModel.phoneState.collectAsStateWithLifecycle()
     val phoneErrorMessage by signUpViewModel.phoneErrorMessage.collectAsStateWithLifecycle()
 
-    val usernameState by signUpViewModel.usernameState.collectAsStateWithLifecycle()
     val firstNameState by signUpViewModel.firstnameState.collectAsStateWithLifecycle()
     val lastNameState by signUpViewModel.lastnameState.collectAsStateWithLifecycle()
 
-    val usernameErrorMessage by signUpViewModel.usernameErrorMessage.collectAsStateWithLifecycle()
     val firstNameErrorMessage by signUpViewModel.firstnameErrorMessage.collectAsStateWithLifecycle()
     val lastNameErrorMessage by signUpViewModel.lastnameErrorMessage.collectAsStateWithLifecycle()
 
@@ -132,26 +131,10 @@ fun CustomerSignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Create Account",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                CustomTextField(
-                    value = signUpViewModel.username,
-                    onValueChange = {
-                        signUpViewModel.onFieldChange(
-                            CustomerViewModel.FieldType.USERNAME, it
-                        )
-                    },
-                    modifier = Modifier,
-                    label = "Username",
-                    leadingIcon = Icons.Filled.AccountCircle,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
-                    errorMessage = usernameErrorMessage,
-                    isError = usernameState is ValidationState.Invalid
+                    text = "Sign Up",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 24.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomTextField(
@@ -259,12 +242,11 @@ fun CustomerSignUpScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomButton(
-                    text = "Register",
+                    text = "Sign Up",
                     onClick = { signUpViewModel.signUp() },
-                    modifier = Modifier.fillMaxWidth(.8f),
-                    shape = MaterialTheme.shapes.medium,
-                    enabled = usernameState is ValidationState.Valid &&
-                            firstNameState is ValidationState.Valid &&
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    enabled = firstNameState is ValidationState.Valid &&
                             lastNameState is ValidationState.Valid &&
                             phoneState is ValidationState.Valid &&
                             emailState is ValidationState.Valid &&

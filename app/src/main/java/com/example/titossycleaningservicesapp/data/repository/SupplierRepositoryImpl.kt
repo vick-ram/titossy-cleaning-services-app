@@ -10,6 +10,7 @@ import com.example.titossycleaningservicesapp.domain.models.ApprovalStatus
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierApproval
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignInRequest
 import com.example.titossycleaningservicesapp.domain.models.requests.supplier.SupplierSignUpRequest
+import com.example.titossycleaningservicesapp.domain.models.ui_models.ChatMessage
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
 import com.example.titossycleaningservicesapp.domain.repository.SupplierRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 class SupplierRepositoryImpl @Inject constructor(
@@ -71,7 +71,30 @@ class SupplierRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateSupplierStatus(id: UUID, approvalStatus: ApprovalStatus): AuthEvent {
+    override fun getSupplierMessages(receiver: String): Flow<Resource<List<ChatMessage>>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.getSupplierMessages(receiver)
+            when (response.status) {
+                "success" -> {
+                    val messages = response.data?.map { it.toChatMessage() }
+                    messages?.let { emit(Resource.Success(it)) }
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val error = FileUtils.createErrorMessage(response.error)
+                        throw Exception(error)
+                    }
+                }
+            }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
+
+    override suspend fun updateSupplierStatus(id: String, approvalStatus: ApprovalStatus): AuthEvent {
         return try {
             AuthEvent.Loading
             val response = apiService.approveSupplier(
@@ -114,7 +137,7 @@ class SupplierRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteSupplier(id: UUID): AuthEvent {
+    override suspend fun deleteSupplier(id: String): AuthEvent {
         return try {
             AuthEvent.Loading
             val response = apiService.deleteSupplier(id)
@@ -256,7 +279,7 @@ class SupplierRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateSupplier(
-        id: UUID,
+        id: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -331,7 +354,7 @@ class SupplierRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getSupplierById(id: UUID): Flow<Resource<Supplier>> {
+    override suspend fun getSupplierById(id: String): Flow<Resource<Supplier>> {
         return flow {
             emit(Resource.Loading)
             val response = apiService.getSupplierById(id.toString())

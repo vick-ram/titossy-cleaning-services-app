@@ -8,7 +8,6 @@ import java.util.UUID
 
 interface CustomerRepository {
     suspend fun createCustomer(
-        username: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -17,14 +16,12 @@ interface CustomerRepository {
     ): AuthEvent
 
     suspend fun signInCustomer(
-        username: String? = null,
-        email: String? = null,
+        email: String,
         password: String
     ): AuthEvent
     suspend fun signOutCustomer(): AuthEvent
     suspend fun updateCustomer(
-        customerId: UUID,
-        username: String,
+        customerId: String,
         firstName: String,
         lastName: String,
         phone: String,
@@ -35,7 +32,6 @@ interface CustomerRepository {
 
     fun getCustomers(): Flow<Resource<List<Customer>>>
     fun getCustomerById(id: UUID): Flow<Resource<Customer>>
-    fun getCustomerByUsername(username: String): Flow<Resource<Customer>>
     fun getCustomersByEmail(email: String): Flow<Resource<Customer>>
 
 }

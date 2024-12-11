@@ -63,38 +63,24 @@ fun HomeScreen(
     val bookingViewModel: BookingViewModel = hiltViewModel()
     val context = LocalContext.current
     var search by rememberSaveable { mutableStateOf("") }
-
-    val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
     val bookingAssignmentUiState by bookingViewModel.bookingAssignmentUiState.collectAsStateWithLifecycle()
     val bookingUpdateUiState by bookingViewModel.bookingUpdate.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = bookingViewModel) {
+    LaunchedEffect(bookingViewModel) {
         bookingViewModel.fetchCleanerAssignments()
     }
-    /*LaunchedEffect(key1 = bookingAssignmentUiState) {
-        if (bookingAssignmentUiState.errorMessage.isNotEmpty()) {
-            Toast.makeText(
-                context,
-                bookingAssignmentUiState.errorMessage,
-                Toast.LENGTH_SHORT
-            ).show()
-        }else if (bookingAssignmentUiState.isSuccess.isNotEmpty()) {
-            Toast.makeText(
-                context,
-                bookingAssignmentUiState.isSuccess,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }*/
 
     LaunchedEffect(key1 = bookingUpdateUiState) {
         when {
             bookingUpdateUiState.isLoading -> return@LaunchedEffect
-            bookingUpdateUiState.successMessage.isNotEmpty() ->
+            bookingUpdateUiState.successMessage.isNotEmpty() -> {
                 showToast(
                     context = context,
+                    length = Toast.LENGTH_LONG,
                     message = bookingUpdateUiState.successMessage
                 )
+            }
+
             bookingUpdateUiState.errorMessage.isNotEmpty() -> {
                 showToast(
                     context = context,
@@ -125,7 +111,7 @@ fun HomeScreen(
                 modifier = modifier.height(48.dp),
                 value = search,
                 onValueChange = { search = it },
-                shape = MaterialTheme.shapes.medium,
+                shape = MaterialTheme.shapes.extraLarge,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -161,7 +147,7 @@ fun HomeScreen(
         }
         Spacer(modifier = modifier.height(8.dp))
         when {
-            bookingUiState.isLoading -> {
+            bookingAssignmentUiState.isLoading -> {
                 Box(
                     modifier = modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
@@ -174,7 +160,8 @@ fun HomeScreen(
                     it.bookingAssignment.bookingStatus.name.contains(
                         search,
                         ignoreCase = true
-                    )
+                    ) || it.bookingAssignment.customer.contains(search, ignoreCase = true)
+                            || it.formattedDate.contains(search, ignoreCase = true)
                 }?.let { assignments ->
                     LazyColumn(
                         modifier = modifier
@@ -205,20 +192,11 @@ fun HomeScreen(
                 }
             }
 
-            bookingUiState.isSuccess.isNotEmpty() -> {
-                Toast.makeText(
-                    context,
-                    bookingUiState.isSuccess,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            bookingUiState.errorMessage.isNotEmpty() -> {
-                Toast.makeText(
-                    context,
-                    bookingUiState.errorMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
+            bookingAssignmentUiState.errorMessage.isNotEmpty() -> {
+                showToast(
+                    context = context,
+                    message = bookingAssignmentUiState.errorMessage
+                )
             }
         }
     }

@@ -132,7 +132,7 @@ fun SmallSearchField(
                 Icon(
                     modifier = modifier
                         .size(iconSize)
-                        .padding(start = 3.dp),
+                        .padding(start = 8.dp),
                     imageVector = Icons.Default.Search,
                     contentDescription = null
                 )

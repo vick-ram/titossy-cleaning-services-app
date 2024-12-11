@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -21,10 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +42,12 @@ import com.example.titossycleaningservicesapp.domain.models.ui_models.ServiceAdd
 
 @Composable
 fun ServiceCardInCart(
+    modifier: Modifier = Modifier,
     cartItem: CartItem,
     onRemove: (CartItem) -> Unit,
 ) {
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(vertical = 8.dp, horizontal = 8.dp),
@@ -57,16 +55,12 @@ fun ServiceCardInCart(
         elevation = CardDefaults.elevatedCardElevation(),
     ) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val itemName = cartItem.name
-            val itemPrice = cartItem.price
-            val qty = cartItem.quantity
-
             Image(
                 painter = rememberAsyncImagePainter(
                     contentScale = ContentScale.Crop,
@@ -77,47 +71,70 @@ fun ServiceCardInCart(
                         .error(R.drawable.errorimg)
                         .build()
                 ),
-                contentDescription = itemName,
+                contentDescription = cartItem.name,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(100.dp)
+                modifier = modifier
+                    .size(60.dp)
                     .clip(MaterialTheme.shapes.medium)
             )
-            Spacer(modifier = Modifier.width(8.dp))
-
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = modifier
+                    .wrapContentSize()
                     .padding(8.dp),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 Text(
-                    text = itemName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = MaterialTheme.typography.titleSmall.fontWeight
+                    modifier = modifier
+                        .padding(bottom = 8.dp),
+                    text = cartItem.name,
+                    style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Kshs. $itemPrice",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    modifier = modifier
+                        .align(Alignment.CenterHorizontally),
+                    text = cartItem.formattedPrice,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 )
             }
 
-            Text(
-                modifier = Modifier,
-                text = "$qty",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold
+            Column(
+                modifier = modifier
+                    .wrapContentSize()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.SpaceAround,
+            ) {
+                Text(
+                    modifier = modifier
+                        .padding(bottom = 8.dp),
+                    text = "Qty",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Bold
+                    )
                 )
-            )
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    text = "${cartItem.quantity}",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                )
+            }
 
             TextButton(
                 modifier = Modifier,
                 onClick = { onRemove(cartItem) }
             ) {
-                Text(text = "Remove")
+                Text(
+                    text = "Remove",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
         }
     }

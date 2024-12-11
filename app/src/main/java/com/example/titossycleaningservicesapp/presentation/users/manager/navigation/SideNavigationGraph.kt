@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
-import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ContactScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ProfileScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.ManagerOrdersScreen
@@ -30,9 +29,6 @@ fun SideNavigationGraph(
                 paddingValues = paddingValues,
                 supplierViewModel = supplierViewModel
             )
-        }
-        composable(RouteData.Contact.route){
-            ContactScreen(navController = navController)
         }
         composable(RouteData.Profile.route) {
             ProfileScreen(

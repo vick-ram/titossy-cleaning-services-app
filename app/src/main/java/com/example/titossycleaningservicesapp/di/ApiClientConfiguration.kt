@@ -3,7 +3,7 @@ package com.example.titossycleaningservicesapp.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.example.titossycleaningservicesapp.data.local.datastore.DataStoreKeys
+import com.example.titossycleaningservicesapp.core.WebsocketService
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.BASE_URL
 import com.example.titossycleaningservicesapp.data.remote.api.ApiService
 import com.example.titossycleaningservicesapp.data.remote.api.AuthorizationInterceptor
@@ -57,6 +57,12 @@ object ApiClientConfiguration {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWebsocketService(okHttpClient: OkHttpClient): WebsocketService {
+        return WebsocketService(okHttpClient)
     }
 
 }
