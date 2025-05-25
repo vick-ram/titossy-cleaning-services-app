@@ -8,11 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.titossycleaningservicesapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.titossycleaningservicesapp"
         minSdk = 26
+        //noinspection OldTargetApi
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

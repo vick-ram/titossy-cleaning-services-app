@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.FAQItem
 
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun FAQsScreen(
@@ -136,7 +135,7 @@ fun FAQsScreen(
             ) { index ->
                 val faqItem = dataItem[index]
                 FAQItemCard(
-                    modifier = modifier.animateItemPlacement(),
+                    modifier = modifier.animateItem(),
                     faqItem = faqItem,
                     onClick = {
                         dataItem.mapIndexed { idx, item ->

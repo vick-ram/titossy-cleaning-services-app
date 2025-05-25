@@ -1,8 +1,9 @@
 package com.example.titossycleaningservicesapp.data.remote.api
 
 object ApiConstants {
-    const val CHAT_ENDPOINT = "wss://vickram.tech/api/chat/3bb79280-4"
-    const val BASE_URL = "https://vickram.tech/"
+    const val CHAT_ENDPOINT = "wss://api.titossy.vickramodero.me/api/chat/3bb79280-4"
+//    const val BASE_URL = "https://vickram.tech/"
+    const val BASE_URL = "https://api.titossy.vickramodero.me/"
     const val CUSTOMER = "api/customer"
     private const val CUSTOMER_AUTH = "$CUSTOMER/auth"
     const val CUSTOMER_SIGN_IN = "$CUSTOMER_AUTH/sign_in"

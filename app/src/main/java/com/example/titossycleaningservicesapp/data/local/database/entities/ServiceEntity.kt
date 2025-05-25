@@ -1,11 +1,10 @@
 package com.example.titossycleaningservicesapp.data.local.database.entities
 
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import androidx.room.Relation
+import androidx.room.Index
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Service
 import com.example.titossycleaningservicesapp.domain.models.ui_models.ServiceAddOn
 import java.util.UUID
@@ -33,8 +32,10 @@ data class ServiceEntity(
     foreignKeys = [ForeignKey(
         entity = ServiceEntity::class,
         parentColumns = ["service_id"],
-        childColumns = ["service_id"]
-    )]
+        childColumns = ["service_id"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index(value = ["service_id"])]
 )
 data class ServiceAddonEntity(
     @ColumnInfo("service_addon_id") @PrimaryKey val id: String,

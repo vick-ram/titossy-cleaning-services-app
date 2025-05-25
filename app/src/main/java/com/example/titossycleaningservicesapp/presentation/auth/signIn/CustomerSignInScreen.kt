@@ -116,6 +116,7 @@ fun CustomerSignInScreen(
     ) {
         Column(
             modifier = Modifier
+                .align(Alignment.Center)
                 .fillMaxWidth()
                 .padding(16.dp)
                 .verticalScroll(state = rememberScrollState()),

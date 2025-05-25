@@ -64,7 +64,7 @@ fun <T> CustomSearch(
             filteredItems,
             key = { item -> key(item) },
         ) { item ->
-            itemContent(item, Modifier.animateItemPlacement(tween(300)))
+            itemContent(item, Modifier.animateItem(tween(300)))
         }
     }
 }
