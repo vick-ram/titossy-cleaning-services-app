@@ -85,6 +85,9 @@ fun HomeScreen(
     val focusManager = LocalFocusManager.current
 
 
+    println("Services fetched: ${serviceState.services}")
+
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(paddingValues)
@@ -187,9 +190,19 @@ fun HomeScreen(
                                     navController.navigate("FAQs")
                                 }
                             )
+
+//                            Dropdown for about us
+                            DropdownMenuItem(
+                                text = { Text(text = "About Us") },
+                                onClick = {
+                                    navController.navigate("aboutUs")
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text(text = "Help") },
-                                onClick = { }
+                                onClick = {
+                                    navController.navigate("help")
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text(text = "logout") },
@@ -210,7 +223,7 @@ fun HomeScreen(
 
                 serviceState.services.isNotEmpty() -> {
                     LazyColumn(
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        modifier = Modifier.padding(horizontal = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(serviceState.services) { service ->

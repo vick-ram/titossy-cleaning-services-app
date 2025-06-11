@@ -21,13 +21,13 @@ enum class Frequency {
 }
 
 enum class OrderStatus {
-    PENDING,
-    REVIEWED,
-    APPROVED,
-    ACKNOWLEDGED,
-    RECEIVED,
-    COMPLETED,
-    CANCELLED
+    PENDING, // inventory manager creates the order
+    REVIEWED, // manager reviews the order
+    APPROVED, // finance approves the order
+    ACKNOWLEDGED, // supplier acknowledges the order
+    RECEIVED, // inventory manager receives the order
+    COMPLETED, // finance completes the payment
+    CANCELLED // order is cancelled
 }
 
 enum class BookingStatus {

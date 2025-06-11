@@ -1,5 +1,6 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
@@ -64,7 +65,7 @@ class BookingViewModel @Inject constructor(
 
                     is Resource.Success -> BookingUiState(
                         isLoading = false,
-                        bookings = resource.data
+                        bookings = resource.data ?: emptyList()
                     )
                 }
             }
@@ -100,7 +101,7 @@ class BookingViewModel @Inject constructor(
 
                     is Resource.Success -> BookingUiState(
                         isLoading = false,
-                        bookings = resource.data
+                        bookings = resource.data ?: emptyList()
                     )
                 }
             }
@@ -261,28 +262,42 @@ class BookingViewModel @Inject constructor(
         bookingId: String,
         cleanerId: String
     ) = viewModelScope.launch {
+        Log.d("assignBooking", "Assigning bookingId: $bookingId to cleanerId: $cleanerId")
         bookingRepository.assignBooking(
             bookingId = bookingId,
             cleanerId = cleanerId
         )
             .map { resource ->
+                Log.d("assignBooking", "Resource state: $resource")
                 when (resource) {
-                    is Resource.Error -> BookingAssignmentUpdateUiState(
-                        isLoading = false,
-                        errorMessage = resource.message.toString()
-                    )
+                    is Resource.Error -> {
+                        Log.e("assignBooking", "Error: ${resource.message}")
 
-                    is Resource.Loading -> BookingAssignmentUpdateUiState(
-                        isLoading = true
-                    )
+                        BookingAssignmentUpdateUiState(
+                            isLoading = false,
+                            errorMessage = resource.message.toString()
+                        )
+                    }
 
-                    is Resource.Success -> BookingAssignmentUpdateUiState(
+                    is Resource.Loading -> {
+                        Log.d("assignBooking", "Loading...")
+                        BookingAssignmentUpdateUiState(
+                            isLoading = true
+                        )
+                    }
+
+                    is Resource.Success -> {
+                        Log.d("assignBooking", "Success: ${resource.data}")
+
+                    BookingAssignmentUpdateUiState(
                         isLoading = false,
                         successMessage = resource.data.toString()
                     )
                 }
+                }
             }
             .collectLatest { state ->
+                Log.d("assignBooking", "Collected state: $state")
                 _bookingAssignmentUpdateUiState.update {
                     it.copy(
                         isLoading = state.isLoading,

@@ -44,10 +44,11 @@ class ProductViewModel @Inject constructor(
 
     fun createProduct(
         context: Context,
-        uri: Uri
+        uri: Uri,
+        supplierId: String,
     ) = viewModelScope.launch {
         productRepository.createProduct(
-            context, uri, name, description, price, stock, reorderLevel
+            context, uri, name, description, price, stock, reorderLevel, supplierId
         ).collect { resource ->
             when(resource) {
                 is Resource.Error -> {

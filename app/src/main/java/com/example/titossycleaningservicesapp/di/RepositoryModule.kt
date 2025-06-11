@@ -6,6 +6,8 @@ import com.example.titossycleaningservicesapp.data.repository.CustomerPaymentRep
 import com.example.titossycleaningservicesapp.data.repository.CustomerRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.EmployeeRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.FeedbackRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.MessageRepositoryImpl
+import com.example.titossycleaningservicesapp.data.repository.MetricsRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ProductRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.PurchaseOrderRepositoryImpl
 import com.example.titossycleaningservicesapp.data.repository.ServiceRepositoryImpl
@@ -17,6 +19,8 @@ import com.example.titossycleaningservicesapp.domain.repository.CustomerPaymentR
 import com.example.titossycleaningservicesapp.domain.repository.CustomerRepository
 import com.example.titossycleaningservicesapp.domain.repository.EmployeeRepository
 import com.example.titossycleaningservicesapp.domain.repository.FeedbackRepository
+import com.example.titossycleaningservicesapp.domain.repository.MessageRepository
+import com.example.titossycleaningservicesapp.domain.repository.MetricsRepository
 import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
 import com.example.titossycleaningservicesapp.domain.repository.PurchaseOrderRepository
 import com.example.titossycleaningservicesapp.domain.repository.ServiceRepository
@@ -85,4 +89,14 @@ abstract class RepositoryModule {
     abstract fun bindSupplierPayment(
         supplierPaymentRepositoryImpl: SupplierPaymentRepositoryImpl
     ) : SupplierPaymentRepository
+
+    @Binds
+    abstract fun bindMessageRepository(
+        messageRepositoryImpl: MessageRepositoryImpl
+    ): MessageRepository
+
+    @Binds
+    abstract fun bindMetricRepository(
+        metricRepositoryImpl: MetricsRepositoryImpl
+    ): MetricsRepository
 }

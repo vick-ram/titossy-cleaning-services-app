@@ -29,7 +29,8 @@ class ProductRepositoryImpl @Inject constructor(
         description: String,
         price: String,
         stock: String,
-        reorderLevel: String
+        reorderLevel: String,
+        supplierId: String
     ): Flow<Resource<String>> {
         return flow {
             emit(Resource.Loading)
@@ -41,13 +42,15 @@ class ProductRepositoryImpl @Inject constructor(
             val pricePart = price.toRequestBody("text/plain".toMediaTypeOrNull())
             val stockPart = stock.toRequestBody("text/plain".toMediaTypeOrNull())
             val reorderLevelPart = reorderLevel.toRequestBody("text/plain".toMediaTypeOrNull())
+            val supplierIdPart = supplierId.toRequestBody("text/plain".toMediaTypeOrNull())
             val response = apiService.createProduct(
                 name = namePart,
                 description = descriptionPart,
                 unitPrice = pricePart,
                 stock = stockPart,
                 image = body,
-                reorderLevel = reorderLevelPart
+                reorderLevel = reorderLevelPart,
+                supplierId = supplierIdPart
             )
 
             when(response.status) {

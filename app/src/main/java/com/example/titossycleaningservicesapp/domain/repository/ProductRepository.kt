@@ -16,7 +16,8 @@ interface ProductRepository {
         description: String,
         price: String,
         stock: String,
-        reorderLevel: String
+        reorderLevel: String,
+        supplierId: String
     ): Flow<Resource<String>>
     fun deleteProduct(productId: String) : Flow<Resource<String>>
 

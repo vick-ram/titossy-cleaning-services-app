@@ -55,10 +55,10 @@ fun PurchaseOrdersScreen(
     val paymentStatusUiState by paymentViewModel.supplierPaymentStatusUiState.collectAsStateWithLifecycle()
     var query by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(purchaseOrderViewModel) {
-        purchaseOrderViewModel.fetchPurchaseOrders()
+    LaunchedEffect(paymentViewModel) {
+        paymentViewModel.fetchSupplierPayments()
     }
-    
+
     LaunchedEffect(key1 = paymentStatusUiState) {
         when {
             paymentStatusUiState.isLoading -> return@LaunchedEffect
@@ -69,6 +69,7 @@ fun PurchaseOrdersScreen(
                     message = paymentStatusUiState.successMessage
                 )
             }
+
             paymentStatusUiState.errorMessage.isNotEmpty() -> {
                 showToast(
                     context = context,
@@ -77,15 +78,16 @@ fun PurchaseOrdersScreen(
             }
         }
     }
-    
+
     when {
         purchaseOrderUiState.isLoading -> {
             Box(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
-                content = { CustomProgressIndicator(isLoading = true)}
+                content = { CustomProgressIndicator(isLoading = true) }
             )
         }
+
         purchaseOrderUiState.purchaseOrders != null -> {
             Column(
                 modifier = modifier
@@ -109,7 +111,7 @@ fun PurchaseOrdersScreen(
                                 || it.supplier.contains(query, ignoreCase = true)
                                 || it.purchaseOrderId.contains(query, ignoreCase = true)
                     }?.let { purchaseOrders ->
-                        items(purchaseOrders) {purchaseOrder ->
+                        items(purchaseOrders) { purchaseOrder ->
                             PurchaseOrderCard(
                                 purchaseOrder = purchaseOrder,
                                 onClick = { order, method ->
@@ -138,19 +140,25 @@ private fun PurchaseOrderCard(
     modifier: Modifier = Modifier,
     purchaseOrder: PurchaseOrder,
     onClick: (PurchaseOrder, PaymentMethod) -> Unit,
-    onApprove: (PurchaseOrder,OrderStatus) -> Unit
+    onApprove: (PurchaseOrder, OrderStatus) -> Unit
 ) {
     val buttonText = when (purchaseOrder.orderStatus) {
         OrderStatus.REVIEWED -> "Approve"
         OrderStatus.RECEIVED -> "Pay"
         else -> ""
     }
-    val buttonAction: () -> Unit = when(purchaseOrder.orderStatus) {
+    val buttonAction: () -> Unit = when (purchaseOrder.orderStatus) {
         OrderStatus.REVIEWED -> {
-            { onApprove(purchaseOrder,OrderStatus.APPROVED) }}
+            { onApprove(purchaseOrder, OrderStatus.APPROVED) }
+        }
+
         OrderStatus.RECEIVED -> {
-            { onClick(purchaseOrder, PaymentMethod.CARD) } }
-        else -> { {} }
+            { onClick(purchaseOrder, PaymentMethod.CARD) }
+        }
+
+        else -> {
+            {}
+        }
     }
     Card(
         modifier = modifier.padding(16.dp),

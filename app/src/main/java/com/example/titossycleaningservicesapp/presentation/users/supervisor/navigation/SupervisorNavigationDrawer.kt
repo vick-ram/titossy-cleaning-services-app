@@ -51,6 +51,7 @@ fun SupervisorNavigationDrawer(
     val drawerItems = listOf(
         NavRoutes.Home,
         NavRoutes.Contact,
+        NavRoutes.Feedback,
         NavRoutes.Profile,
     )
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route

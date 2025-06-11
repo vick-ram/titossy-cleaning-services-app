@@ -51,10 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.LoadingButton
+import com.example.titossycleaningservicesapp.core.generateItextPdf
+import com.example.titossycleaningservicesapp.core.generatePdf
 import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.Frequency
 import com.example.titossycleaningservicesapp.domain.models.requests.booking.BookingRequest
+import com.example.titossycleaningservicesapp.domain.models.ui_models.Booking
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.ServiceViewModel
 import kotlinx.coroutines.delay
@@ -99,6 +103,7 @@ fun BookingDataScreen(
                     )
                 }
             }
+
             bookingUiState.errorMessage.isNotEmpty() -> {
                 showToast(
                     context = context,
@@ -155,7 +160,7 @@ fun BookingDataScreen(
                     trailingIcon = {
                         IconButton(onClick = {
                             showDatePicker(
-                                onDateSelected = {selectedDate = it},
+                                onDateSelected = { selectedDate = it },
                                 context = context
                             )
                         }) {
@@ -185,7 +190,7 @@ fun BookingDataScreen(
                     trailingIcon = {
                         IconButton(onClick = {
                             showTimePicker(
-                                onTimeSelected = {selectedTime = it},
+                                onTimeSelected = { selectedTime = it },
                                 context = context
                             )
                         }) {
@@ -240,6 +245,52 @@ fun BookingDataScreen(
                         && selectedTime.isNotEmpty()
                         && address.isNotEmpty()
             ) { Text(text = "Proceed to checkout") }
+
+//            Button(
+//                onClick = {
+//                    bookingUiState.bookings?.let {
+//                        generateItextPdf(
+//                            context = context,
+//                            fileName = "Booking",
+//                            data = it,
+//                            headerTitles = listOf(
+//                                "Booking ID",
+//                                "Customer",
+//                                "Date",
+//                                "Frequency",
+//                                "Address",
+//                                "Instructions",
+//                                "Amount",
+//                                "Paid",
+//                                "Status"
+//                            ),
+//                            title = "Titossy Cleaning Service",
+//                            logoResId = R.drawable.titossy_logo,
+//                            contentBuilder = { booking, table ->
+//                                table.addCell(booking.bookingId)
+//                                table.addCell(booking.customer)
+//                                table.addCell(booking.formattedDate)
+//                                table.addCell(booking.frequency.name)
+//                                table.addCell(booking.address)
+//                                booking.additionalInstructions.let {
+//                                    table.addCell(booking.additionalInstructions)
+//                                }
+//                                table.addCell(booking.amount)
+//                                table.addCell(booking.paidString)
+//                                table.addCell(booking.bookingStatus.name)
+//                            },
+//                            onComplete = { filePath ->
+//                                filePath?.let { path ->
+//                                    Toast.makeText(context, "PDF saved to $path", Toast.LENGTH_LONG)
+//                                        .show()
+//                                }
+//                            }
+//                        )
+//                    }
+//                }
+//            ) {
+//                Text("Download")
+//            }
         }
     }
 }

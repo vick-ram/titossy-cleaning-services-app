@@ -23,6 +23,7 @@ import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLO
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.EMPLOYEE_SIGN_OUT
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.FEEDBACK
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.MESSAGES
+import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.METRICS
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.ORDER_ID
 import com.example.titossycleaningservicesapp.data.remote.api.ApiConstants.PRODUCT
@@ -45,7 +46,9 @@ import com.example.titossycleaningservicesapp.data.remote.dto.BookingDto
 import com.example.titossycleaningservicesapp.data.remote.dto.CustomerDto
 import com.example.titossycleaningservicesapp.data.remote.dto.CustomerPaymentDto
 import com.example.titossycleaningservicesapp.data.remote.dto.EmployeeDto
+import com.example.titossycleaningservicesapp.data.remote.dto.FeedbackDto
 import com.example.titossycleaningservicesapp.data.remote.dto.MessageDto
+import com.example.titossycleaningservicesapp.data.remote.dto.MetricsDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductCartDto
 import com.example.titossycleaningservicesapp.data.remote.dto.ProductDto
 import com.example.titossycleaningservicesapp.data.remote.dto.PurchaseOrderDto
@@ -318,6 +321,9 @@ interface ApiService {
         @Body feedbackRequest: FeedBackRequest
     ) : ApiResponse<Unit>
 
+    @GET(FEEDBACK)
+    suspend fun getFeedbacks(): ApiResponse<List<FeedbackDto>>
+
     @POST(CUSTOMER_PAYMENT)
     suspend fun createPayment(
         @Body customerPayment: CustomerPaymentRequest
@@ -358,6 +364,7 @@ interface ApiService {
         @Part("stock") stock: RequestBody,
         @Part("reorderLevel") reorderLevel: RequestBody,
         @Part image: MultipartBody.Part,
+        @Part("supplier_id") supplierId: RequestBody
     ): ApiResponse<ProductDto>
 
     @DELETE(PRODUCT_ID)
@@ -407,5 +414,13 @@ interface ApiService {
     suspend fun getSupplierMessages(
         @Path("receiver") receiver: String
     ): ApiResponse<List<MessageDto>>
+
+    @GET(MESSAGES)
+    suspend fun getMessages(
+        @Path("receiver") receiver: String
+    ): ApiResponse<List<MessageDto>>
+
+    @GET(METRICS)
+    suspend fun getMetrics(): ApiResponse<MetricsDto>
 
 }

@@ -271,10 +271,10 @@ class PaymentViewModel @Inject constructor(
                     }
                     is Resource.Success -> {
                         resource.data?.let {
-                            _supplierPaymentUiState.update {
-                                it.copy(
+                            _supplierPaymentUiState.update { state ->
+                                state.copy(
                                     isLoading = false,
-                                    supplierPayments = resource.data
+                                    supplierPayments = it
                                 )
                             }
                         }

@@ -87,7 +87,19 @@ fun PendingBookingsScreen(
             }
 
             bookingUiState.bookings != null -> {
-                pendingBookings?.let { bookings ->
+                if (pendingBookings.isNullOrEmpty()) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No pending bookings found.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else {
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -97,7 +109,7 @@ fun PendingBookingsScreen(
                             modifier = modifier
                                 .fillMaxWidth()
                         ) {
-                            items(bookings) { booking ->
+                            items(pendingBookings) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onClick = {

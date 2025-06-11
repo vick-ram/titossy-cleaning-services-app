@@ -26,7 +26,7 @@ data class SupplierPayment(
 
 data class SupplierPaymentUiState(
     val isLoading: Boolean = false,
-    val supplierPayments: List<SupplierPayment>? = null,
+    val supplierPayments: List<SupplierPayment> = emptyList(),
     val errorMessage: String = ""
 )
 

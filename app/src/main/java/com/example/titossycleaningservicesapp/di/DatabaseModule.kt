@@ -25,7 +25,7 @@ object DatabaseModule {
         ).setQueryCallback({ sqlQuery, bindArgs ->
             Log.d("RoomSql", "SQL Query: $sqlQuery SQL Args: $bindArgs")
         }, Runnable::run)
-            .fallbackToDestructiveMigration(false)
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

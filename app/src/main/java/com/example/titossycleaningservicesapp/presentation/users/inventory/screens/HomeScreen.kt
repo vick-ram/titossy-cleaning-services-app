@@ -69,6 +69,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.FileUtils
@@ -186,213 +187,213 @@ fun HomeScreen(
                     Log.d(TAG, "HomeScreen: ${productsState.errorMessage}")
                 }
             }
-            if (openDialog) {
-                AlertDialog(
-                    onDismissRequest = { openDialog = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                requestFile?.let {
-                                    productViewModel.createProduct(
-                                        context = context,
-                                        uri = it
-                                    )
-                                }
-                            },
-                            enabled = productViewModel.name.isNotBlank()
-                                    && productViewModel.description.isNotBlank()
-                                    && productViewModel.price.isNotBlank()
-                        ) {
-                            Text(text = "Create")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { openDialog = false }) {
-                            Text(text = "Cancel")
-                        }
-                    },
-                    title = {
-                        Text(text = "Add new inventory")
-                    },
-                    text = {
-                        Column(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .verticalScroll(state = rememberScrollState())
-                        ) {
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = productViewModel.name,
-                                onValueChange = { productViewModel.name = it },
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = "Name",
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = productViewModel.description,
-                                onValueChange = { productViewModel.description = it },
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = "Description",
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = productViewModel.price,
-                                onValueChange = { productViewModel.price = it },
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = "Price",
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = productViewModel.stock,
-                                onValueChange = { productViewModel.stock = it },
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = "Stock",
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = productViewModel.reorderLevel,
-                                onValueChange = { productViewModel.reorderLevel = it },
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                placeholder = {
-                                    Text(
-                                        text = "Reorder Level",
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-                                        )
-                                    )
-                                },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            OutlinedTextField(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                value = fileName,
-                                onValueChange = { fileName = it },
-                                readOnly = true,
-                                shape = MaterialTheme.shapes.medium,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent
-                                ),
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ),
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        launcher.launch("image/*")
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.AttachFile,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    },
-                    properties = DialogProperties(
-                        dismissOnBackPress = false,
-                        dismissOnClickOutside = false
-                    )
-                )
-            }
+//            if (openDialog) {
+//                AlertDialog(
+//                    onDismissRequest = { openDialog = false },
+//                    confirmButton = {
+//                        TextButton(
+//                            onClick = {
+//                                requestFile?.let {
+//                                    productViewModel.createProduct(
+//                                        context = context,
+//                                        uri = it
+//                                    )
+//                                }
+//                            },
+//                            enabled = productViewModel.name.isNotBlank()
+//                                    && productViewModel.description.isNotBlank()
+//                                    && productViewModel.price.isNotBlank()
+//                        ) {
+//                            Text(text = "Create")
+//                        }
+//                    },
+//                    dismissButton = {
+//                        TextButton(onClick = { openDialog = false }) {
+//                            Text(text = "Cancel")
+//                        }
+//                    },
+//                    title = {
+//                        Text(text = "Add new inventory")
+//                    },
+//                    text = {
+//                        Column(
+//                            modifier = modifier
+//                                .fillMaxWidth()
+//                                .verticalScroll(state = rememberScrollState())
+//                        ) {
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = productViewModel.name,
+//                                onValueChange = { productViewModel.name = it },
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                placeholder = {
+//                                    Text(
+//                                        text = "Name",
+//                                        style = MaterialTheme.typography.bodyLarge.copy(
+//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+//                                        )
+//                                    )
+//                                },
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            )
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = productViewModel.description,
+//                                onValueChange = { productViewModel.description = it },
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                placeholder = {
+//                                    Text(
+//                                        text = "Description",
+//                                        style = MaterialTheme.typography.bodyLarge.copy(
+//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+//                                        )
+//                                    )
+//                                },
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            )
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = productViewModel.price,
+//                                onValueChange = { productViewModel.price = it },
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                placeholder = {
+//                                    Text(
+//                                        text = "Price",
+//                                        style = MaterialTheme.typography.bodyLarge.copy(
+//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+//                                        )
+//                                    )
+//                                },
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            )
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = productViewModel.stock,
+//                                onValueChange = { productViewModel.stock = it },
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                placeholder = {
+//                                    Text(
+//                                        text = "Stock",
+//                                        style = MaterialTheme.typography.bodyLarge.copy(
+//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+//                                        )
+//                                    )
+//                                },
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            )
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = productViewModel.reorderLevel,
+//                                onValueChange = { productViewModel.reorderLevel = it },
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                placeholder = {
+//                                    Text(
+//                                        text = "Reorder Level",
+//                                        style = MaterialTheme.typography.bodyLarge.copy(
+//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
+//                                        )
+//                                    )
+//                                },
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            )
+//                            OutlinedTextField(
+//                                modifier = modifier
+//                                    .fillMaxWidth()
+//                                    .padding(16.dp),
+//                                value = fileName,
+//                                onValueChange = { fileName = it },
+//                                readOnly = true,
+//                                shape = MaterialTheme.shapes.medium,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                                    focusedBorderColor = Color.Transparent,
+//                                    unfocusedBorderColor = Color.Transparent
+//                                ),
+//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                ),
+//                                trailingIcon = {
+//                                    IconButton(onClick = {
+//                                        launcher.launch("image/*")
+//                                    }) {
+//                                        Icon(
+//                                            imageVector = Icons.Default.AttachFile,
+//                                            contentDescription = null
+//                                        )
+//                                    }
+//                                }
+//                            )
+//                        }
+//                    },
+//                    properties = DialogProperties(
+//                        dismissOnBackPress = false,
+//                        dismissOnClickOutside = false
+//                    )
+//                )
+//            }
         }
-        FloatingActionButton(
-            modifier = modifier
-                .align(Alignment.BottomEnd)
-                .padding(8.dp),
-            onClick = { openDialog = true }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null
-            )
-        }
+//        FloatingActionButton(
+//            modifier = modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(8.dp),
+//            onClick = { openDialog = true }
+//        ) {
+//            Icon(
+//                imageVector = Icons.Default.Add,
+//                contentDescription = null
+//            )
+//        }
     }
 }
 
@@ -432,7 +433,15 @@ fun ProductCard(
         ) {
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = product.image,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(product.image)
+                        .setHeader(
+                            "User-Agent",
+                            "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                        )
+                        .setHeader("Referer", "https://imghippo.com/")
+                        .crossfade(true)
+                        .build(),
                     contentScale = ContentScale.Crop
                 ),
                 contentDescription = product.name,

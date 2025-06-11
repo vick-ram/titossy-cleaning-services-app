@@ -49,6 +49,7 @@ fun SupplierNavigationDrawer(
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val drawerItems = listOf(
+        NavRoutes.Products,
         NavRoutes.Home,
         NavRoutes.Contact,
         NavRoutes.Profile

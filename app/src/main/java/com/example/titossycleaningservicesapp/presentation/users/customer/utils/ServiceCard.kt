@@ -1,5 +1,7 @@
 package com.example.titossycleaningservicesapp.presentation.users.customer.utils
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +35,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.domain.models.ui_models.CartItem
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Service
 import com.example.titossycleaningservicesapp.domain.models.ui_models.ServiceAddOn
-
 
 @Composable
 fun ServiceCardInCart(
@@ -66,6 +68,11 @@ fun ServiceCardInCart(
                     contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(cartItem.thumbnail)
+                        .setHeader(
+                            "User-Agent",
+                            "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                        )
+                        .setHeader("Referer", "https://imghippo.com/")
                         .crossfade(true)
                         .placeholder(R.drawable.cleaning1)
                         .error(R.drawable.errorimg)
@@ -157,7 +164,15 @@ fun ServiceAddOnCard(
                 .fillMaxWidth(),
         ) {
             val painter = rememberAsyncImagePainter(
-                model = serviceAddOn.image,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(serviceAddOn.image)
+                    .setHeader(
+                        "User-Agent",
+                        "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                    )
+                    .setHeader("Referer", "https://imghippo.com/")
+                    .crossfade(true)
+                    .build(),
                 contentScale = ContentScale.Crop
             )
             Image(
@@ -232,11 +247,25 @@ fun CustomServiceCard(
                 painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(service.image)
-                        .crossfade(true)
+                        .setHeader(
+                            "User-Agent",
+                            "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                        )
+                        .setHeader("Referer", "https://imghippo.com/")
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .crossfade(500)
                         .placeholder(R.drawable.cleaning1)
                         .error(R.drawable.errorimg)
-                        .build(),
-                    contentScale = ContentScale.Crop
+                        .listener(
+                            onError = { _, result ->
+                                Log.e(
+                                    "COIL",
+                                    "Failed to load ${service.image}: ${result.throwable.message}"
+                                )
+                            }
+                        )
+                        .build()
                 ),
                 contentDescription = service.name,
                 modifier = Modifier

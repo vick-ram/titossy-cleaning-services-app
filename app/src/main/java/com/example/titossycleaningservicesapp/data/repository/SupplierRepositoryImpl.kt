@@ -105,6 +105,7 @@ class SupplierRepositoryImpl @Inject constructor(
             )
             when (response.status) {
                 "success" -> {
+                    withContext(Dispatchers.IO) {
                     val entitySupplier = supplierDao.getSupplierById(id.toString()).firstOrNull()
                     entitySupplier?.let { supplierDao.updateSupplier(it) }
 
@@ -114,6 +115,7 @@ class SupplierRepositoryImpl @Inject constructor(
                         supplierDao.deleteAllSuppliers()
                         supplierDao.insertAllSuppliers(it)
                     }
+                }
                     AuthEvent.Success(
                         message = response.message
                     )

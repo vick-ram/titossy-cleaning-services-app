@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -13,6 +14,7 @@ sealed class NavRoutes(val route: String, val title: String, val icon: ImageVect
     data object Home : NavRoutes("home", "Home", Icons.Filled.Home)
     data object Contact : NavRoutes("contact", "Contact", Icons.AutoMirrored.Filled.Help)
     data object Profile : NavRoutes("profile", "Profile", Icons.Filled.AccountCircle)
+    data object Feedback: NavRoutes("feedback", "Feedback", Icons.Default.Email)
 }
 
 sealed class BookingRoutes(val route: String) {

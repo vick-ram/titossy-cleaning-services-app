@@ -86,7 +86,19 @@ fun InProgressBooking(
             }
 
             bookingUiState.bookings != null -> {
-                inProgressBookings?.let { bookings ->
+                if (inProgressBookings.isNullOrEmpty()) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No In-Progress Bookings Found",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else {
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -96,7 +108,7 @@ fun InProgressBooking(
                             modifier = modifier
                                 .fillMaxWidth()
                         ) {
-                            items(bookings) { booking ->
+                            items(inProgressBookings) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onClick = {

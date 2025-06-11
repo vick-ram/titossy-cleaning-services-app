@@ -58,7 +58,7 @@ fun HomeScreen(
     navController: NavHostController,
     paymentViewModel: PaymentViewModel,
     paddingValues: PaddingValues
-){
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val pages = listOf("Income", "OutCome")
@@ -67,7 +67,12 @@ fun HomeScreen(
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { pages.size })
 
     val earnings = customerPaymentUIState.customerPayments?.sumOf { it.amount } ?: BigDecimal.ZERO
-    val expenditure = supplierPaymentUIState.supplierPayments?.sumOf { it.amount } ?: BigDecimal.ZERO
+    val expenditure =
+        supplierPaymentUIState.supplierPayments?.sumOf { it.amount } ?: BigDecimal.ZERO
+
+    LaunchedEffect(paymentViewModel) {
+        paymentViewModel.fetchSupplierPayments()
+    }
 
     Column(
         modifier = modifier
@@ -92,16 +97,17 @@ fun HomeScreen(
         }
         HorizontalPager(
             state = pagerState,
-            modifier = modifier.weight(1f)
-        ) {page ->
-            when(page) {
+            modifier = modifier.fillMaxWidth().padding(top = 8.dp)
+        ) { page ->
+            when (page) {
                 0 -> {
                     when {
                         customerPaymentUIState.isLoading -> Box(
                             modifier = modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
-                            content = { CustomProgressIndicator(isLoading = true)}
+                            content = { CustomProgressIndicator(isLoading = true) }
                         )
+
                         customerPaymentUIState.customerPayments != null -> {
                             customerPaymentUIState.customerPayments?.let { customerPayments ->
                                 LazyColumn(
@@ -110,7 +116,7 @@ fun HomeScreen(
                                         .padding(top = 4.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    items(customerPayments) {customerPayment ->
+                                    items(customerPayments) { customerPayment ->
                                         PaymentCard(
                                             icon = Icons.Default.ArrowUpward,
                                             iconColor = MaterialTheme.colorScheme.primary,
@@ -122,19 +128,22 @@ fun HomeScreen(
                                 }
                             }
                         }
+
                         customerPaymentUIState.errorMessage.isNotEmpty() -> showToast(
                             context = context,
                             message = customerPaymentUIState.errorMessage
                         )
                     }
                 }
+
                 1 -> {
                     when {
                         supplierPaymentUIState.isLoading -> Box(
                             modifier = modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
-                            content = { CustomProgressIndicator(isLoading = true)}
+                            content = { CustomProgressIndicator(isLoading = true) }
                         )
+
                         supplierPaymentUIState.supplierPayments != null -> {
                             supplierPaymentUIState.supplierPayments?.let { supplierPayments ->
                                 LazyColumn(
@@ -142,7 +151,7 @@ fun HomeScreen(
                                         .fillMaxWidth()
                                         .padding(top = 4.dp)
                                 ) {
-                                    items(supplierPayments) {supplierPayment ->
+                                    items(supplierPayments) { supplierPayment ->
                                         PaymentCard(
                                             icon = Icons.Default.ArrowDownward,
                                             iconColor = MaterialTheme.colorScheme.error,
@@ -154,6 +163,7 @@ fun HomeScreen(
                                 }
                             }
                         }
+
                         supplierPaymentUIState.errorMessage.isNotEmpty() -> showToast(
                             context = context,
                             message = customerPaymentUIState.errorMessage
@@ -309,8 +319,8 @@ private fun PaymentCard(
 }
 
 @Composable
-private fun cardColor(paymentType: PaymentMethod) : Color {
-    return when(paymentType) {
+private fun cardColor(paymentType: PaymentMethod): Color {
+    return when (paymentType) {
         PaymentMethod.CASH -> Color(0xFF4CAF50)
         PaymentMethod.CARD -> Color(0xFFBDBDBD)
         else -> Color(0xFFE57373)

@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.ui)
+    implementation(libs.itextpdf)
+    implementation(libs.core)
+    implementation(libs.androidx.constraintlayout.compose)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.symbol.processing.api)
@@ -87,6 +90,9 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     //extended icons
     implementation(libs.material.icons.extended)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

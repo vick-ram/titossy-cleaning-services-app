@@ -157,7 +157,10 @@ fun ServiceDetailsScreen(
             )
         },
         bottomBar = {
-            Column {
+            Column(
+                modifier = modifier.fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -259,8 +262,7 @@ fun ServiceDetailsScreen(
             }
         }
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding),
+            modifier = Modifier,
             contentPadding = innerPadding
         ) {
             item {

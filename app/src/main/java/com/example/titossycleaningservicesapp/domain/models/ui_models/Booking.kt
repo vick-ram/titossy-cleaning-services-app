@@ -41,7 +41,7 @@ data class BookingServiceAddOns(
 
 data class BookingUiState(
     val isLoading: Boolean = false,
-    val bookings: List<Booking>? = null,
+    val bookings: List<Booking> = emptyList(),
     val booking: Booking? = null,
     val errorMessage: String = "",
     val isSuccess: String = ""

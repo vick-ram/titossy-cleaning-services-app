@@ -13,11 +13,13 @@ data class FeedbackDto(
     val updatedAt: String
 ) {
     fun toFeedback() = Feedback(
-        feedbackId = UUID.fromString(feedbackId),
-        customerId = UUID.fromString(customerId),
+        feedbackId = feedbackId,
+        customerId = customerId,
         bookingId = bookingId,
         feedback = feedback,
-        rating = rating
+        rating = rating,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 

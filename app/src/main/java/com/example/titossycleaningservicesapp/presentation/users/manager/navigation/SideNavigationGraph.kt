@@ -10,9 +10,9 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ProfileScreen
-import com.example.titossycleaningservicesapp.presentation.users.manager.utils.ManagerOrdersScreen
+import com.example.titossycleaningservicesapp.presentation.users.manager.screens.ManagerOrdersScreen
 import com.example.titossycleaningservicesapp.presentation.users.manager.utils.RouteData
-import com.example.titossycleaningservicesapp.presentation.users.manager.utils.SuppliersScreen
+import com.example.titossycleaningservicesapp.presentation.users.manager.screens.SuppliersScreen
 
 @Composable
 fun SideNavigationGraph(
@@ -37,14 +37,14 @@ fun SideNavigationGraph(
                 employeeViewModel = employeeViewModel
             )
         }
-        composable("managerSuppliers") {
+        composable(RouteData.Supplier.route) {
             SuppliersScreen(
                 navController = navController,
                 supplierViewModel = supplierViewModel,
                 paddingValues = paddingValues
             )
         }
-        composable("managerOrders") {
+        composable(RouteData.Orders.route) {
             ManagerOrdersScreen(
                 paddingValues = paddingValues,
                 navController = navController

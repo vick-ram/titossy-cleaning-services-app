@@ -54,6 +54,8 @@ fun ManagerNavigationDrawer(
     val scope = rememberCoroutineScope()
     val drawerItems = listOf(
         RouteData.Home,
+        RouteData.Supplier,
+        RouteData.Orders,
         RouteData.Profile
     )
     val currentDestination by navController.currentBackStackEntryAsState()

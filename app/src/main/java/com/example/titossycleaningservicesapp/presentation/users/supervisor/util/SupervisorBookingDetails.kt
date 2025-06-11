@@ -279,7 +279,7 @@ fun BookingDataRow(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingData(
     modifier: Modifier = Modifier,

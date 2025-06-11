@@ -23,7 +23,9 @@ fun ProfileScreen(
     var cleanerId by rememberSaveable { mutableStateOf<String?>(null) }
     val employeeState by employeeViewModel.employeeUiState.collectAsStateWithLifecycle()
 
-    val cleaner = employeeState.employees?.find { it.id.toString() == cleanerId }
+    val cleaner = employeeState.employees?.find { it.id == cleanerId }
+
+    println("Cleaner data : $cleaner")
 
     LaunchedEffect(key1 = cleanerId) {
         cleanerId = mainViewModel.readUserId()

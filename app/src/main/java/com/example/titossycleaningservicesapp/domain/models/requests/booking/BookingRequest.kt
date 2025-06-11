@@ -18,6 +18,6 @@ data class UpdateBookingStatus(
 
 data class AssignBooking(
     val bookingId: String,
-    val cleanerId: UUID
+    val cleanerId: String
 )
 

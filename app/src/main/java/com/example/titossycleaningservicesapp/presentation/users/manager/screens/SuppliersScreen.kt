@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.manager.utils
+package com.example.titossycleaningservicesapp.presentation.users.manager.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.border
@@ -116,24 +116,6 @@ fun SuppliersScreen(
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
-                        Row(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(onClick = { navController.navigateUp() }) {
-                                Icon(
-                                    modifier = modifier.size(32.dp),
-                                    imageVector = Icons.Default.ChevronLeft,
-                                    contentDescription = null
-                                )
-                            }
-                            Text(
-                                text = "Suppliers",
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
                         Column(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -486,7 +468,7 @@ fun FullWidthDivider() {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         HorizontalDivider(
             modifier = Modifier
-                .width(maxWidth)
+                .width(this.maxWidth)
                 .padding(vertical = 8.dp),
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.onSurface.copy(.1f)

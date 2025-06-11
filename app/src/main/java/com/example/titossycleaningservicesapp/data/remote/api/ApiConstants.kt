@@ -59,4 +59,6 @@ object ApiConstants {
     const val ORDER_ID = "$ORDER/{id}"
 
     const val MESSAGES = "api/messages/{receiver}"
+
+    const val METRICS = "api/metrics"
 }

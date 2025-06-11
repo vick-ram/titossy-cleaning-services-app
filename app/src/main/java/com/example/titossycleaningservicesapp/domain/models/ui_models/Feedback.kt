@@ -1,17 +1,18 @@
 package com.example.titossycleaningservicesapp.domain.models.ui_models
 
-import java.util.UUID
-
 data class Feedback(
-    val feedbackId: UUID,
-    val customerId: UUID?,
+    val feedbackId: String,
+    val customerId: String?,
     val bookingId: String,
     val feedback: String,
-    val rating: Double
+    val rating: Double,
+    val createdAt: String,
+    val updatedAt: String,
 )
 
 data class FeedbackUiState(
     val isLoading: Boolean = false,
     val successMessage: String = "",
-    val errorMessage: String = ""
+    val errorMessage: String = "",
+    val feedbacks: List<Feedback> = emptyList()
 )

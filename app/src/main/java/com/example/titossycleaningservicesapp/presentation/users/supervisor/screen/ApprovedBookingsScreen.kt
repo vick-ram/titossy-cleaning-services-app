@@ -32,7 +32,7 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
-import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
+import com.example.titossycleaningservicesapp.core.EmptyScreen
 
 @Composable
 fun ApprovedBookingsScreen(
@@ -86,7 +86,9 @@ fun ApprovedBookingsScreen(
             }
 
             bookingUiState.bookings != null -> {
-                approvedBookings?.let { bookings ->
+                if (approvedBookings.isNullOrEmpty()) {
+                   EmptyScreen(modifier, "No approved bookings found.")
+                } else {
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -96,7 +98,7 @@ fun ApprovedBookingsScreen(
                             modifier = modifier
                                 .fillMaxWidth()
                         ) {
-                            items(bookings) { booking ->
+                            items(approvedBookings) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onClick = {

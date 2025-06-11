@@ -21,6 +21,11 @@ class FeedbackViewModel @Inject constructor(
     private val _feedbackState = MutableStateFlow(FeedbackUiState(isLoading = true))
     val feedbackState = _feedbackState.asStateFlow()
 
+
+    init {
+        getFeedbacks()
+    }
+
     fun giveFeedback(
         bookingId: String,
         feedback: String,
@@ -52,6 +57,36 @@ class FeedbackViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             successMessage = resource.data.toString()
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getFeedbacks() = viewModelScope.launch {
+        feedbackRepository.getFeedbacks().collect { resource ->
+            when(resource) {
+                is Resource.Error -> {
+                    _feedbackState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = resource.message.toString()
+                        )
+                    }
+                }
+                is Resource.Loading -> {
+                    _feedbackState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+                is Resource.Success -> {
+                    _feedbackState.update {
+                        it.copy(
+                            isLoading = false,
+                            feedbacks = resource.data ?: emptyList()
                         )
                     }
                 }

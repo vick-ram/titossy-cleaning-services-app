@@ -88,7 +88,19 @@ fun CancelledBookings(
             }
 
             bookingUiState.bookings != null -> {
-                cancelledBookings?.let { bookings ->
+                if (cancelledBookings.isNullOrEmpty()) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No cancelled bookings found.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else {
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -98,7 +110,7 @@ fun CancelledBookings(
                             modifier = modifier
                                 .fillMaxWidth()
                         ) {
-                            items(bookings) { booking ->
+                            items(cancelledBookings) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onClick = {

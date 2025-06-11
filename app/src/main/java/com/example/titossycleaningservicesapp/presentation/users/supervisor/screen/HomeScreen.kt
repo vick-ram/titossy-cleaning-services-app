@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -52,14 +53,19 @@ fun HomeScreen(
     val bookingViewModel: BookingViewModel = hiltViewModel()
     val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
     val allBookings = bookingUiState.bookings?.size ?: 0
-    val pendingBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.PENDING }?.size ?: 0
-    val approvedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.APPROVED }?.size ?: 0
-    val inProgressBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size ?: 0
-    val completedBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size ?: 0
-    val cancelledBookings = bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.CANCELLED }?.size ?: 0
-    val scrollState  = rememberScrollState()
+    val pendingBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.PENDING }?.size ?: 0
+    val approvedBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.APPROVED }?.size ?: 0
+    val inProgressBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.IN_PROGRESS }?.size ?: 0
+    val completedBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }?.size ?: 0
+    val cancelledBookings =
+        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.CANCELLED }?.size ?: 0
+    val scrollState = rememberScrollState()
 
-    LaunchedEffect(key1 = bookingViewModel) {
+    LaunchedEffect(Unit) {
         bookingViewModel.fetchBookings()
     }
 
@@ -67,7 +73,6 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(16.dp)
             .verticalScroll(state = scrollState)
     ) {
         Spacer(modifier = modifier.height(16.dp))
@@ -171,7 +176,7 @@ fun HomeScreen(
                     .weight(1f),
                 onClick = {
                     navController.navigate(BookingRoutes.ApprovedBookings.route)
-                          },
+                },
                 elevation = CardDefaults.elevatedCardElevation(
                     defaultElevation = 4.dp,
                     pressedElevation = 6.dp

@@ -1,7 +1,11 @@
 package com.example.titossycleaningservicesapp.presentation.users.supervisor.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +16,7 @@ import com.example.titossycleaningservicesapp.presentation.users.supervisor.scre
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.CancelledBookings
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.CompletedBookingsScreen
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.ContactScreen
+import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.FeedbackScreen
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.InProgressBooking
 import com.example.titossycleaningservicesapp.presentation.users.supervisor.screen.PendingBookingsScreen
@@ -27,7 +32,10 @@ fun NavigationGraph(
     mainViewModel: MainViewModel,
     employeeViewModel: EmployeeViewModel
 ) {
-    NavHost(navController = navController, startDestination = NavRoutes.Home.route) {
+    NavHost(
+        navController = navController,
+        startDestination = NavRoutes.Home.route
+    ) {
         composable(NavRoutes.Home.route) {
             HomeScreen(
                 navController = navController,
@@ -39,6 +47,9 @@ fun NavigationGraph(
                 navController = navController,
                 paddingValues = paddingValues
             )
+        }
+        composable(NavRoutes.Feedback.route) {
+            FeedbackScreen(paddingValues)
         }
         composable(NavRoutes.Profile.route) {
             ProfileScreen(
@@ -65,7 +76,7 @@ fun NavigationGraph(
         composable(BookingRoutes.CancelledBookings.route) {
             CancelledBookings(navController = navController)
         }
-        composable("supplierBookingDetails/{bookingId}") {backStackEntry ->
+        composable("supplierBookingDetails/{bookingId}") { backStackEntry ->
             val bookingId = backStackEntry.arguments?.getString("bookingId").toString()
             SupervisorBookingDetails(
                 bookingId = bookingId,

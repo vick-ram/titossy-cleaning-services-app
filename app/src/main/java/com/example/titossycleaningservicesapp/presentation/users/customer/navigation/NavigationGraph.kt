@@ -13,8 +13,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import com.example.titossycleaningservicesapp.presentation.users.customer.screens.AboutUsScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.BookingsScreen
+import com.example.titossycleaningservicesapp.presentation.users.customer.screens.ChatScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.FAQsScreen
+import com.example.titossycleaningservicesapp.presentation.users.customer.screens.HelpScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.HomeScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.ServiceDetailsScreen
 import com.example.titossycleaningservicesapp.presentation.users.customer.screens.SettingsScreen
@@ -41,6 +44,7 @@ fun NavigationGraph(
         composable(NavRoutes.Home.route) {
             HomeScreen(navController, paddingValues, onSignOut)
         }
+
         composable(CustomerBottomRoutes.Bookings.route) {
             BookingsScreen( paddingValues = paddingValues)
         }
@@ -64,6 +68,18 @@ fun NavigationGraph(
                 navController = navController,
                 paddingValues = paddingValues
             )
+        }
+
+        composable("chat") {
+            ChatScreen()
+        }
+
+        composable("aboutUs") {
+            AboutUsScreen(navController = navController)
+        }
+
+        composable("help") {
+            HelpScreen(navController = navController, paddingValues = paddingValues)
         }
     }
 }

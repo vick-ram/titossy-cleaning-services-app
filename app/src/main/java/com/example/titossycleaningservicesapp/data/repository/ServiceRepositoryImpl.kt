@@ -21,8 +21,11 @@ class ServiceRepositoryImpl @Inject constructor(
         return flow {
             emit(Resource.Loading)
             val servicesFromDb = serviceDao.getAllServices().firstOrNull()
+            println("Services from DB: $servicesFromDb")
             if (servicesFromDb.isNullOrEmpty()) {
                 val response = apiService.getServices()
+
+                println("Services from the API: ${response.data}")
                 when (response.status) {
                     "success" -> {
                         val serviceEntity = response.data?.map { it.toServiceEntity() }

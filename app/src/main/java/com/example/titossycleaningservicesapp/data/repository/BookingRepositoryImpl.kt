@@ -238,7 +238,7 @@ class BookingRepositoryImpl @Inject constructor(
             val response = apiService.assignBooking(
                 AssignBooking(
                     bookingId = bookingId,
-                    cleanerId = UUID.fromString(cleanerId)
+                    cleanerId = cleanerId
                 )
             )
 

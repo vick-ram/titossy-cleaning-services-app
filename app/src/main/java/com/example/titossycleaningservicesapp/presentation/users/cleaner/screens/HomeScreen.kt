@@ -156,6 +156,20 @@ fun HomeScreen(
             }
 
             bookingAssignmentUiState.assignedBookings != null -> {
+                if (bookingAssignmentUiState.assignedBookings.isNullOrEmpty()) {
+                    Box(
+                        modifier = modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No bookings assigned",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+                }
                 bookingAssignmentUiState.assignedBookings?.filter {
                     it.bookingAssignment.bookingStatus.name.contains(
                         search,

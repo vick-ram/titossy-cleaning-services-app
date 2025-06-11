@@ -32,7 +32,6 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
-import com.example.titossycleaningservicesapp.presentation.utils.NavigationIcon
 
 @Composable
 fun CompletedBookingsScreen(
@@ -44,7 +43,7 @@ fun CompletedBookingsScreen(
     val bookingUiState by bookingViewModel.bookingUiState.collectAsStateWithLifecycle()
 
     val completedBookings =
-        bookingUiState.bookings?.filter { it.bookingStatus == BookingStatus.COMPLETED }
+        bookingUiState.bookings.filter { it.bookingStatus == BookingStatus.COMPLETED }
 
     LaunchedEffect(key1 = bookingViewModel) {
         bookingViewModel.fetchBookings()
@@ -87,8 +86,20 @@ fun CompletedBookingsScreen(
                 )
             }
 
-            bookingUiState.bookings != null -> {
-                completedBookings?.let { bookings ->
+            bookingUiState.bookings.isNotEmpty() -> {
+                if (completedBookings.isEmpty()) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No completed bookings found.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else {
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -98,7 +109,7 @@ fun CompletedBookingsScreen(
                             modifier = modifier
                                 .fillMaxWidth()
                         ) {
-                            items(bookings) { booking ->
+                            items(completedBookings) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onClick = {

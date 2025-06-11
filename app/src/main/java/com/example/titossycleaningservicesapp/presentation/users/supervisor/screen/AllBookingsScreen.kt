@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.R
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
+import com.example.titossycleaningservicesapp.core.EmptyScreen
 import com.example.titossycleaningservicesapp.domain.models.BookingStatus
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Booking
 import com.example.titossycleaningservicesapp.domain.viewmodel.BookingViewModel
@@ -94,12 +95,14 @@ fun AllBookingsScreen(
             }
 
             bookingUiState.bookings != null -> {
-                bookingUiState.bookings?.let { bookings ->
+                if (bookingUiState.bookings.isNullOrEmpty()) {
+                    EmptyScreen(modifier, "No Bookings Found")
+                } else {
                     LazyColumn(
                         modifier = modifier
                             .fillMaxWidth()
                     ) {
-                        items(bookings) { booking ->
+                        items(bookingUiState.bookings ?: emptyList()) { booking ->
                             BookingCard(
                                 booking = booking,
                                 onClick = {

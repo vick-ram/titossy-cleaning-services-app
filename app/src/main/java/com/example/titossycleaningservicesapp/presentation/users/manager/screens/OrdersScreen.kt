@@ -1,4 +1,4 @@
-package com.example.titossycleaningservicesapp.presentation.users.manager.utils
+package com.example.titossycleaningservicesapp.presentation.users.manager.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -106,20 +106,6 @@ fun ManagerOrdersScreen(
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NavigationIcon(icon = Icons.Rounded.ChevronLeft) {
-                navController.navigateUp()
-            }
-            Text(
-                text = "Pending Orders",
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
         when {
             purchaseOrderUiState.isLoading -> Box(
                 modifier = modifier.fillMaxSize(),

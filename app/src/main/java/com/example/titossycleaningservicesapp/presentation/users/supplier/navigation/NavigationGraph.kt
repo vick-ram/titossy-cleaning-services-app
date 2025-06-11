@@ -9,6 +9,7 @@ import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.ContactScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.HomeScreen
+import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.ProductsScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.ProfileScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.PurchaseOrderDetailsScreen
 import com.example.titossycleaningservicesapp.presentation.users.supplier.screens.SupplierReceiptScreen
@@ -24,8 +25,11 @@ fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.Home.route
+        startDestination = NavRoutes.Products.route
     ) {
+        composable(NavRoutes.Products.route) {
+            ProductsScreen()
+        }
         composable(NavRoutes.Home.route) {
             HomeScreen(navController, paddingValues)
         }
