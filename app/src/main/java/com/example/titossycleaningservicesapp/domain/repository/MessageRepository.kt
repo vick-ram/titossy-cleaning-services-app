@@ -5,5 +5,5 @@ import com.example.titossycleaningservicesapp.domain.models.ui_models.ChatMessag
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
-    fun getMessages(receiver: String): Flow<Resource<List<ChatMessage>>>
+    fun getMessages(sender: String, receiver: String): Flow<Resource<List<ChatMessage>>>
 }

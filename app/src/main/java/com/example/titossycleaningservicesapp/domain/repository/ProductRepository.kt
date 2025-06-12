@@ -19,9 +19,13 @@ interface ProductRepository {
         reorderLevel: String,
         supplierId: String
     ): Flow<Resource<String>>
+    fun editProduct(productId: String, name: String?, description: String?, price: String?, stock: String?, reorderLevel: String?, supplierId: String?): Flow<Resource<Product>>
     fun deleteProduct(productId: String) : Flow<Resource<String>>
 
-    fun getAllProducts(): Flow<Resource<List<Product>>>
+    fun getAllProducts(
+        search: String? = null,
+        supplierId: String? = null,
+    ): Flow<Resource<List<Product>>>
 
     fun addProductToPurchase(
         productId: String,

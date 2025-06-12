@@ -87,16 +87,7 @@ fun HomeScreen(
     paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-    var requestFile by remember { mutableStateOf<Uri?>(null) }
-    var fileName by remember { mutableStateOf("") }
     var openDialog by rememberSaveable { mutableStateOf(false) }
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            requestFile = uri
-            uri?.let {
-                fileName = FileUtils.getFileName(context, uri) ?: ""
-            }
-        }
     val productViewModel: ProductViewModel = hiltViewModel()
     val productsState by productViewModel.productDataUiState.collectAsState()
     val pUiState by productViewModel.productUiState.collectAsState()
@@ -162,7 +153,7 @@ fun HomeScreen(
                                             productId = product.productId,
                                             quantity = quantity.toInt()
                                         )
-                                        navController.navigate("purchaseOrder")
+                                        navController.navigate("purchaseOrder/${product.supplierId}")
                                     },
                                     onDelete = { productViewModel.deleteProduct(it.productId) }
                                 )
@@ -187,213 +178,7 @@ fun HomeScreen(
                     Log.d(TAG, "HomeScreen: ${productsState.errorMessage}")
                 }
             }
-//            if (openDialog) {
-//                AlertDialog(
-//                    onDismissRequest = { openDialog = false },
-//                    confirmButton = {
-//                        TextButton(
-//                            onClick = {
-//                                requestFile?.let {
-//                                    productViewModel.createProduct(
-//                                        context = context,
-//                                        uri = it
-//                                    )
-//                                }
-//                            },
-//                            enabled = productViewModel.name.isNotBlank()
-//                                    && productViewModel.description.isNotBlank()
-//                                    && productViewModel.price.isNotBlank()
-//                        ) {
-//                            Text(text = "Create")
-//                        }
-//                    },
-//                    dismissButton = {
-//                        TextButton(onClick = { openDialog = false }) {
-//                            Text(text = "Cancel")
-//                        }
-//                    },
-//                    title = {
-//                        Text(text = "Add new inventory")
-//                    },
-//                    text = {
-//                        Column(
-//                            modifier = modifier
-//                                .fillMaxWidth()
-//                                .verticalScroll(state = rememberScrollState())
-//                        ) {
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = productViewModel.name,
-//                                onValueChange = { productViewModel.name = it },
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                placeholder = {
-//                                    Text(
-//                                        text = "Name",
-//                                        style = MaterialTheme.typography.bodyLarge.copy(
-//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-//                                        )
-//                                    )
-//                                },
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                )
-//                            )
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = productViewModel.description,
-//                                onValueChange = { productViewModel.description = it },
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                placeholder = {
-//                                    Text(
-//                                        text = "Description",
-//                                        style = MaterialTheme.typography.bodyLarge.copy(
-//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-//                                        )
-//                                    )
-//                                },
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                )
-//                            )
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = productViewModel.price,
-//                                onValueChange = { productViewModel.price = it },
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                placeholder = {
-//                                    Text(
-//                                        text = "Price",
-//                                        style = MaterialTheme.typography.bodyLarge.copy(
-//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-//                                        )
-//                                    )
-//                                },
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                )
-//                            )
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = productViewModel.stock,
-//                                onValueChange = { productViewModel.stock = it },
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                placeholder = {
-//                                    Text(
-//                                        text = "Stock",
-//                                        style = MaterialTheme.typography.bodyLarge.copy(
-//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-//                                        )
-//                                    )
-//                                },
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                )
-//                            )
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = productViewModel.reorderLevel,
-//                                onValueChange = { productViewModel.reorderLevel = it },
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                placeholder = {
-//                                    Text(
-//                                        text = "Reorder Level",
-//                                        style = MaterialTheme.typography.bodyLarge.copy(
-//                                            color = MaterialTheme.colorScheme.onSurface.copy(.5f)
-//                                        )
-//                                    )
-//                                },
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                )
-//                            )
-//                            OutlinedTextField(
-//                                modifier = modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                value = fileName,
-//                                onValueChange = { fileName = it },
-//                                readOnly = true,
-//                                shape = MaterialTheme.shapes.medium,
-//                                colors = OutlinedTextFieldDefaults.colors(
-//                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                                    focusedBorderColor = Color.Transparent,
-//                                    unfocusedBorderColor = Color.Transparent
-//                                ),
-//                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-//                                    color = MaterialTheme.colorScheme.onSurface
-//                                ),
-//                                trailingIcon = {
-//                                    IconButton(onClick = {
-//                                        launcher.launch("image/*")
-//                                    }) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.AttachFile,
-//                                            contentDescription = null
-//                                        )
-//                                    }
-//                                }
-//                            )
-//                        }
-//                    },
-//                    properties = DialogProperties(
-//                        dismissOnBackPress = false,
-//                        dismissOnClickOutside = false
-//                    )
-//                )
-//            }
         }
-//        FloatingActionButton(
-//            modifier = modifier
-//                .align(Alignment.BottomEnd)
-//                .padding(8.dp),
-//            onClick = { openDialog = true }
-//        ) {
-//            Icon(
-//                imageVector = Icons.Default.Add,
-//                contentDescription = null
-//            )
-//        }
     }
 }
 
@@ -471,6 +256,14 @@ fun ProductCard(
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
+                    )
+                )
+                Text(
+                    text = "Supplier: ${product.supplierName}",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
             }

@@ -11,6 +11,7 @@ import com.example.titossycleaningservicesapp.core.Resource
 import com.example.titossycleaningservicesapp.domain.models.requests.po.ProductCartUiState
 import com.example.titossycleaningservicesapp.domain.models.requests.po.ProductDataUiState
 import com.example.titossycleaningservicesapp.domain.models.requests.po.ProductUiState
+import com.example.titossycleaningservicesapp.domain.models.ui_models.Product
 import com.example.titossycleaningservicesapp.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,8 +40,8 @@ class ProductViewModel @Inject constructor(
     var description by mutableStateOf("")
     var price by mutableStateOf("")
     var image by mutableStateOf("")
-    var stock by mutableStateOf("")
-    var reorderLevel by mutableStateOf("")
+    var stock by mutableStateOf("0")
+    var reorderLevel by mutableStateOf("0")
 
     fun createProduct(
         context: Context,
@@ -80,9 +81,55 @@ class ProductViewModel @Inject constructor(
         _productUiState.update { it.copy(isLoading = false) }
     }
 
+    fun editProduct(
+        product: Product
+    ) = viewModelScope.launch {
+        productRepository.editProduct(
+            productId = product.productId,
+            name = product.name,
+            description = product.description,
+            price = product.unitPrice,
+            stock = product.stock.toString(),
+            reorderLevel = product.reorderLevel.toString(),
+            supplierId = product.supplierId
+        ).collectLatest { resource ->
+            when (resource) {
+                is Resource.Error -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = resource.message.toString()
+                        )
+                    }
+                }
 
-    fun fetchProducts() = viewModelScope.launch {
-        productRepository.getAllProducts()
+                Resource.Loading -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+
+                is Resource.Success -> {
+                    _productUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            product = resource.data
+                        )
+                    }
+                    fetchProducts()
+                }
+            }
+        }
+    }
+
+
+    fun fetchProducts(
+        search: String? = null,
+        supplierId: String? = null
+    ) = viewModelScope.launch {
+        productRepository.getAllProducts(search, supplierId)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000L),

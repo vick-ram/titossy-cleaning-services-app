@@ -93,10 +93,52 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAllProducts(): Flow<Resource<List<Product>>> {
+    override fun editProduct(
+        productId: String,
+        name: String?,
+        description: String?,
+        price: String?,
+        stock: String?,
+        reorderLevel: String?,
+        supplierId: String?
+    ): Flow<Resource<Product>> {
         return flow {
             emit(Resource.Loading)
-            val response = apiService.getProducts()
+            val response = apiService.editProduct(
+                productId = UUID.fromString(productId),
+                name = name?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                description = description?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                unitPrice = price?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                stock = stock?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                reorderLevel = reorderLevel?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                supplierId = supplierId?.toRequestBody("text/plain".toMediaTypeOrNull())
+            )
+            when (response.status) {
+                "success" -> {
+                    val product = response.data?.toProduct()
+                    product?.let { emit(Resource.Success(it)) }
+                }
+
+                "error" -> {
+                    if (response.error != null) {
+                        val errorMessage = FileUtils.createErrorMessage(response.error)
+                        throw Exception(errorMessage)
+                    }
+                }
+            }
+        }.catch { e ->
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
+    }
+
+    override fun getAllProducts(
+        search: String?,
+        supplierId: String?,
+    ): Flow<Resource<List<Product>>> {
+        return flow {
+            emit(Resource.Loading)
+            val response = apiService.getProducts(search, supplierId)
             when (response.status) {
                 "success" -> {
                     val products = response.data?.map { it.toProduct() }

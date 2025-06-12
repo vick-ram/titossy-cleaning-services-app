@@ -3,8 +3,10 @@ package com.example.titossycleaningservicesapp.presentation.users.inventory.navi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.titossycleaningservicesapp.domain.viewmodel.EmployeeViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.presentation.users.inventory.screens.HomeScreen
@@ -46,11 +48,18 @@ fun InventoryNavigationGraph(
         }
 
         composable(
-            route = "purchaseOrder"
-        ) {
+            route = "purchaseOrder/{supplierId}",
+            arguments = listOf(
+                navArgument("supplierId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backstackEntry ->
+            val supplierId = backstackEntry.arguments?.getString("supplierId") ?: ""
             PurchaseOrderScreen(
                 paddingValues = paddingValues,
                 navController = navController,
+                supplierId = supplierId,
             )
         }
         composable("InventoryPurchaseOrderDetails/{purchaseOrderId}") { backStackEntry ->

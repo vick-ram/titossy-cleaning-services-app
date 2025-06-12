@@ -50,6 +50,7 @@ import androidx.navigation.NavHostController
 import com.example.titossycleaningservicesapp.core.CustomProgressIndicator
 import com.example.titossycleaningservicesapp.core.showToast
 import com.example.titossycleaningservicesapp.domain.models.ui_models.Supplier
+import com.example.titossycleaningservicesapp.domain.viewmodel.MainViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.ProductViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.PurchaseOrderViewModel
 import com.example.titossycleaningservicesapp.domain.viewmodel.SupplierViewModel
@@ -64,31 +65,26 @@ fun PurchaseOrderScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     navController: NavHostController,
+    supplierId: String,
 ) {
 
     val context = LocalContext.current
-
-    var expanded by rememberSaveable { mutableStateOf(false) }
     var showDateDialog by rememberSaveable { mutableStateOf(false) }
-    var selectedSupplier by remember { mutableStateOf<Supplier?>(null) }
     val productViewModel: ProductViewModel = hiltViewModel()
     val productCartUiState by productViewModel.productCartUiState.collectAsStateWithLifecycle()
-    val supplierViewModel: SupplierViewModel = hiltViewModel()
-    val supplierState by supplierViewModel.supplierUiState.collectAsStateWithLifecycle()
     val purchaseOrderViewModel: PurchaseOrderViewModel = hiltViewModel()
     val datePickerState = rememberDatePickerState()
     val confirmEnabled = remember { derivedStateOf { datePickerState.selectedDateMillis != null } }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val purchaseOrderStatus by purchaseOrderViewModel.purchaseOrderStatus.collectAsStateWithLifecycle()
 
-    val isButtonEnabled = remember(selectedSupplier, selectedDate) {
-        selectedSupplier != null && (selectedDate.isEqual(LocalDate.now()) || selectedDate.isAfter(
+    val isButtonEnabled = remember(selectedDate) {
+        (selectedDate.isEqual(LocalDate.now()) || selectedDate.isAfter(
             LocalDate.now()
         ))
     }
 
     LaunchedEffect(Unit) {
-        supplierViewModel.fetchSuppliers()
         productViewModel.fetchProductCart()
     }
 
@@ -219,62 +215,6 @@ fun PurchaseOrderScreen(
             Row(
                 modifier = modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = modifier
-                        .padding(end = 16.dp),
-                    text = "Select Supplier",
-                    style = MaterialTheme.typography.bodyLarge.copy()
-                )
-                when {
-                    supplierState.suppliers != null -> {
-                        ExposedDropdownMenuBox(
-                            modifier = modifier
-                                .weight(1f),
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
-                        ) {
-
-                            TextField(
-                                value = selectedSupplier?.fullName ?: "",
-                                onValueChange = { },
-                                label = { },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .menuAnchor(),
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                                },
-                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                readOnly = true
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                supplierState.suppliers?.let { suppliers ->
-                                    suppliers.forEach { supplier ->
-                                        DropdownMenuItem(
-                                            text = { Text(text = supplier.fullName) },
-                                            onClick = {
-                                                selectedSupplier = supplier
-                                                expanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        item {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 LoadingButton(
@@ -283,7 +223,7 @@ fun PurchaseOrderScreen(
                     isLoading = !purchaseOrderStatus.isLoading,
                     onClick = {
                         purchaseOrderViewModel.createPurchaseOrder(
-                            supplierId = selectedSupplier?.id.toString(),
+                            supplierId = supplierId,
                             expectedDate = selectedDate
                         )
                     },

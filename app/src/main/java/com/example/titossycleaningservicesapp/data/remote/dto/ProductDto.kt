@@ -14,6 +14,8 @@ data class ProductDto(
     val stock: Int,
     val reorderLevel: Int,
     val sku: String,
+    val supplierId: String,
+    val supplierName: String,
     val createdAt: String,
     val updatedAt: String
 ) {
@@ -25,7 +27,9 @@ data class ProductDto(
         image = image,
         stock = stock,
         reorderLevel = reorderLevel,
-        sku = sku
+        sku = sku,
+        supplierId = supplierId,
+        supplierName = supplierName
     )
 }
 

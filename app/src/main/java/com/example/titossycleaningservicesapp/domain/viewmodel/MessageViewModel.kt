@@ -1,8 +1,5 @@
 package com.example.titossycleaningservicesapp.domain.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.titossycleaningservicesapp.core.Resource
@@ -35,8 +32,8 @@ class MessageViewModel @Inject constructor(
         websocketService.sendMessage(message)
     }
 
-    fun fetchMessages(receiver: String) = viewModelScope.launch {
-        messageRepository.getMessages(receiver).collect { resource ->
+    fun fetchMessages(sender: String, receiver: String) = viewModelScope.launch {
+        messageRepository.getMessages(sender, receiver).collect { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     _messageUiState.update { state ->

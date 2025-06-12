@@ -11,6 +11,8 @@ data class Product(
     val stock: Int,
     val reorderLevel: Int,
     val sku: String,
+    val supplierId: String,
+    val supplierName: String,
 )
 
 data class ProductCart(

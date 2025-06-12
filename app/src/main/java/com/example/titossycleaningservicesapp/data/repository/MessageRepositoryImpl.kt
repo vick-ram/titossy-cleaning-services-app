@@ -13,10 +13,10 @@ import javax.inject.Inject
 class MessageRepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ): MessageRepository {
-    override fun getMessages(receiver: String): Flow<Resource<List<ChatMessage>>> {
+    override fun getMessages(sender: String, receiver: String): Flow<Resource<List<ChatMessage>>> {
         return flow {
             emit(Resource.Loading)
-            val response = apiService.getMessages(receiver)
+            val response = apiService.getMessages(sender, receiver)
             when (response.status) {
                 "success" -> {
                     val messages = response.data?.map { it.toChatMessage() }

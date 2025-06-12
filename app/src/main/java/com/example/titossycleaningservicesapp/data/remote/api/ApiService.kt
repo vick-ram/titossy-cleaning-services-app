@@ -367,11 +367,27 @@ interface ApiService {
         @Part("supplier_id") supplierId: RequestBody
     ): ApiResponse<ProductDto>
 
+    @Multipart
+    @PUT(PRODUCT_ID)
+    suspend fun editProduct(
+        @Path("id") productId: UUID,
+        @Part("name") name: RequestBody? = null,
+        @Part("description") description: RequestBody? = null,
+        @Part("price") unitPrice: RequestBody? = null,
+        @Part("stock") stock: RequestBody? = null,
+        @Part("reorderLevel") reorderLevel: RequestBody? = null,
+        @Part image: MultipartBody.Part? = null,
+        @Part("supplier_id") supplierId: RequestBody? = null
+    ): ApiResponse<ProductDto>
+
     @DELETE(PRODUCT_ID)
     suspend fun deleteProduct(@Path("id") productId: UUID) : ApiResponse<Unit>
 
     @GET(PRODUCT)
-    suspend fun getProducts(): ApiResponse<List<ProductDto>>
+    suspend fun getProducts(
+        @Query("search") query: String? = null,
+        @Query("supplierId") supplierId: String? = null
+    ): ApiResponse<List<ProductDto>>
 
     @POST(PRODUCT_CART)
     suspend fun addProductToCart(
@@ -417,6 +433,7 @@ interface ApiService {
 
     @GET(MESSAGES)
     suspend fun getMessages(
+        @Path("sender") sender: String,
         @Path("receiver") receiver: String
     ): ApiResponse<List<MessageDto>>
 

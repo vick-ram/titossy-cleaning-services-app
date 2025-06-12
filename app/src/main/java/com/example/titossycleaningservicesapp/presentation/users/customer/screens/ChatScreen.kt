@@ -49,7 +49,7 @@ fun ChatScreen(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(messageViewModel) {
-        admin?.let { messageViewModel.fetchMessages(it.id) }
+        admin?.let { messageViewModel.fetchMessages(currentUserId.toString(), it.id) }
     }
 
     if (messageUiState.isLoading) {
